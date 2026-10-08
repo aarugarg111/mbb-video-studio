@@ -1,4 +1,5 @@
 import { formatINR, summarise } from '../src/money.js';
+import { invoiceOf } from '../src/invoice.js';
 import { esc } from '../src/esc.js';
 
 export const name = 'create-invoice';
@@ -29,14 +30,9 @@ export function render(data, state) {
     .map((item, i) => ({ item, p: itemProgress[i] ?? 0 }))
     .filter(entry => entry.p > 0.001);
 
-  /* Scaling each quantity by its appearance progress makes the whole totals
-   * block - taxable, CGST, SGST, round off - count up together and land on the
-   * exact real figures when every item has fully arrived. */
-  const effective = data.items.map((item, i) => ({
-    ...item,
-    qty: item.qty * (itemProgress[i] ?? 0)
-  }));
-  const bill = summarise(effective);
+  /* The timeline publishes the scaled summary once; reading it here keeps this
+   * screen and invoice-created agreeing on every figure. */
+  const bill = state.bill ?? summarise([]);
 
   const partyBlock = partyIn > 0.001
     ? `
@@ -86,7 +82,7 @@ export function render(data, state) {
   <div class="appbar">
     <div class="grow">
       <h1>Create Bill / Invoice</h1>
-      <div class="sub">#5945</div>
+      <div class="sub">#${esc(invoiceOf(data).number)}</div>
     </div>
   </div>
 

@@ -1,4 +1,5 @@
 import { formatINR } from '../src/money.js';
+import { invoiceOf } from '../src/invoice.js';
 import { esc } from '../src/esc.js';
 
 export const name = 'home';
@@ -14,6 +15,10 @@ export const targets = {
 /* Laid out from reference/frames/mbb-dashboard.png. Labels are the app's own
  * English, not translations - see the plan's Global Constraints. */
 export function render(data, state) {
+  /* The two sample rows sit just before the invoice this video creates. */
+  const next = invoiceOf(data).number;
+  const prev = next - 1;
+  const prev2 = next - 2;
   const nav = ['Dashboard', 'Parties', 'Items', 'For You', 'More'];
 
   const tile = (fill, title, sub, titleColour) => `
@@ -65,8 +70,8 @@ export function render(data, state) {
   </div>
 
   <div style="padding: 0 16px 150px">
-    ${txn('Cash Sale', 'Sales Invoice #5944', '08 Oct', formatINR(5), true)}
-    ${txn('ASHOK POLITHIN CENTER', 'Sales Invoice #5943', '04 Oct', formatINR(21846), false)}
+    ${txn('Cash Sale', `Sales Invoice #${prev}`, '08 Oct', formatINR(5), true)}
+    ${txn('ASHOK POLITHIN CENTER', `Sales Invoice #${prev2}`, '04 Oct', formatINR(21846), false)}
   </div>
 
   <div class="fab-row">

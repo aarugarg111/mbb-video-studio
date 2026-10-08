@@ -255,3 +255,62 @@ shots:
   assert.ok(!r.errors, 'a screen with no bill on it is legitimate');
   assert.deepEqual(r.recipe.items, []);
 });
+
+const withVideo = v => GOOD.replace('video: demo', 'video: ' + v);
+
+test('video must be a plain name, never a path', () => {
+  for (const bad of ['../x', 'a/b', '..', 'has space', '""']) {
+    const res = parse(withVideo(bad.startsWith('"') ? bad : JSON.stringify(bad)), CATALOGUE);
+    assert.ok(res.errors, 'should reject ' + bad);
+    assert.match(res.errors.join('\n'), /"video"/);
+  }
+  const res = parse(withVideo('"../x"'), CATALOGUE);
+  assert.ok(res.errors.join('\n').includes('"../x"'), 'names the offending value');
+});
+
+test('video must be a string', () => {
+  for (const bad of ['[1, 2]', '{ a: 1 }', '123', 'true']) {
+    assert.ok(parse(withVideo(bad), CATALOGUE).errors, 'should reject ' + bad);
+  }
+});
+
+test('an absent video defaults to a safe name', () => {
+  const res = parse(GOOD.replace('video: demo\n', ''), CATALOGUE);
+  assert.equal(res.recipe.video, 'untitled');
+});
+
+test('invoice defaults when absent and is read when present', () => {
+  const d = parse(GOOD, CATALOGUE).recipe.invoice;
+  assert.equal(typeof d.number, 'number');
+  assert.equal(typeof d.date, 'string');
+  const res = parse(withVideo('demo\ninvoice: { number: 7001, date: "15/11/2026" }'), CATALOGUE);
+  assert.deepEqual(res.recipe.invoice, { number: 7001, date: '15/11/2026' });
+});
+
+test('a partly specified invoice keeps the default for the rest', () => {
+  const res = parse(withVideo('demo\ninvoice: { number: 7001 }'), CATALOGUE);
+  assert.equal(res.recipe.invoice.number, 7001);
+  assert.equal(typeof res.recipe.invoice.date, 'string');
+});
+
+test('a malformed invoice is an error', () => {
+  for (const bad of ['{ number: abc }', '{ number: 1.5 }', '{ number: 0 }', '{ date: 5 }', '[1]']) {
+    assert.ok(parse(withVideo('demo\ninvoice: ' + bad), CATALOGUE).errors, 'should reject ' + bad);
+  }
+});
+
+test('duration must be a real number, not a coerced value', () => {
+  for (const bad of ['true', '""', '"2"', 'null', '[]']) {
+    const res = parse(GOOD.replace('duration: 2.0', 'duration: ' + bad), CATALOGUE);
+    assert.ok(res.errors, 'should reject duration ' + bad);
+    assert.match(res.errors.join('\n'), /duration must be a positive number/);
+  }
+});
+
+test('an action "at" must be a real number, not a coerced value', () => {
+  for (const bad of ['true', '""', '"1"', 'null']) {
+    const res = parse(GOOD.replace('at: 1.0', 'at: ' + bad), CATALOGUE);
+    assert.ok(res.errors, 'should reject at ' + bad);
+    assert.match(res.errors.join('\n'), /"at" must be a number/);
+  }
+});

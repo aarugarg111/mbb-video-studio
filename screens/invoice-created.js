@@ -1,4 +1,5 @@
 import { formatINR } from '../src/money.js';
+import { invoiceOf } from '../src/invoice.js';
 import { esc } from '../src/esc.js';
 
 export const name = 'invoice-created';
@@ -11,7 +12,8 @@ export const targets = {
 /* Laid out from reference/frames/mbb-t24.png: a header, the rendered invoice,
  * then Print / Download / Share, then Done. */
 export function render(data, state) {
-  const total = state.total ?? 0;
+  const total = state.bill?.total ?? state.total ?? 0;
+  const inv = invoiceOf(data);
   const appear = state.appear ?? 1;
 
   const actions = ['Print', 'Download', 'Share'];
@@ -28,7 +30,7 @@ export function render(data, state) {
   <div class="row" style="padding: 18px 16px 14px">
     <div class="grow">
       <div style="font-size: 19px; font-weight: 700; letter-spacing: -0.3px">Sales Invoice Created</div>
-      <div class="label" style="margin-top: 2px">#5945</div>
+      <div class="label" style="margin-top: 2px">#${esc(inv.number)}</div>
     </div>
   </div>
 
@@ -37,7 +39,7 @@ export function render(data, state) {
       <span class="grow" style="font-size: 14px; font-weight: 700; letter-spacing: 0.4px">${esc(data.business.name)}</span>
       <span class="label" style="font-size: 10px">BILL OF SUPPLY</span>
     </div>
-    <div class="label" style="font-size: 10px; margin-top: 8px">Invoice No. 5945 &nbsp;·&nbsp; 08/10/2026</div>
+    <div class="label" style="font-size: 10px; margin-top: 8px">Invoice No. ${esc(inv.number)} &nbsp;·&nbsp; ${esc(inv.date)}</div>
     <div style="height: 1px; background: var(--mbb-line); margin: 12px 0"></div>
     <div class="label" style="font-size: 10px">Bill To</div>
     <div style="font-size: 12px; font-weight: 500; margin-top: 3px">${esc(data.party.name)}</div>

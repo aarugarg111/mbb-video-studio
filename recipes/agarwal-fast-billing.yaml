@@ -4,6 +4,12 @@
 # real text is not in the /form bank yet.
 video: agarwal-fast-billing
 
+# The invoice this video creates. Change both for a second video, or the
+# screens show the default number.
+invoice:
+  number: 5945
+  date: "08/10/2026"
+
 business:
   name: SAGAR SUPERBAZAAR
   gstin: 09ABCDE1234F1Z5

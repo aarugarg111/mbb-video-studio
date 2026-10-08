@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { SCREENS, catalogue } from '../screens/index.js';
+import { summarise } from '../src/money.js';
+import { stateAt } from '../src/timeline.js';
 
 const DATA = {
   business: { name: 'Agarwal Super Market', gstin: '09ABCDE1234F1Z5' },
@@ -52,7 +54,7 @@ test('home uses the app English labels, not Hinglish', () => {
 test('home shows a transaction with a paid and an unpaid pill', () => {
   const html = SCREENS.home.render(DATA, {});
   assert.match(html, /ASHOK POLITHIN CENTER/);
-  assert.match(html, /Sales Invoice #5943/);
+  assert.match(html, /Sales Invoice #\d+/);
   assert.match(html, />Paid</);
   assert.match(html, />Unpaid</);
 });
@@ -80,6 +82,33 @@ test('kit.css holds no colour literals, only tokens', async () => {
   assert.deepEqual(literals, [], 'use var(--mbb-*) and add the value to tokens.css');
 });
 
+test('stage/ holds no colour literals, only tokens', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const { fileURLToPath } = await import('node:url');
+  const { dirname, join } = await import('node:path');
+
+  const here = dirname(fileURLToPath(import.meta.url));
+  for (const file of ['index.html', 'stage.js']) {
+    const src = await readFile(join(here, '..', 'stage', file), 'utf8');
+    const literals = src.match(/#[0-9a-fA-F]{3,8}\b|\brgba?\s*\(/g) || [];
+    assert.deepEqual(literals, [], 'stage/' + file + ': use a token from kit/tokens.css');
+  }
+});
+
+test('the stage loads no fonts from the network, and the font files exist', async () => {
+  const { readFile, access } = await import('node:fs/promises');
+  const { fileURLToPath } = await import('node:url');
+  const { dirname, join } = await import('node:path');
+
+  const here = dirname(fileURLToPath(import.meta.url));
+  const html = await readFile(join(here, '..', 'stage', 'index.html'), 'utf8');
+  const tokens = await readFile(join(here, '..', 'kit', 'tokens.css'), 'utf8');
+  assert.doesNotMatch(html, /https?:\/\//, 'the stage must not depend on the network');
+  const files = tokens.match(/fonts\/[a-z0-9-]+\.woff2/g) || [];
+  assert.ok(files.length > 0, 'tokens.css should declare @font-face sources');
+  for (const f of files) await access(join(here, '..', 'kit', f));
+});
+
 test('every token kit.css references is defined in tokens.css', async () => {
   const { readFile } = await import('node:fs/promises');
   const { fileURLToPath } = await import('node:url');
@@ -97,25 +126,31 @@ test('every token kit.css references is defined in tokens.css', async () => {
   assert.deepEqual(missing, [], 'a typo here fails silently as an unstyled element');
 });
 
+/* What stateAt hands the screens: item progress plus the scaled bill summary. */
+function billState(progress) {
+  const bill = summarise(TWO.items.map((it, i) => ({ ...it, qty: it.qty * progress[i] })));
+  return { items: progress, bill, total: bill.total };
+}
+
 const TWO = { ...DATA, items: [
   { name: 'TATA SALT 1KG', rate: 30, qty: 10, gst: 5 },
   { name: 'SUGAR 5KG', rate: 250, qty: 2, gst: 5 }
 ]};
 
 test('every item in the catalogue is listed, on the bill or not', () => {
-  const html = SCREENS['create-invoice'].render(TWO, { items: [1, 0] });
+  const html = SCREENS['create-invoice'].render(TWO, billState([1, 0]));
   assert.match(html, /TATA SALT 1KG/);
   assert.match(html, /SUGAR 5KG/, 'unselected items still show in the search results');
 });
 
 test('an item on the bill gets a stepper, one not on it gets ADD', () => {
-  const html = SCREENS['create-invoice'].render(TWO, { items: [1, 0] });
+  const html = SCREENS['create-invoice'].render(TWO, billState([1, 0]));
   assert.match(html, /class="stepper"/, 'the added item should show a stepper');
   assert.match(html, /class="addbtn"/, 'the other should still offer ADD');
 });
 
 test('the stepper shows the quantity from the recipe', () => {
-  const html = SCREENS['create-invoice'].render(TWO, { items: [1, 0] });
+  const html = SCREENS['create-invoice'].render(TWO, billState([1, 0]));
   assert.match(html, /class="qty">10</);
 });
 
@@ -132,29 +167,29 @@ test('an item already on the bill survives a search that excludes it', () => {
 });
 
 test('the totals block shows the full GST breakdown', () => {
-  const html = SCREENS['create-invoice'].render(TWO, { items: [1, 1] });
+  const html = SCREENS['create-invoice'].render(TWO, billState([1, 1]));
   for (const label of ['Taxable Amount', 'CGST', 'SGST', 'Round Off', 'Total Amount']) {
     assert.ok(html.includes(label), `missing "${label}"`);
   }
 });
 
 test('totals land on the real figures once every item has arrived', () => {
-  const html = SCREENS['create-invoice'].render(TWO, { items: [1, 1] });
+  const html = SCREENS['create-invoice'].render(TWO, billState([1, 1]));
   /* 30x10 + 250x2 = 800 inclusive of 5% */
   assert.match(html, /₹800/);
 });
 
 test('the item count reads correctly and is singular at one', () => {
-  assert.match(SCREENS['create-invoice'].render(TWO, { items: [1, 0] }), /1 item</);
-  assert.match(SCREENS['create-invoice'].render(TWO, { items: [1, 1] }), /2 items</);
+  assert.match(SCREENS['create-invoice'].render(TWO, billState([1, 0])), /1 item</);
+  assert.match(SCREENS['create-invoice'].render(TWO, billState([1, 1])), /2 items</);
 });
 
 test('create-invoice disables Create with an empty bill', () => {
-  assert.match(SCREENS['create-invoice'].render(TWO, { items: [0, 0] }), /disabled/);
+  assert.match(SCREENS['create-invoice'].render(TWO, billState([0, 0])), /disabled/);
 });
 
 test('create-invoice enables Create once an item is on the bill', () => {
-  assert.doesNotMatch(SCREENS['create-invoice'].render(TWO, { items: [1, 0] }), /disabled/);
+  assert.doesNotMatch(SCREENS['create-invoice'].render(TWO, billState([1, 0])), /disabled/);
 });
 
 test('create-invoice renders with no state at all', () => {
@@ -179,4 +214,38 @@ test('every registered screen avoids hard-coded hex colours', () => {
     const html = mod.render(DATA, {});
     assert.doesNotMatch(html, /#[0-9a-fA-F]{6}/, `${key} has a hard-coded hex`);
   }
+});
+
+test('invoice number and date come from the recipe, not the screens', () => {
+  const data = { ...DATA, invoice: { number: 7001, date: '15/11/2026' } };
+  const created = SCREENS['invoice-created'].render(data, {});
+  assert.match(created, /#7001/);
+  assert.match(created, /Invoice No\. 7001/);
+  assert.match(created, /15\/11\/2026/);
+  assert.match(SCREENS['create-invoice'].render(data, {}), /#7001/);
+  const home = SCREENS.home.render(data, {});
+  assert.match(home, /#7000/);
+  assert.match(home, /#6999/);
+  for (const html of [created, home]) assert.doesNotMatch(html, /594[345]/);
+});
+
+test('create-invoice and invoice-created show the same total from stateAt', () => {
+  const recipe = {
+    business: DATA.business, party: DATA.party, items: TWO.items,
+    shots: [
+      { screen: 'create-invoice', duration: 3, actions: [
+        { do: 'addItem', at: 0, index: 0 }, { do: 'addItem', at: 0.5, index: 1 }] },
+      { screen: 'invoice-created', duration: 2, actions: [] }
+    ]
+  };
+  const { screenState } = stateAt(recipe, 4);
+  assert.equal(screenState.bill.total, 800);
+  assert.match(SCREENS['create-invoice'].render(TWO, screenState), /₹800/);
+  assert.match(SCREENS['invoice-created'].render(TWO, screenState), /₹800/);
+});
+
+test('screens fall back to a default invoice when the recipe has none', () => {
+  const html = SCREENS['invoice-created'].render(DATA, {});
+  assert.match(html, /Invoice No\. \d+/);
+  assert.doesNotMatch(html, /undefined|NaN/);
 });

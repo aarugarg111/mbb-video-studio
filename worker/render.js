@@ -23,7 +23,8 @@ const TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
-  '.json': 'application/json; charset=utf-8'
+  '.json': 'application/json; charset=utf-8',
+  '.woff2': 'font/woff2'
 };
 
 /* The stage page loads native ES modules. Chrome gives a file:// page an opaque
@@ -81,6 +82,11 @@ async function openStage(recipe) {
   await page.evaluate(r => window.mount(r), recipe);
   await page.evaluate(() => window.stageReady);
   throwIfBroken();
+
+  const fontErrors = await page.evaluate(() => window.fontErrors);
+  if (fontErrors.length > 0) {
+    console.warn('warning: font did not load, frames will use a fallback face: ' + fontErrors.join('; '));
+  }
 
   /* Closing both is the caller's job - the server outlives the page. */
   const close = async () => {

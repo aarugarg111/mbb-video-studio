@@ -48,10 +48,6 @@ export function taxableOf(item) {
   return lineTotal(item) / (1 + gst / 100);
 }
 
-export function taxOf(item) {
-  return lineTotal(item) - taxableOf(item);
-}
-
 /* Everything the totals block on a bill needs, in one call. */
 export function summarise(items) {
   const subtotal = items.reduce((sum, item) => sum + lineTotal(item), 0);

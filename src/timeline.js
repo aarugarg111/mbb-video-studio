@@ -49,6 +49,7 @@ export function stateAt(recipe, t) {
     party: 0,
     items: recipe.items.map(() => 0),
     total: 0,
+    bill: summarise([]),
     typed: '',
     appear: easeOut(ramp(localT, 0, 0.45))
   };
@@ -112,7 +113,8 @@ export function stateAt(recipe, t) {
     ...item,
     qty: item.qty * screenState.items[i]
   }));
-  screenState.total = summarise(effective).total;
+  screenState.bill = summarise(effective);
+  screenState.total = screenState.bill.total;
 
   const outgoing = index > 0 && localT < TRANSITION_SECONDS
     ? { screen: recipe.shots[index - 1].screen, progress: localT / TRANSITION_SECONDS }

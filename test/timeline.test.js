@@ -197,3 +197,13 @@ test('typing reveals the text progressively', () => {
   assert.ok(half.length > 0 && half.length < 9, `expected partial text, got "${half}"`);
   assert.equal(stateAt(typingRecipe, 1.2).screenState.typed, 'Tata Salt');
 });
+
+test('stateAt publishes the scaled bill summary once, and total agrees with it', () => {
+  assert.equal(stateAt(RECIPE, 2.9).screenState.bill.total, 0);
+  const late = stateAt(RECIPE, 5.5).screenState;
+  assert.equal(late.bill.total, 1320);
+  assert.equal(late.total, late.bill.total);
+  for (const k of ['subtotal', 'taxable', 'tax', 'cgst', 'sgst', 'roundOff', 'total']) {
+    assert.equal(typeof late.bill[k], 'number', k);
+  }
+});

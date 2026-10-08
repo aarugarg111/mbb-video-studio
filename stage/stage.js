@@ -13,7 +13,12 @@ window.setTime = function setTime(t) {
   if (!recipe) throw new Error('setTime called before mount');
 
   const frame = stateAt(recipe, t);
-  const data = { business: recipe.business, party: recipe.party, items: recipe.items };
+  const data = {
+    business: recipe.business,
+    party: recipe.party,
+    items: recipe.items,
+    invoice: recipe.invoice
+  };
 
   const layers = [];
 
@@ -29,7 +34,7 @@ window.setTime = function setTime(t) {
   }
 
   const inX = frame.outgoing ? ((1 - frame.outgoing.progress) * 100).toFixed(2) : '0';
-  const shadow = frame.outgoing ? '-14px 0 28px rgba(0,0,0,0.14)' : 'none';
+  const shadow = frame.outgoing ? '-14px 0 28px var(--mbb-transition-shadow)' : 'none';
   layers.push(
     `<div class="layer" style="transform: translateX(${inX}%); z-index: 20; box-shadow: ${shadow}">` +
     SCREENS[frame.screen].render(data, frame.screenState) +
@@ -57,8 +62,24 @@ window.setTime = function setTime(t) {
  * here to prevent. Ask for each weight explicitly first. */
 const FONT_WEIGHTS = ['400', '500', '700'];
 
+/* Fonts are self-hosted (kit/fonts), so a failure here is a real defect - a
+ * missing file or a broken @font-face - and must not pass silently into a video
+ * rendered in a fallback face. Record it for the renderer and warn. */
+window.fontErrors = [];
+
 window.stageReady = Promise
-  .all(FONT_WEIGHTS.map(w => document.fonts.load(`${w} 16px "DM Sans"`)))
-  .catch(() => {})        // offline: fall back rather than hang the render
+  .all(FONT_WEIGHTS.map(w =>
+    Promise.all([
+      document.fonts.load(`${w} 16px "DM Sans"`, 'A'),
+      document.fonts.load(`${w} 16px "DM Sans"`, '₹')   // latin-ext subset, loaded lazily otherwise
+    ]).then(([latin, ext]) => {
+      const faces = [...latin, ...ext];
+      if (faces.length === 0) throw new Error(`no DM Sans face loaded for weight ${w}`);
+    })
+  ))
+  .catch(e => {
+    window.fontErrors.push(e.message);
+    console.warn('Font load failed: ' + e.message);
+  })
   .then(() => document.fonts.ready)
   .then(() => true);

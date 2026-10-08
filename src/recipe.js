@@ -6,8 +6,11 @@
  */
 
 import yaml from 'js-yaml';
+import { DEFAULT_INVOICE } from './invoice.js';
 
 export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem'];
+
+const VIDEO_NAME = /^[A-Za-z0-9_-]+$/;
 
 const MIN_SHOT_SECONDS = 0.5;
 const MAX_VIDEO_SECONDS = 60;
@@ -30,12 +33,43 @@ export function parse(text, catalogue) {
   const screenNames = Object.keys(catalogue);
 
   const recipe = {
-    video: doc.video || 'untitled',
+    video: doc.video ?? 'untitled',
+    invoice: { ...DEFAULT_INVOICE },
     business: { name: '', ...(doc.business || {}) },
     party: { name: '', ...(doc.party || {}) },
     items: Array.isArray(doc.items) ? doc.items : [],
     shots: []
   };
+
+  /* "video" becomes a directory name under out/, so it must not be able to
+   * escape it or be anything but plain text. */
+  if (typeof recipe.video !== 'string' || !VIDEO_NAME.test(recipe.video)) {
+    errors.push(
+      `"video" must be a name of letters, digits, "-" and "_" only, got ${JSON.stringify(recipe.video)}.`
+    );
+  }
+
+  if (doc.invoice != null) {
+    const inv = doc.invoice;
+    if (typeof inv !== 'object' || Array.isArray(inv)) {
+      errors.push('"invoice" must be a mapping with "number" and "date".');
+    } else {
+      if (inv.number != null) {
+        if (typeof inv.number === 'number' && Number.isInteger(inv.number) && inv.number > 0) {
+          recipe.invoice.number = inv.number;
+        } else {
+          errors.push(`invoice.number must be a positive whole number, got ${JSON.stringify(inv.number)}.`);
+        }
+      }
+      if (inv.date != null) {
+        if (typeof inv.date === 'string' && inv.date.trim() !== '') {
+          recipe.invoice.date = inv.date;
+        } else {
+          errors.push(`invoice.date must be text such as "08/10/2026", got ${JSON.stringify(inv.date)}.`);
+        }
+      }
+    }
+  }
 
   /* Present but not a list is an error, for the same reason a malformed
    * "actions" is: silently emptying it makes every later addItem complain the
@@ -67,9 +101,9 @@ export function parse(text, catalogue) {
       return;
     }
 
-    const duration = Number(shot.duration);
-    if (!Number.isFinite(duration) || duration <= 0) {
-      errors.push(`${where}: duration must be a positive number, got "${shot.duration}".`);
+    const duration = shot.duration;
+    if (typeof duration !== 'number' || !Number.isFinite(duration) || duration <= 0) {
+      errors.push(`${where}: duration must be a positive number, got ${JSON.stringify(shot.duration)}.`);
       return;
     }
     if (duration < MIN_SHOT_SECONDS) {
@@ -96,9 +130,9 @@ export function parse(text, catalogue) {
         return;
       }
 
-      const when = Number(action.at);
-      if (!Number.isFinite(when) || when < 0) {
-        errors.push(`${at}: "at" must be zero or more, got "${action.at}".`);
+      const when = action.at;
+      if (typeof when !== 'number' || !Number.isFinite(when) || when < 0) {
+        errors.push(`${at}: "at" must be a number, zero or more, got ${JSON.stringify(action.at)}.`);
         return;
       }
       if (when >= duration) {
