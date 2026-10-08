@@ -214,7 +214,7 @@ test('invoice number and date come from the recipe, not the screens', () => {
   const data = { ...DATA, invoice: { number: 7001, date: '15/11/2026' } };
   const created = SCREENS['invoice-created'].render(data, {});
   assert.match(created, /#7001/);
-  assert.match(created, /Invoice No\. 7001/);
+  assert.match(created, /Invoice No\.<\/b><div>7001/);
   assert.match(created, /15\/11\/2026/);
   assert.match(SCREENS['create-bill'].render(data, {}), /15 Nov 2026/);
   const home = SCREENS.home.render(data, {});
@@ -240,7 +240,7 @@ test('create-invoice and invoice-created show the same total from stateAt', () =
 
 test('screens fall back to a default invoice when the recipe has none', () => {
   const html = SCREENS['invoice-created'].render(DATA, {});
-  assert.match(html, /Invoice No\. \d+/);
+  assert.match(html, /Invoice No\.<\/b><div>\d+/);
   assert.doesNotMatch(html, /undefined|NaN/);
 });
 

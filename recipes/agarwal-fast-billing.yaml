@@ -9,14 +9,17 @@ video: agarwal-fast-billing
 invoice:
   number: 5945
   date: "08/10/2026"
+  theme: none
 
 business:
   name: SAGAR SUPERBAZAAR
   gstin: 09ABCDE1234F1Z5
+  address: Main Market, Agra, Uttar Pradesh, 282001
 
 party:
   name: ASHOK POLITHIN CENTER
   phone: 98765 43210
+  address: Sadar Bazaar, Agra, Uttar Pradesh, 282003
 
 # Prices are tax-inclusive, as the app treats them. gst is the slab percentage.
 items:
@@ -50,4 +53,4 @@ shots:
       - { at: 3.8, do: tap, target: generate-bill }
 
   - screen: invoice-created
-    duration: 1.8
+    duration: 3.0

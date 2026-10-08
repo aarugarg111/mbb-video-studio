@@ -295,3 +295,36 @@
   color: var(--mbb-brand-text);
   text-align: center;
 }
+
+/* invoice-created: the bill itself */
+.bill { position: relative; margin: 12px 12px 0; background: var(--mbb-surface); border: 1px solid var(--mbb-border); border-radius: 4px; overflow: hidden; }
+.bill-theme { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.5; }
+.bill-theme.warm { opacity: 1; background:
+  radial-gradient(ellipse at 50% 38%, var(--mbb-theme-warm-c) 0%, transparent 62%),
+  linear-gradient(165deg, var(--mbb-theme-warm-a) 0%, var(--mbb-theme-warm-b) 100%); }
+.bill-body { position: relative; padding: 12px 12px 10px; font-size: 11px; line-height: 1.38; color: var(--mbb-ink); }
+.bill-body b { font-weight: 700; display: block; font-size: 11px; }
+.bill .bh { display: flex; align-items: flex-start; justify-content: space-between; }
+.bill .shop { font-size: 18px; font-weight: 700; letter-spacing: 0.3px; color: var(--mbb-primary-deep); max-width: 190px; line-height: 1.2; }
+.bill .bos { font-size: 12px; font-weight: 700; text-align: right; }
+.bill .badge { display: block; margin-top: 3px; padding: 1px 4px; border: 1px solid var(--mbb-border); border-radius: 2px; font-size: 8px; font-weight: 500; color: var(--mbb-ink-muted); }
+.bill .addr { margin-top: 4px; font-size: 10px; color: var(--mbb-ink-muted); }
+.bill .cols.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 9px; }
+.bill .cols .sm { font-size: 10px; color: var(--mbb-ink-muted); }
+.bill .tbl { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 11px; }
+.bill .tbl th { background: var(--mbb-bill-band); font-weight: 700; text-align: right; padding: 4px 3px; border-top: 1px solid var(--mbb-bill-rule); border-bottom: 1px solid var(--mbb-bill-rule); }
+.bill .tbl td { text-align: right; padding: 5px 3px; border-bottom: 1px solid var(--mbb-bill-rule); vertical-align: top; }
+.bill .tbl th:first-child, .bill .tbl td:first-child { text-align: left; width: 18px; }
+.bill .tbl .nm { text-align: left; }
+.bill .sub-row { display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 5px 3px; background: var(--mbb-bill-band); font-weight: 700; font-size: 11px; }
+.bill .sub-row span:nth-child(2) { text-align: center; }
+.bill .sub-row span:last-child { text-align: right; }
+.bill .tot { margin-top: 10px; align-items: start; }
+.bill .terms div { font-size: 9px; color: var(--mbb-ink-muted); margin-top: 2px; }
+.bill .sums .r { display: flex; justify-content: space-between; padding: 2px 0; }
+.bill .sums .strong { font-weight: 700; font-size: 12px; border-top: 1px solid var(--mbb-bill-rule); }
+.bill .words { margin-top: 12px; }
+.bill .words div { font-size: 13px; font-weight: 500; }
+.bill .sig { margin: 12px 0 0 auto; width: 160px; text-align: center; font-size: 10px; }
+.bill .sig b { font-size: 10px; }
+.bill .sigbox { height: 38px; border: 1px solid var(--mbb-border); border-radius: 4px; margin-bottom: 3px; }

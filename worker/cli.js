@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /* recipe in, mp4 (or a single still) out. */
 
-import { readFile, mkdir, rm } from 'node:fs/promises';
+import { readFile, mkdir, rm, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { parse } from '../src/recipe.js';
+import { parse, BUILT_IN_THEMES } from '../src/recipe.js';
 import { catalogue } from '../screens/index.js';
 import { renderFrames, renderStill } from './render.js';
 import { encode } from './encode.js';
@@ -22,7 +22,10 @@ async function main() {
   const stillAt = stillIndex >= 0 ? Number(rest[stillIndex + 1]) : null;
 
   const text = await readFile(recipePath, 'utf8');
-  const result = parse(text, catalogue());
+  /* Theme art dropped into kit/themes/<name>.png becomes a valid theme name. */
+  const art = (await readdir('kit/themes').catch(() => []))
+    .filter(f => f.endsWith('.png')).map(f => f.slice(0, -4));
+  const result = parse(text, catalogue(), { themes: [...BUILT_IN_THEMES, ...art] });
 
   for (const warning of result.warnings) console.warn('warning: ' + warning);
 

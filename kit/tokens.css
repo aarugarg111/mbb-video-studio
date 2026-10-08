@@ -131,3 +131,12 @@
  *   #F9F9E1  yellow sticky notes
  *   #E1F3F9  blue sticky notes
  */
+
+/* --- invoice paper and the neutral demonstration theme ------------------- */
+:root {
+  --mbb-bill-rule:    #E3E1EA;  /* SAMPLED - thin rules inside the bill     */
+  --mbb-bill-band:    #F4F3F8;  /* SAMPLED - table header and subtotal band */
+  --mbb-theme-warm-a: #FBEFD9;  /* demonstration wash only - plain warm paper */
+  --mbb-theme-warm-b: #F6DDB8;
+  --mbb-theme-warm-c: #FFF8EC;
+}

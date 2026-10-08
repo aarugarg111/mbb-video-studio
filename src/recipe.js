@@ -29,7 +29,13 @@ const MIN_READABLE_SECONDS = 1.0;
 const MAX_DEAD_AIR_SECONDS = 2.0;
 const MIN_ACTION_GAP_SECONDS = 0.6;
 
-export function parse(text, catalogue) {
+/* Themes the recipe may name. 'none' and 'warm' are built in; the CLI adds the
+ * PNG names it finds in kit/themes. Kept as a parameter so this file stays
+ * free of filesystem access. */
+export const BUILT_IN_THEMES = ['none', 'warm'];
+
+export function parse(text, catalogue, options = {}) {
+  const themes = options.themes ?? BUILT_IN_THEMES;
   const errors = [];
   const warnings = [];
 
@@ -81,6 +87,18 @@ export function parse(text, catalogue) {
           recipe.invoice.date = inv.date;
         } else {
           errors.push(`invoice.date must be text such as "08/10/2026", got ${JSON.stringify(inv.date)}.`);
+        }
+      }
+      if (inv.theme != null) {
+        if (typeof inv.theme === 'string' && themes.includes(inv.theme)) {
+          recipe.invoice.theme = inv.theme;
+        } else {
+          /* A video that renders unthemed beats one that does not render. */
+          warnings.push(
+            `invoice.theme ${JSON.stringify(inv.theme)} is not a known theme, so the bill renders plain. ` +
+            `Known: ${themes.join(', ')}.`
+          );
+          recipe.invoice.theme = 'none';
         }
       }
     }
