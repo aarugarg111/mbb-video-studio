@@ -1,0 +1,70 @@
+name: render
+
+# The run-name carries the job id so the web app can find this run again -
+# repository_dispatch does not return a run id to its caller.
+run-name: render-${{ github.event.client_payload.jobId }}
+
+on:
+  repository_dispatch:
+    types: [render]
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Cached across runs, so this is a few seconds after the first render.
+      - name: Cache the browser
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install the browser's system libraries
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Confirm ffmpeg is present
+        run: ffmpeg -version | head -1
+
+      - name: Write the recipe
+        env:
+          RECIPE: ${{ github.event.client_payload.recipe }}
+        run: |
+          mkdir -p recipes
+          printf '%s' "$RECIPE" > recipes/job.yaml
+          echo "--- recipe ---"
+          cat recipes/job.yaml
+
+      - name: Render
+        run: node worker/cli.js recipes/job.yaml
+
+      # The CLI writes to out/<video>/<video>.mp4 and the recipe chooses that
+      # name, so collect whatever MP4 was produced rather than guessing it.
+      - name: Collect the video
+        run: |
+          mkdir -p artifact
+          find out -name '*.mp4' -exec cp {} artifact/video.mp4 \;
+          ls -la artifact/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ github.event.client_payload.jobId }}
+          path: artifact/video.mp4
+          retention-days: 7
