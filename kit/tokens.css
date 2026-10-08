@@ -1,0 +1,55 @@
+/* myBillBook design tokens
+ *
+ * Source: sampled from 1:1 renders of the myBillBook Design System Figma file
+ * (uhjJAJZvkoX1TTEDBJwWVw), 2026-10-08. Only pixels whose entire 3x3
+ * neighbourhood was identical were counted, so these are true solid fills,
+ * not antialiased edges.
+ *
+ * CONFIRMED = the same value appeared independently on two different pages.
+ * SAMPLED   = read once, from a single page.
+ *
+ * This is the only file that should need changing if the app is restyled, or
+ * when real design-token values become available (blocked today: the Figma
+ * variables API needs a Dev/Full seat; this account has View).
+ */
+
+:root {
+  /* --- brand ------------------------------------------------------------ */
+  --mbb-primary:        #4C3CCE;  /* CONFIRMED - buttons, header, totals, links */
+  --mbb-primary-strong: #4A3BCC;  /* SAMPLED   - primary composited on tint     */
+  --mbb-primary-light:  #6F62D8;  /* CONFIRMED - lighter indigo, secondary      */
+  --mbb-primary-deep:   #1D1852;  /* SAMPLED   - darkest indigo, text on tint   */
+
+  /* --- brand tints ------------------------------------------------------ */
+  --mbb-tint-100: #F7F7FE;  /* CONFIRMED - faintest indigo surface */
+  --mbb-tint-200: #ECE8FF;  /* SAMPLED                             */
+  --mbb-tint-300: #E8E4FB;  /* SAMPLED   - selected / hover fill    */
+
+  /* --- text ------------------------------------------------------------- */
+  --mbb-ink:       #353452;  /* CONFIRMED - headings and body      */
+  --mbb-ink-muted: #666666;  /* SAMPLED   - secondary text         */
+
+  /* --- surfaces and lines ----------------------------------------------- */
+  --mbb-surface: #FFFFFF;  /* CONFIRMED                        */
+  --mbb-border:  #D8D8D8;  /* SAMPLED   - field and card border */
+  --mbb-line:    #E0E0E0;  /* SAMPLED   - hairline divider      */
+
+  /* --- status ----------------------------------------------------------- */
+  --mbb-danger:       #EB4F40;  /* SAMPLED - error text and fills  */
+  --mbb-success-tint: #D4EFEA;  /* SAMPLED - success message fill  */
+  --mbb-warning-tint: #FFF2DD;  /* SAMPLED - warning message fill  */
+  --mbb-info:         #78D3F8;  /* SAMPLED - informational accent  */
+
+  /* --- type ------------------------------------------------------------- */
+  /* PROVISIONAL. The Figma file's text styles are not readable without a
+   * Dev/Full seat, so the family is a stand-in chosen to sit close to the
+   * renders. Replace when the real family is known. */
+  --mbb-font: "DM Sans", system-ui, -apple-system, sans-serif;
+}
+
+/* NOT myBillBook colours - recorded so they are never mistaken for tokens.
+ * These are Figma canvas furniture that appears in any screenshot of the file:
+ *   #E5E5E5  Figma canvas background
+ *   #F9F9E1  yellow sticky notes
+ *   #E1F3F9  blue sticky notes
+ */
