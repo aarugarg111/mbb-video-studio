@@ -98,7 +98,7 @@ shots:
   assert.ok(r.errors.some(e => /duration/.test(e)));
 });
 
-test('addItem beyond the item list warns but still parses', () => {
+test('addItem beyond the item list is an error naming the index and item count', () => {
   const r = parse(`
 items:
   - { name: Salt, rate: 10, qty: 1 }
@@ -108,8 +108,8 @@ shots:
     actions:
       - { at: 0.5, do: addItem, index: 7 }
 `, CATALOGUE);
-  assert.ok(!r.errors, 'should not be fatal');
-  assert.ok(r.warnings.some(w => /7/.test(w)));
+  assert.ok(r.errors, 'should be fatal');
+  assert.ok(r.errors.some(e => /shot 1, action 1/.test(e) && /7/.test(e) && /lists 1/.test(e)));
 });
 
 test('a very short shot warns but still parses', () => {
@@ -141,4 +141,96 @@ shots:
   assert.deepEqual(r.recipe.items, []);
   assert.equal(r.recipe.business.name, '');
   assert.equal(r.recipe.party.name, '');
+});
+
+const shotWith = (screen, duration, actionLine) => `
+shots:
+  - screen: ${screen}
+    duration: ${duration}
+    actions:
+      - ${actionLine}
+`;
+
+test('a type action missing its text is an error', () => {
+  const r = parse(shotWith('create-invoice', 2.0, '{ at: 0.5, do: type, target: add-item }'), CATALOGUE);
+  assert.ok(r.errors.some(e => /shot 1, action 1/.test(e) && /text/.test(e)));
+});
+
+test('a selectParty action parses fine', () => {
+  const r = parse(shotWith('create-invoice', 2.0, '{ at: 0.5, do: selectParty }'), CATALOGUE);
+  assert.ok(!r.errors, 'expected no errors, got: ' + JSON.stringify(r.errors));
+  assert.equal(r.recipe.shots[0].actions[0].do, 'selectParty');
+});
+
+test('a negative at is an error', () => {
+  const r = parse(shotWith('home', 2.0, '{ at: -1, do: tap, target: create-invoice-cta }'), CATALOGUE);
+  assert.ok(r.errors.some(e => /"at"/.test(e) && /-1/.test(e)));
+});
+
+test('a non-integer addItem index is an error', () => {
+  const r = parse(`
+items:
+  - { name: Salt, rate: 10, qty: 1 }
+shots:
+  - screen: create-invoice
+    duration: 2.0
+    actions:
+      - { at: 0.5, do: addItem, index: 0.5 }
+`, CATALOGUE);
+  assert.ok(r.errors.some(e => /index/.test(e) && /0.5/.test(e)));
+});
+
+test('a negative duration is an error', () => {
+  const r = parse(`
+shots:
+  - screen: home
+    duration: -3
+`, CATALOGUE);
+  assert.ok(r.errors.some(e => /shot 1/.test(e) && /duration/.test(e)));
+});
+
+test('actions given as a string is an error, not silently dropped', () => {
+  const r = parse(`
+shots:
+  - screen: home
+    duration: 2.0
+    actions: tap home
+`, CATALOGUE);
+  assert.ok(r.errors.some(e => /shot 1/.test(e) && /actions/.test(e) && /list/.test(e)));
+});
+
+test('a shot with no actions key is valid', () => {
+  const r = parse(`
+shots:
+  - screen: home
+    duration: 2.0
+`, CATALOGUE);
+  assert.ok(!r.errors);
+  assert.deepEqual(r.recipe.shots[0].actions, []);
+});
+
+test('screen: constructor returns errors rather than throwing', () => {
+  let r;
+  assert.doesNotThrow(() => {
+    r = parse(`
+shots:
+  - screen: constructor
+    duration: 2.0
+    actions:
+      - { at: 0.5, do: tap, target: x }
+`, CATALOGUE);
+  });
+  assert.ok(r.errors.some(e => /constructor/.test(e) && /home/.test(e)));
+});
+
+test('warnings are still returned alongside errors', () => {
+  const r = parse(`
+shots:
+  - screen: home
+    duration: 0.2
+  - screen: nowhere
+    duration: 1.0
+`, CATALOGUE);
+  assert.ok(r.errors.some(e => /shot 2/.test(e)));
+  assert.ok(r.warnings.some(w => /shot 1/.test(w) && /short/i.test(w)));
 });

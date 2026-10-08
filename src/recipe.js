@@ -52,7 +52,7 @@ export function parse(text, catalogue) {
       return;
     }
 
-    if (!catalogue[shot.screen]) {
+    if (!Object.hasOwn(catalogue, shot.screen)) {
       errors.push(
         `${where}: unknown screen "${shot.screen}". Valid screens: ${screenNames.join(', ')}.`
       );
@@ -70,7 +70,11 @@ export function parse(text, catalogue) {
     totalSeconds += duration;
 
     const targets = catalogue[shot.screen];
-    const actions = Array.isArray(shot.actions) ? shot.actions : [];
+    if (shot.actions != null && !Array.isArray(shot.actions)) {
+      errors.push(`${where}: "actions" must be a list, got ${typeof shot.actions === 'string' ? '"' + shot.actions + '"' : 'a ' + typeof shot.actions}.`);
+      return;
+    }
+    const actions = shot.actions ?? [];
 
     actions.forEach((action, j) => {
       const at = `${where}, action ${j + 1}`;
@@ -114,10 +118,11 @@ export function parse(text, catalogue) {
           return;
         }
         if (index >= recipe.items.length) {
-          warnings.push(
+          errors.push(
             `${at}: addItem index ${index} has no matching item ` +
             `(the recipe lists ${recipe.items.length}).`
           );
+          return;
         }
       }
     });
