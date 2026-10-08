@@ -27,7 +27,9 @@ export const RecipeSchema = z.object({
   business: z.object({ name: z.string(), gstin: z.string() }),
   party: z.object({ name: z.string(), phone: z.string() }),
   invoice: z.object({
-    number: z.string(),
+    /* The renderer requires a positive whole number here, not a string.
+     * A string is rejected by src/recipe.js and the render never starts. */
+    number: z.number().int().positive(),
     date: z.string(),
     theme: z.enum(THEMES)
   }),
