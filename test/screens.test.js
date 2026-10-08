@@ -96,3 +96,87 @@ test('every token kit.css references is defined in tokens.css', async () => {
   const missing = [...used].filter(t => !defined.has(t));
   assert.deepEqual(missing, [], 'a typo here fails silently as an unstyled element');
 });
+
+const TWO = { ...DATA, items: [
+  { name: 'TATA SALT 1KG', rate: 30, qty: 10, gst: 5 },
+  { name: 'SUGAR 5KG', rate: 250, qty: 2, gst: 5 }
+]};
+
+test('every item in the catalogue is listed, on the bill or not', () => {
+  const html = SCREENS['create-invoice'].render(TWO, { items: [1, 0] });
+  assert.match(html, /TATA SALT 1KG/);
+  assert.match(html, /SUGAR 5KG/, 'unselected items still show in the search results');
+});
+
+test('an item on the bill gets a stepper, one not on it gets ADD', () => {
+  const html = SCREENS['create-invoice'].render(TWO, { items: [1, 0] });
+  assert.match(html, /class="stepper"/, 'the added item should show a stepper');
+  assert.match(html, /class="addbtn"/, 'the other should still offer ADD');
+});
+
+test('the stepper shows the quantity from the recipe', () => {
+  const html = SCREENS['create-invoice'].render(TWO, { items: [1, 0] });
+  assert.match(html, /class="qty">10</);
+});
+
+test('typing filters the item list', () => {
+  const html = SCREENS['create-invoice'].render(TWO, { items: [0, 0], typed: 'SUGAR' });
+  assert.match(html, /SUGAR 5KG/);
+  assert.doesNotMatch(html, /TATA SALT/, 'filtered out by the search text');
+});
+
+test('an item already on the bill survives a search that excludes it', () => {
+  const html = SCREENS['create-invoice'].render(TWO, { items: [1, 0], typed: 'SUGAR' });
+  assert.match(html, /TATA SALT 1KG/, 'on the bill, so it must stay listed');
+  assert.match(html, /SUGAR 5KG/);
+});
+
+test('the totals block shows the full GST breakdown', () => {
+  const html = SCREENS['create-invoice'].render(TWO, { items: [1, 1] });
+  for (const label of ['Taxable Amount', 'CGST', 'SGST', 'Round Off', 'Total Amount']) {
+    assert.ok(html.includes(label), `missing "${label}"`);
+  }
+});
+
+test('totals land on the real figures once every item has arrived', () => {
+  const html = SCREENS['create-invoice'].render(TWO, { items: [1, 1] });
+  /* 30x10 + 250x2 = 800 inclusive of 5% */
+  assert.match(html, /₹800/);
+});
+
+test('the item count reads correctly and is singular at one', () => {
+  assert.match(SCREENS['create-invoice'].render(TWO, { items: [1, 0] }), /1 item</);
+  assert.match(SCREENS['create-invoice'].render(TWO, { items: [1, 1] }), /2 items</);
+});
+
+test('create-invoice disables Create with an empty bill', () => {
+  assert.match(SCREENS['create-invoice'].render(TWO, { items: [0, 0] }), /disabled/);
+});
+
+test('create-invoice enables Create once an item is on the bill', () => {
+  assert.doesNotMatch(SCREENS['create-invoice'].render(TWO, { items: [1, 0] }), /disabled/);
+});
+
+test('create-invoice renders with no state at all', () => {
+  const html = SCREENS['create-invoice'].render(DATA, {});
+  assert.match(html, /Create Bill \/ Invoice/);
+});
+
+test('invoice-created shows the party and the final total', () => {
+  const html = SCREENS['invoice-created'].render(DATA, { total: 280 });
+  assert.match(html, /Ramesh Kumar/);
+  assert.match(html, /₹280/);
+});
+
+test('every registered screen has at least one tap target', () => {
+  for (const [key, mod] of Object.entries(SCREENS)) {
+    assert.ok(Object.keys(mod.targets).length > 0, `${key} has no targets`);
+  }
+});
+
+test('every registered screen avoids hard-coded hex colours', () => {
+  for (const [key, mod] of Object.entries(SCREENS)) {
+    const html = mod.render(DATA, {});
+    assert.doesNotMatch(html, /#[0-9a-fA-F]{6}/, `${key} has a hard-coded hex`);
+  }
+});

@@ -1,7 +1,11 @@
 import * as home from './home.js';
+import * as createInvoice from './create-invoice.js';
+import * as invoiceCreated from './invoice-created.js';
 
 export const SCREENS = {
-  [home.name]: home
+  [home.name]: home,
+  [createInvoice.name]: createInvoice,
+  [invoiceCreated.name]: invoiceCreated
 };
 
 /* The shape src/recipe.js validates against: screen name -> its target names. */
