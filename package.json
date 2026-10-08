@@ -1,19 +1,16 @@
 {
   "name": "mbb-video-studio",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24" },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test test/",
+    "render": "node worker/cli.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "pngjs": "^7.0.0"
+    "js-yaml": "^4.1.0",
+    "pngjs": "^7.0.0",
+    "playwright": "^1.49.0"
   }
 }
