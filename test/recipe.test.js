@@ -314,3 +314,28 @@ test('an action "at" must be a real number, not a coerced value', () => {
     assert.match(res.errors.join('\n'), /"at" must be a number/);
   }
 });
+
+test('brand: absent means no end card', () => {
+  const { recipe } = parse(GOOD, CATALOGUE);
+  assert.equal(recipe.brand.endCard, null);
+});
+
+test('brand: end card defaults duration and tagline', () => {
+  const { recipe, errors } = parse(GOOD + '\nbrand:\n  endCard: {}\n', CATALOGUE);
+  assert.deepEqual(errors ?? [], []);
+  assert.equal(recipe.brand.endCard.duration, 1.6);
+  assert.equal(recipe.brand.endCard.tagline, 'India ka No.1 Billing App');
+});
+
+test('brand: non-positive endCard duration is an error', () => {
+  for (const d of ['0', '-1', 'soon']) {
+    const { errors } = parse(GOOD + `\nbrand:\n  endCard: { duration: ${d} }\n`, CATALOGUE);
+    assert.ok(errors.some(e => /endCard\.duration/.test(e)), d);
+  }
+});
+
+test('brand: unknown key warns but still parses', () => {
+  const { recipe, warnings } = parse(GOOD + '\nbrand:\n  sparkle: true\n', CATALOGUE);
+  assert.ok(recipe);
+  assert.ok(warnings.some(w => /brand\.sparkle/.test(w)));
+});

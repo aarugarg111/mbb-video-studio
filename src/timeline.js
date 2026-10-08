@@ -24,8 +24,14 @@ const ITEM_SECONDS = 0.35;
 const RIPPLE_SECONDS = 0.6;
 const TYPE_SECONDS = 1.2;
 
-export function totalDuration(recipe) {
+export const END_CARD_FADE_SECONDS = 0.35;
+
+function shotsDuration(recipe) {
   return recipe.shots.reduce((sum, shot) => sum + shot.duration, 0);
+}
+
+export function totalDuration(recipe) {
+  return shotsDuration(recipe) + (recipe.brand?.endCard?.duration ?? 0);
 }
 
 function locate(recipe, t) {
@@ -43,7 +49,15 @@ function locate(recipe, t) {
 
 export function stateAt(recipe, t) {
   const clamped = Math.max(0, t);
+  /* Past the last shot the locator holds the final shot, so the screen under
+   * the end card stays valid and nothing can crash. */
   const { index, shot, localT } = locate(recipe, clamped);
+
+  const card = recipe.brand?.endCard;
+  const cardStart = shotsDuration(recipe);
+  const endCard = card && clamped >= cardStart
+    ? { progress: clamp01((clamped - cardStart) / END_CARD_FADE_SECONDS) }
+    : null;
 
   const screenState = {
     party: 0,
@@ -120,5 +134,5 @@ export function stateAt(recipe, t) {
     ? { screen: recipe.shots[index - 1].screen, progress: localT / TRANSITION_SECONDS }
     : null;
 
-  return { t: clamped, shotIndex: index, screen: shot.screen, outgoing, screenState, ripple };
+  return { t: clamped, shotIndex: index, screen: shot.screen, outgoing, screenState, ripple, endCard };
 }

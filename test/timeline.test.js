@@ -207,3 +207,34 @@ test('stateAt publishes the scaled bill summary once, and total agrees with it',
     assert.equal(typeof late.bill[k], 'number', k);
   }
 });
+
+const CARD = { ...RECIPE, brand: { endCard: { duration: 1.6, tagline: 'x' } } };
+
+test('no brand section: duration unchanged and endCard is null', () => {
+  const shots = RECIPE.shots.reduce((s, x) => s + x.duration, 0);
+  assert.equal(totalDuration(RECIPE), shots);
+  assert.equal(stateAt(RECIPE, shots + 5).endCard, null);
+});
+
+test('end card extends totalDuration by its duration', () => {
+  assert.ok(Math.abs(totalDuration(CARD) - totalDuration(RECIPE) - 1.6) < 1e-9);
+});
+
+test('endCard is null before its window and progresses inside it', () => {
+  const start = totalDuration(RECIPE);
+  assert.equal(stateAt(CARD, start - 0.01).endCard, null);
+  const p = stateAt(CARD, start + 0.1).endCard.progress;
+  assert.ok(p > 0 && p < 1);
+});
+
+test('end card progress reaches 1 and holds', () => {
+  const start = totalDuration(RECIPE);
+  assert.equal(stateAt(CARD, start + 0.4).endCard.progress, 1);
+  assert.equal(stateAt(CARD, totalDuration(CARD)).endCard.progress, 1);
+});
+
+test('stateAt with an end card does not mutate the recipe', () => {
+  const before = JSON.stringify(CARD);
+  stateAt(CARD, totalDuration(CARD) - 0.1);
+  assert.equal(JSON.stringify(CARD), before);
+});

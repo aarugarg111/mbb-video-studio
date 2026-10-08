@@ -189,3 +189,34 @@
   pointer-events: none;
   z-index: 60;
 }
+
+/* --- brand furniture (stage only; never inside the app screens) ---------- */
+.logo-band {
+  height: 150px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.logo-band img { width: 300px; height: auto; display: block; }
+
+.endcard {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  background: var(--mbb-brand-slate);
+}
+.endcard img { width: 420px; height: auto; display: block; }
+.endcard-tagline {
+  margin: 0;
+  font-family: var(--mbb-font);
+  font-size: 38px;
+  font-weight: 500;
+  color: var(--mbb-brand-text);
+  text-align: center;
+}

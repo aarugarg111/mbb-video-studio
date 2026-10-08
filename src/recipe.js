@@ -8,6 +8,10 @@
 import yaml from 'js-yaml';
 import { DEFAULT_INVOICE } from './invoice.js';
 
+export const DEFAULT_END_CARD = { duration: 1.6, tagline: 'India ka No.1 Billing App' };
+const BRAND_KEYS = ['endCard'];
+const END_CARD_KEYS = ['duration', 'tagline'];
+
 export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem'];
 
 const VIDEO_NAME = /^[A-Za-z0-9_-]+$/;
@@ -38,6 +42,7 @@ export function parse(text, catalogue) {
     business: { name: '', ...(doc.business || {}) },
     party: { name: '', ...(doc.party || {}) },
     items: Array.isArray(doc.items) ? doc.items : [],
+    brand: { endCard: null },
     shots: []
   };
 
@@ -66,6 +71,47 @@ export function parse(text, catalogue) {
           recipe.invoice.date = inv.date;
         } else {
           errors.push(`invoice.date must be text such as "08/10/2026", got ${JSON.stringify(inv.date)}.`);
+        }
+      }
+    }
+  }
+
+  if (doc.brand != null) {
+    const brand = doc.brand;
+    if (typeof brand !== 'object' || Array.isArray(brand)) {
+      errors.push('"brand" must be a mapping, such as "endCard".');
+    } else {
+      for (const key of Object.keys(brand)) {
+        if (!BRAND_KEYS.includes(key)) {
+          warnings.push(`brand.${key} is not a known setting and is ignored. Known: ${BRAND_KEYS.join(', ')}.`);
+        }
+      }
+      if (Object.hasOwn(brand, 'endCard')) {
+        const card = brand.endCard ?? {};   // "endCard:" with nothing under it means all defaults
+        if (typeof card !== 'object' || Array.isArray(card)) {
+          errors.push('brand.endCard must be a mapping with "duration" and "tagline".');
+        } else {
+          for (const key of Object.keys(card)) {
+            if (!END_CARD_KEYS.includes(key)) {
+              warnings.push(`brand.endCard.${key} is not a known setting and is ignored.`);
+            }
+          }
+          const endCard = { ...DEFAULT_END_CARD };
+          if (card.duration != null) {
+            if (typeof card.duration === 'number' && Number.isFinite(card.duration) && card.duration > 0) {
+              endCard.duration = card.duration;
+            } else {
+              errors.push(`brand.endCard.duration must be a positive number, got ${JSON.stringify(card.duration)}.`);
+            }
+          }
+          if (card.tagline != null) {
+            if (typeof card.tagline === 'string' && card.tagline.trim() !== '') {
+              endCard.tagline = card.tagline;
+            } else {
+              errors.push(`brand.endCard.tagline must be text, got ${JSON.stringify(card.tagline)}.`);
+            }
+          }
+          recipe.brand.endCard = endCard;
         }
       }
     }

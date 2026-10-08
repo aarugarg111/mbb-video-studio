@@ -2,7 +2,12 @@ import { SCREENS } from '../screens/index.js';
 import { stateAt, totalDuration } from '../src/timeline.js';
 
 const viewport = document.getElementById('viewport');
+const endcardRoot = document.getElementById('endcard-root');
 let recipe = null;
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
 
 window.mount = function mount(r) {
   recipe = r;
@@ -51,6 +56,13 @@ window.setTime = function setTime(t) {
   }
 
   viewport.innerHTML = layers.join('');
+
+  /* Full-bleed: a child of #frame, not of the phone, above the logo band. */
+  endcardRoot.innerHTML = frame.endCard
+    ? `<div class="endcard" style="opacity: ${frame.endCard.progress.toFixed(3)}">` +
+      `<img src="../kit/brand/mybillbook-logo.webp" alt="myBillBook">` +
+      `<p class="endcard-tagline">${escapeHtml(recipe.brand.endCard.tagline)}</p></div>`
+    : '';
 };
 
 /* The renderer waits on this before the first screenshot. Without it the first

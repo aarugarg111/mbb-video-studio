@@ -109,6 +109,15 @@
   --stage-phone-body:        #15171C;
   --stage-backdrop:          var(--mbb-ink);
   --mbb-transition-shadow:   rgba(0, 0, 0, 0.14);
+
+  /* --- BRAND palette (sampled from the logo) ---------------------------
+   * NOT the app-UI palette above. The app screens are indigo and stay indigo;
+   * this orange/slate is furniture around the phone and the end card only. */
+  --mbb-brand-orange:        #DA6119;  /* "BillBook", the plane */
+  --mbb-brand-slate:         #27303B;  /* "my", frame backdrop, end-card ground */
+  --mbb-brand-orange-light:  #FF9B60;  /* plane highlight */
+  --mbb-brand-orange-dark:   #AE4E14;  /* plane shadow */
+  --mbb-brand-text:          #FFFFFF;  /* end-card tagline */
 }
 
 /* NOT myBillBook colours - recorded so they are never mistaken for tokens.

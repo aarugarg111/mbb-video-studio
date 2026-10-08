@@ -23,6 +23,11 @@ items:
   - { name: TATA SALT 1KG, rate: 30,  qty: 10, gst: 5, unit: PCS }
   - { name: SUGAR 5KG,     rate: 250, qty: 2,  gst: 5, unit: PCS }
 
+brand:
+  endCard:
+    duration: 1.6
+    tagline: India ka No.1 Billing App
+
 shots:
   - screen: home
     duration: 2.2
