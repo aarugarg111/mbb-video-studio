@@ -25,17 +25,17 @@ items:
 
 brand:
   endCard:
-    duration: 1.6
+    duration: 1.5
     tagline: India ka No.1 Billing App
 
 shots:
   - screen: home
-    duration: 2.2
+    duration: 2.0
     actions:
       - { at: 1.3, do: tap, target: create-invoice-cta }
 
   - screen: create-invoice
-    duration: 5.4
+    duration: 4.6
     actions:
       - { at: 0.6, do: selectParty }
       - { at: 1.2, do: type, target: item-search, text: TATA, duration: 0.9 }
@@ -44,4 +44,4 @@ shots:
       - { at: 4.4, do: tap, target: save-and-share }
 
   - screen: invoice-created
-    duration: 2.2
+    duration: 1.8

@@ -17,7 +17,10 @@ export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem'];
 const VIDEO_NAME = /^[A-Za-z0-9_-]+$/;
 
 const MIN_SHOT_SECONDS = 0.5;
-const MAX_VIDEO_SECONDS = 60;
+/* These clips run as creator ads, where the ceiling is ten seconds. Longer
+ * still renders - this is a guide, not an impossibility - but a clip over the
+ * limit cannot be used, so say so loudly. */
+const MAX_VIDEO_SECONDS = 10;
 
 export function parse(text, catalogue) {
   const errors = [];
@@ -218,8 +221,18 @@ export function parse(text, catalogue) {
     recipe.shots.push({ screen: shot.screen, duration, actions });
   });
 
-  if (totalSeconds > MAX_VIDEO_SECONDS) {
-    warnings.push(`The whole video is ${totalSeconds.toFixed(1)}s, over the ${MAX_VIDEO_SECONDS}s guide.`);
+  /* The end card is part of the clip the viewer sees, so it counts toward the
+   * limit. Measuring only the shots under-reports every branded video. */
+  const endCardSeconds = recipe.brand.endCard ? recipe.brand.endCard.duration : 0;
+  const clipSeconds = totalSeconds + endCardSeconds;
+
+  if (clipSeconds > MAX_VIDEO_SECONDS) {
+    const madeOf = endCardSeconds > 0
+      ? ` (${totalSeconds.toFixed(1)}s of shots plus a ${endCardSeconds}s end card)`
+      : "";
+    warnings.push(
+      `The whole clip is ${clipSeconds.toFixed(1)}s${madeOf}, over the ${MAX_VIDEO_SECONDS}s limit for a creator ad.`
+    );
   }
 
   if (errors.length > 0) return { errors, warnings };

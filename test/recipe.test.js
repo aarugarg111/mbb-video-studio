@@ -122,14 +122,14 @@ shots:
   assert.ok(r.warnings.some(w => /short/i.test(w)));
 });
 
-test('a video over sixty seconds warns', () => {
+test('a very long video warns', () => {
   const r = parse(`
 shots:
   - screen: home
     duration: 61
 `, CATALOGUE);
   assert.ok(!r.errors);
-  assert.ok(r.warnings.some(w => /60/.test(w)));
+  assert.ok(r.warnings.some(w => /limit/.test(w)));
 });
 
 test('missing optional sections default to empty', () => {
@@ -338,4 +338,39 @@ test('brand: unknown key warns but still parses', () => {
   const { recipe, warnings } = parse(GOOD + '\nbrand:\n  sparkle: true\n', CATALOGUE);
   assert.ok(recipe);
   assert.ok(warnings.some(w => /brand\.sparkle/.test(w)));
+});
+
+test('a clip over the ten second limit warns', () => {
+  const r = parse(`
+shots:
+  - screen: home
+    duration: 11
+`, CATALOGUE);
+  assert.ok(!r.errors, 'still renders - it is a guide, not an impossibility');
+  assert.ok(r.warnings.some(w => /10s limit/.test(w)));
+});
+
+test('the end card counts toward the limit', () => {
+  const r = parse(`
+brand:
+  endCard:
+    duration: 2.0
+shots:
+  - screen: home
+    duration: 9
+`, CATALOGUE);
+  assert.ok(r.warnings.some(w => /11\.0s/.test(w)), '9s of shots plus a 2s card is 11s');
+  assert.ok(r.warnings.some(w => /end card/.test(w)), 'the message should explain what it is made of');
+});
+
+test('a clip inside the limit does not warn about length', () => {
+  const r = parse(`
+brand:
+  endCard:
+    duration: 1.5
+shots:
+  - screen: home
+    duration: 8
+`, CATALOGUE);
+  assert.ok(!r.warnings.some(w => /limit/.test(w)), '9.5s is fine');
 });
