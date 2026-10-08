@@ -305,7 +305,9 @@
 .bill-body { position: relative; padding: 12px 12px 10px; font-size: 11px; line-height: 1.38; color: var(--mbb-ink); }
 .bill-body b { font-weight: 700; display: block; font-size: 11px; }
 .bill .bh { display: flex; align-items: flex-start; justify-content: space-between; }
-.bill .shop { font-size: 18px; font-weight: 700; letter-spacing: 0.3px; color: var(--mbb-primary-deep); max-width: 190px; line-height: 1.2; }
+/* The real app keeps the shop name on one line. DM Sans is wider than the
+ * app's face, so it is sized to fit rather than allowed to wrap. */
+.bill .shop { font-size: 15px; font-weight: 700; letter-spacing: 0.2px; color: var(--mbb-primary-deep); max-width: 205px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bill .bos { font-size: 12px; font-weight: 700; text-align: right; }
 .bill .badge { display: block; margin-top: 3px; padding: 1px 4px; border: 1px solid var(--mbb-border); border-radius: 2px; font-size: 8px; font-weight: 500; color: var(--mbb-ink-muted); }
 .bill .addr { margin-top: 4px; font-size: 10px; color: var(--mbb-ink-muted); }
