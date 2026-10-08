@@ -49,5 +49,16 @@ window.setTime = function setTime(t) {
 };
 
 /* The renderer waits on this before the first screenshot. Without it the first
- * frames render in a fallback font and the video visibly shifts. */
-window.stageReady = document.fonts.ready.then(() => true);
+ * frames render in a fallback font and the video visibly shifts.
+ *
+ * document.fonts.ready alone is NOT enough: at module load the viewport is
+ * still empty, nothing on the page asks for DM Sans, so there is no pending
+ * font load and it resolves immediately - reintroducing the exact bug it is
+ * here to prevent. Ask for each weight explicitly first. */
+const FONT_WEIGHTS = ['400', '500', '700'];
+
+window.stageReady = Promise
+  .all(FONT_WEIGHTS.map(w => document.fonts.load(`${w} 16px "DM Sans"`)))
+  .catch(() => {})        // offline: fall back rather than hang the render
+  .then(() => document.fonts.ready)
+  .then(() => true);
