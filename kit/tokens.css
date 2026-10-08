@@ -71,12 +71,6 @@
   --mbb-tile-red:   #FBEDEE;  /* CONFIRMED - To Pay       */
   --mbb-banner:     #DEEFFB;  /* SAMPLED   - promo banner */
 
-  /* --- text and marks that sit ON the primary colour -------------------- */
-  /* These are white and translucent white. They are tokens rather than
-   * literals so that kit.css can hold no colour values of its own - the whole
-   * palette stays in this one file. */
-  --mbb-on-primary:        #FFFFFF;
-  --mbb-on-primary-muted:  rgba(255, 255, 255, 0.78);
   /* The ring has to read on BOTH a white card and the purple CTA pill, so the
    * fill is white (visible on purple) and the edge is ink (visible on white).
    * A single-colour ripple disappears against one or the other. */
@@ -92,6 +86,17 @@
   /* The dark pill ("Received Payment") is the same value as the ink token.
    * Figma reads #353452, the live app #343351 - the gap is H.264 chroma
    * error, not a second colour. */
+
+  /* --- billing screens (sampled from full-resolution app frames) -------- */
+  --mbb-field-grey:    #EAEEF4;  /* SAMPLED - item-search field            */
+  --mbb-pill-grey:     #F2F2F2;  /* SAMPLED - All Categories / Create Item */
+  --mbb-strip-grey:    #F9F9F9;  /* SAMPLED - "2 items" summary strip      */
+  --mbb-hairline:      #F1F1F1;  /* SAMPLED - item-list row divider        */
+  --mbb-avatar-peach:  #EFDFDA;  /* SAMPLED - item avatar tints            */
+  --mbb-avatar-pink:   #EFD8EB;
+  --mbb-avatar-lilac:  #E6DCF3;
+  --mbb-avatar-ink:    #9C8F9A;  /* SAMPLED - the letter on an avatar      */
+  --mbb-form-strip:    #F7F7FB;  /* SAMPLED - the Add Items strip          */
 
   /* --- status ----------------------------------------------------------- */
   --mbb-danger:       #EB4F40;  /* SAMPLED - error text and fills  */

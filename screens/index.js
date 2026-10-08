@@ -1,9 +1,11 @@
 import * as home from './home.js';
+import * as createBill from './create-bill.js';
 import * as createInvoice from './create-invoice.js';
 import * as invoiceCreated from './invoice-created.js';
 
 export const SCREENS = {
   [home.name]: home,
+  [createBill.name]: createBill,
   [createInvoice.name]: createInvoice,
   [invoiceCreated.name]: invoiceCreated
 };

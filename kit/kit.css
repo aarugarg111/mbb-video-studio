@@ -11,16 +11,22 @@
 }
 
 .appbar {
-  height: 92px;
+  height: 64px;
   box-sizing: border-box;
-  padding: 18px 16px 0;
-  background: var(--mbb-primary);
+  padding: 0 12px;
+  background: var(--mbb-surface);
+  border-bottom: 1px solid var(--mbb-line);
+  color: var(--mbb-primary);
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  align-items: center;
+  gap: 14px;
 }
-.appbar h1 { margin: 0; font-size: 17px; font-weight: 700; color: var(--mbb-on-primary); letter-spacing: -0.2px; }
-.appbar .sub { font-size: 11px; color: var(--mbb-on-primary-muted); margin-top: 3px; }
+.appbar .titles { flex-grow: 1; min-width: 0; }
+.appbar h1 { margin: 0; font-size: 14px; font-weight: 700; color: var(--mbb-ink); }
+.appbar .sub { font-size: 11px; color: var(--mbb-ink-muted); margin-top: 2px; }
+.appbar .icons { display: flex; align-items: center; gap: 22px; }
+.appbar .danger { color: var(--mbb-danger); }
+.ico { display: inline-flex; align-items: center; justify-content: center; line-height: 0; }
 
 .body { padding: 14px; display: flex; flex-direction: column; gap: 11px; }
 
@@ -55,7 +61,7 @@
   border: 0;
   border-radius: 13px;
   background: var(--mbb-primary);
-  color: var(--mbb-on-primary);
+  color: var(--mbb-surface);
   font-size: 16px;
   font-weight: 700;
   font-family: inherit;
@@ -136,49 +142,118 @@
 
 /* --- billing ------------------------------------------------------------ */
 
-.searchbar {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  background: var(--mbb-surface);
-  border: 1px solid var(--mbb-border);
-  border-radius: 11px;
-  padding: 13px 14px;
+/* create-invoice: the item search */
+.isearch { display: flex; align-items: center; gap: 12px; padding: 16px 12px 0 12px; color: var(--mbb-primary); }
+.isearch .field {
+  flex: 1; min-width: 0; height: 41px; box-sizing: border-box;
+  display: flex; align-items: center; gap: 8px; padding: 0 12px;
+  background: var(--mbb-field-grey); border-radius: 6px;
+  color: var(--mbb-ink); font-size: 12.5px;
 }
-/* A static caret. It does not blink: a blinking cursor would make frames at
- * the same t differ, which is exactly what this design avoids. */
-.searchbar .caret {
-  display: inline-block;
-  width: 2px;
-  height: 17px;
-  background: var(--mbb-primary);
-  margin-left: 1px;
-  vertical-align: middle;
+.isearch .field .grow { flex-grow: 1; }
+.isearch .field .muted { color: var(--mbb-ink-muted); }
+/* A static caret: a blinking one would make frames at the same t differ. */
+.isearch .caret { display: inline-block; width: 1px; height: 14px; background: var(--mbb-ink); margin-left: 1px; vertical-align: middle; }
+
+.pills { display: flex; gap: 8px; padding: 14px 8px 16px; }
+.pills .p {
+  flex: 1; height: 37px; border-radius: 999px; background: var(--mbb-pill-grey);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 10px; color: var(--mbb-ink);
 }
 
+.items { border-top: 1px solid var(--mbb-hairline); }
+.irow {
+  position: relative; min-height: 107px; box-sizing: border-box;
+  padding: 12px 16px 0 15px; border-bottom: 1px solid var(--mbb-hairline);
+  display: flex; gap: 10px;
+}
+.irow .av {
+  flex: none; width: 38px; height: 38px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 500; color: var(--mbb-avatar-ink);
+}
+.irow .info { flex: 1; min-width: 0; }
+.irow .nm { font-size: 10px; font-weight: 600; letter-spacing: -0.1px; color: var(--mbb-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-top: 1px; }
+.irow .pr { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 10.5px; font-weight: 600; color: var(--mbb-ink); }
+.irow .pr .u { border-bottom: 1px dashed var(--mbb-border); padding-bottom: 1px; }
+.irow .pr .ico { color: var(--mbb-ink-muted); }
+.irow .st { margin-top: 9px; font-size: 11px; color: var(--mbb-ink-muted); }
+.irow .ctl { position: absolute; right: 16px; top: 16px; width: 107px; display: flex; flex-direction: column; align-items: flex-end; gap: 9px; }
+
+.editbtn {
+  width: 54px; height: 37px; box-sizing: border-box; border: 1px solid var(--mbb-hairline);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500; color: var(--mbb-primary);
+}
+/* Three bordered cells that share their edges - not a single pill. */
 .stepper {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  border: 1px solid var(--mbb-primary);
-  border-radius: 9px;
-  padding: 6px 11px;
+  display: flex; width: 107px; height: 33px; box-sizing: border-box;
+  border: 1px solid var(--mbb-pill-grey); border-radius: 6px; overflow: hidden;
   color: var(--mbb-primary);
-  font-size: 15px;
-  font-weight: 700;
 }
-.stepper .qty { color: var(--mbb-ink); min-width: 14px; text-align: center; }
-
+.stepper > span { display: flex; align-items: center; justify-content: center; }
+.stepper .cell { width: 34px; }
+.stepper .qty {
+  flex: 1; color: var(--mbb-ink); font-size: 12px; font-weight: 500;
+  border-left: 1px solid var(--mbb-pill-grey); border-right: 1px solid var(--mbb-pill-grey);
+}
 .addbtn {
-  flex-shrink: 0;
-  border: 1px solid var(--mbb-primary);
-  border-radius: 9px;
-  padding: 7px 14px;
-  color: var(--mbb-primary);
-  font-size: 12px;
-  font-weight: 700;
+  width: 60px; height: 37px; box-sizing: border-box; border: 1px solid var(--mbb-primary);
+  border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 5px;
+  font-size: 11px; font-weight: 500; color: var(--mbb-primary);
 }
+
+.sumstrip {
+  position: absolute; left: 0; right: 0; bottom: 100px; height: 35px; box-sizing: border-box;
+  padding: 0 15px; background: var(--mbb-strip-grey);
+  display: flex; align-items: center; font-size: 12px; font-weight: 500; color: var(--mbb-ink);
+}
+.sumstrip .grow { flex-grow: 1; }
+.genrow {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 100px; box-sizing: border-box;
+  padding: 14px 15px 0; background: var(--mbb-surface);
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.genrow .more { flex: 1; min-width: 0; padding-top: 3px; }
+.genrow .more .a { font-size: 12px; font-weight: 700; color: var(--mbb-primary); }
+.genrow .more .b { font-size: 9.5px; color: var(--mbb-ink-muted); margin-top: 6px; white-space: nowrap; }
+.genbtn {
+  flex: none; width: 122px; height: 45px; border: 0; padding: 0; font-family: inherit; border-radius: 6px; background: var(--mbb-primary);
+  color: var(--mbb-surface); font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.genbtn.off { background: var(--mbb-line); color: var(--mbb-ink-muted); }
+
+/* create-bill: the form */
+.promo { padding: 16px 17px 0; }
+.promo .t1 { font-size: 11.5px; color: var(--mbb-ink-muted); }
+.promo .t2 { font-size: 11.5px; color: var(--mbb-ink-muted); margin-top: 8px; }
+.scanbtn {
+  margin-top: 14px; height: 45px; border-radius: 6px; background: var(--mbb-brand-orange);
+  color: var(--mbb-surface); font-size: 12px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.formdate { padding: 40px 17px 0; font-size: 11.5px; color: var(--mbb-ink-muted); }
+.flabel { padding: 22px 17px 0; font-size: 11.5px; letter-spacing: 0.4px; color: var(--mbb-ink-muted); text-transform: uppercase; }
+.flabel .req { color: var(--mbb-danger); }
+.pfield {
+  margin: 8px 17px 0; height: 46px; box-sizing: border-box; border: 1px solid var(--mbb-line);
+  border-radius: 6px; display: flex; align-items: center; gap: 12px; padding: 0 12px;
+  font-size: 13px; color: var(--mbb-ink-muted);
+}
+.pfield .ico { color: var(--mbb-ink-muted); }
+.pfield.set { color: var(--mbb-ink); font-weight: 600; }
+.itemsstrip {
+  margin-top: 8px; height: 35px; background: var(--mbb-form-strip); padding: 0 17px;
+  display: flex; align-items: center; justify-content: flex-end;
+  font-size: 12px; font-weight: 500; color: var(--mbb-primary);
+}
+
+/* invoice-created: Print / Download / Share */
+.acts { display: flex; padding: 18px 16px 0; }
+.acts .a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--mbb-primary); font-size: 11px; font-weight: 500; }
+.acts .a span.l { color: var(--mbb-ink); }
 
 .ripple {
   position: absolute;

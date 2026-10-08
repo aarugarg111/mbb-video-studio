@@ -19,7 +19,7 @@ const RECIPE = {
       { at: 0.5, do: 'selectParty' },
       { at: 1.0, do: 'addItem', index: 0 },
       { at: 2.0, do: 'addItem', index: 1 },
-      { at: 3.0, do: 'tap', target: 'save-and-share' }
+      { at: 3.0, do: 'tap', target: 'generate-bill' }
     ]},
     { screen: 'invoice-created', duration: 2.0, actions: [] }
   ]
@@ -160,7 +160,7 @@ test('the success screen shows the real bill total', () => {
 });
 
 test('a ripple from an earlier shot is not present in a later one', () => {
-  assert.ok(stateAt(RECIPE, 5.2).ripple, 'sanity: save-and-share ripple in shot 2');
+  assert.ok(stateAt(RECIPE, 5.2).ripple, 'sanity: generate-bill ripple in shot 2');
   assert.equal(stateAt(RECIPE, 6.5).ripple, null);
   assert.equal(stateAt(RECIPE, 3.0).ripple, null, 'home tap does not linger in shot 2');
 });

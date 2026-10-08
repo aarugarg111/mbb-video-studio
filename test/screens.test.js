@@ -166,13 +166,6 @@ test('an item already on the bill survives a search that excludes it', () => {
   assert.match(html, /SUGAR 5KG/);
 });
 
-test('the totals block shows the full GST breakdown', () => {
-  const html = SCREENS['create-invoice'].render(TWO, billState([1, 1]));
-  for (const label of ['Taxable Amount', 'CGST', 'SGST', 'Round Off', 'Total Amount']) {
-    assert.ok(html.includes(label), `missing "${label}"`);
-  }
-});
-
 test('totals land on the real figures once every item has arrived', () => {
   const html = SCREENS['create-invoice'].render(TWO, billState([1, 1]));
   /* 30x10 + 250x2 = 800 inclusive of 5% */
@@ -184,17 +177,18 @@ test('the item count reads correctly and is singular at one', () => {
   assert.match(SCREENS['create-invoice'].render(TWO, billState([1, 1])), /2 items</);
 });
 
-test('create-invoice disables Create with an empty bill', () => {
+test('create-invoice disables Generate Bill with an empty bill', () => {
   assert.match(SCREENS['create-invoice'].render(TWO, billState([0, 0])), /disabled/);
 });
 
-test('create-invoice enables Create once an item is on the bill', () => {
+test('create-invoice enables Generate Bill once an item is on the bill', () => {
   assert.doesNotMatch(SCREENS['create-invoice'].render(TWO, billState([1, 0])), /disabled/);
 });
 
 test('create-invoice renders with no state at all', () => {
   const html = SCREENS['create-invoice'].render(DATA, {});
-  assert.match(html, /Create Bill \/ Invoice/);
+  assert.match(html, /Generate Bill/);
+  assert.match(html, /Add more details/);
 });
 
 test('invoice-created shows the party and the final total', () => {
@@ -222,7 +216,7 @@ test('invoice number and date come from the recipe, not the screens', () => {
   assert.match(created, /#7001/);
   assert.match(created, /Invoice No\. 7001/);
   assert.match(created, /15\/11\/2026/);
-  assert.match(SCREENS['create-invoice'].render(data, {}), /#7001/);
+  assert.match(SCREENS['create-bill'].render(data, {}), /15 Nov 2026/);
   const home = SCREENS.home.render(data, {});
   assert.match(home, /#7000/);
   assert.match(home, /#6999/);
@@ -248,4 +242,110 @@ test('screens fall back to a default invoice when the recipe has none', () => {
   const html = SCREENS['invoice-created'].render(DATA, {});
   assert.match(html, /Invoice No\. \d+/);
   assert.doesNotMatch(html, /undefined|NaN/);
+});
+
+/* --- task 10: the billing screens rebuilt from the real app ---------------- */
+
+test('every screen renders with an empty state object', () => {
+  for (const [key, mod] of Object.entries(SCREENS)) {
+    assert.equal(typeof mod.render(DATA, {}), 'string', key);
+    assert.equal(typeof mod.render({}, {}), 'string', key + ' with empty data');
+  }
+});
+
+test('create-bill is registered with its three targets', () => {
+  assert.deepEqual(catalogue()['create-bill'], ['party-field', 'add-items', 'scan-record']);
+});
+
+test('create-invoice has the new targets and no save-and-share', () => {
+  assert.deepEqual(catalogue()['create-invoice'],
+    ['item-search', 'add-item-0', 'add-item-1', 'generate-bill']);
+});
+
+test('create-invoice shows Generate Bill and never Save & Share', () => {
+  const html = SCREENS['create-invoice'].render(TWO, billState([1, 0]));
+  assert.match(html, /Generate Bill/);
+  assert.doesNotMatch(html, /Save (&amp;|&) Share/);
+});
+
+test('create-invoice has no app bar, party card or totals card', () => {
+  const html = SCREENS['create-invoice'].render(TWO, billState([1, 1]));
+  assert.doesNotMatch(html, /class="appbar"/);
+  for (const gone of ['Taxable Amount', 'CGST', 'Search or add party']) {
+    assert.ok(!html.includes(gone), `"${gone}" is not on the real item-search screen`);
+  }
+});
+
+test('an item row has a dashed-underline price and a stock line', () => {
+  const html = SCREENS['create-invoice'].render(TWO, billState([1, 0]));
+  assert.match(html, /class="u">₹ 30\/PCS</);
+  assert.match(html, /Stock: 150\.0PCS/);
+  assert.match(html, />EDIT</);
+});
+
+test('the stepper is three cells, and an item off the bill shows ADD instead', () => {
+  const html = SCREENS['create-invoice'].render(TWO, billState([1, 0]));
+  assert.equal((html.match(/class="stepper"/g) || []).length, 1);
+  assert.equal((html.match(/class="addbtn"/g) || []).length, 1);
+  assert.equal((html.match(/class="cell"/g) || []).length, 2, 'minus and plus cells around the qty');
+});
+
+test('create-bill shows the placeholder before a party is chosen and the name after', () => {
+  const before = SCREENS['create-bill'].render(DATA, { party: 0 });
+  assert.match(before, /Search\/Create Party/);
+  assert.doesNotMatch(before, /Ramesh Kumar/);
+  const after = SCREENS['create-bill'].render(DATA, { party: 1 });
+  assert.match(after, /Ramesh Kumar/);
+  assert.doesNotMatch(after, /Search\/Create Party/);
+});
+
+test('create-bill carries the form copy and an orange Scan & Record', async () => {
+  const html = SCREENS['create-bill'].render({ ...DATA, invoice: { number: 1, date: '08/10/2026' } }, {});
+  for (const t of ['Create Bill / Invoice', 'Now create Invoices instantly', 'Scan &amp; Record',
+                   'Party Name', 'Add Items', '08 Oct 2026']) {
+    assert.ok(html.includes(t), `missing "${t}"`);
+  }
+  assert.match(html, /class="scanbtn/);
+  const { readFile } = await import('node:fs/promises');
+  const css = await readFile(new URL('../kit/kit.css', import.meta.url), 'utf8');
+  assert.match(css, /\.scanbtn[^}]*var\(--mbb-brand-orange\)/);
+});
+
+test('create-bill escapes the party name', () => {
+  const html = SCREENS['create-bill'].render({ ...DATA, party: { name: '<b>x</b>' } }, { party: 1 });
+  assert.doesNotMatch(html, /<b>x/);
+});
+
+test('no screen emits a raw hex or rgb colour, in any state', () => {
+  for (const [key, mod] of Object.entries(SCREENS)) {
+    for (const st of [{}, billState([1, 1]), { items: [1, 0], typed: 'S', party: 1 }]) {
+      const html = mod.render(TWO, st);
+      assert.doesNotMatch(html, /#[0-9a-fA-F]{6}\b|rgba?\(/, `${key} has a raw colour`);
+    }
+  }
+});
+
+test('the app bar is white with dark text - no white-on-purple', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const css = await readFile(new URL('../kit/kit.css', import.meta.url), 'utf8');
+  const rule = css.match(/\.appbar \{[^}]*\}/)[0];
+  assert.match(rule, /background: var\(--mbb-surface\)/);
+  assert.doesNotMatch(css.match(/\.appbar[^{]*\{[^}]*\}/g).join(' '), /on-primary|background: var\(--mbb-primary\)/);
+  const html = SCREENS['invoice-created'].render(DATA, {});
+  assert.match(html, /class="appbar"/);
+});
+
+test('invoice-created shows the header icons and three icon-over-label actions', () => {
+  const html = SCREENS['invoice-created'].render(DATA, {});
+  assert.match(html, /Sales Invoice Created/);
+  assert.match(html, /class="ico danger"/, 'the delete icon is red');
+  for (const l of ['Print', 'Download', 'Share']) assert.ok(html.includes('>' + l + '<'), l);
+  assert.equal((html.match(/class="a"/g) || []).length, 3);
+  assert.doesNotMatch(html, /class="card"/, 'actions are columns, not outlined pills');
+});
+
+test('tokens.css no longer carries the unused on-primary tokens', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const tokens = await readFile(new URL('../kit/tokens.css', import.meta.url), 'utf8');
+  assert.doesNotMatch(tokens, /--mbb-on-primary/);
 });

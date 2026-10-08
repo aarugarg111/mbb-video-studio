@@ -46,7 +46,7 @@ export function render(data, state) {
   return `
 <div class="screen" style="background: var(--mbb-page)">
   <div class="row" style="padding: 18px 16px 10px">
-    <h1 style="margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -0.3px">${esc(data.business.name)}</h1>
+    <h1 style="margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -0.3px">${esc(data?.business?.name)}</h1>
     <span style="margin-left: 8px; color: var(--mbb-primary); font-size: 13px">▾</span>
   </div>
 

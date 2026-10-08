@@ -1,6 +1,7 @@
 import { formatINR } from '../src/money.js';
 import { invoiceOf } from '../src/invoice.js';
 import { esc } from '../src/esc.js';
+import { icons } from '../src/icons.js';
 
 export const name = 'invoice-created';
 
@@ -16,7 +17,7 @@ export function render(data, state) {
   const inv = invoiceOf(data);
   const appear = state.appear ?? 1;
 
-  const actions = ['Print', 'Download', 'Share'];
+  const actions = [['Print', icons.print], ['Download', icons.download], ['Share', icons.share]];
 
   const line = (item) => `
     <div class="row" style="margin-top: 7px">
@@ -26,25 +27,31 @@ export function render(data, state) {
     </div>`;
 
   return `
-<div class="screen" style="background: var(--mbb-page)">
-  <div class="row" style="padding: 18px 16px 14px">
-    <div class="grow">
-      <div style="font-size: 19px; font-weight: 700; letter-spacing: -0.3px">Sales Invoice Created</div>
-      <div class="label" style="margin-top: 2px">#${esc(inv.number)}</div>
+<div class="screen" style="background: var(--mbb-pill-grey)">
+  <div class="appbar" style="margin-bottom: 16px">
+    <span class="ico">${icons.back(24)}</span>
+    <div class="titles">
+      <h1>Sales Invoice Created</h1>
+      <div class="sub">#${esc(inv.number)}</div>
+    </div>
+    <div class="icons">
+      <span class="ico">${icons.edit(24)}</span>
+      <span class="ico danger">${icons.trash(24)}</span>
+      <span class="ico">${icons.more(24)}</span>
     </div>
   </div>
 
   <div style="margin: 0 16px; padding: 18px; border: 1px solid var(--mbb-border); border-radius: 10px; background: var(--mbb-surface); opacity: ${appear.toFixed(3)}; transform: scale(${(0.97 + 0.03 * appear).toFixed(3)})">
     <div class="row">
-      <span class="grow" style="font-size: 14px; font-weight: 700; letter-spacing: 0.4px">${esc(data.business.name)}</span>
+      <span class="grow" style="font-size: 14px; font-weight: 700; letter-spacing: 0.4px">${esc(data?.business?.name)}</span>
       <span class="label" style="font-size: 10px">BILL OF SUPPLY</span>
     </div>
     <div class="label" style="font-size: 10px; margin-top: 8px">Invoice No. ${esc(inv.number)} &nbsp;·&nbsp; ${esc(inv.date)}</div>
     <div style="height: 1px; background: var(--mbb-line); margin: 12px 0"></div>
     <div class="label" style="font-size: 10px">Bill To</div>
-    <div style="font-size: 12px; font-weight: 500; margin-top: 3px">${esc(data.party.name)}</div>
+    <div style="font-size: 12px; font-weight: 500; margin-top: 3px">${esc(data?.party?.name)}</div>
     <div style="height: 1px; background: var(--mbb-line); margin: 12px 0"></div>
-    ${data.items.map(line).join('')}
+    ${(data?.items ?? []).map(line).join('')}
     <div style="height: 1px; background: var(--mbb-line); margin: 12px 0"></div>
     <div class="row">
       <span class="grow" style="font-size: 12px; font-weight: 700">Total Amount</span>
@@ -52,11 +59,9 @@ export function render(data, state) {
     </div>
   </div>
 
-  <div style="display: flex; gap: 10px; padding: 20px 16px 0">
-    ${actions.map(label => `
-      <div class="card" style="flex: 1; padding: 14px 8px; text-align: center">
-        <div class="label" style="font-size: 12px; font-weight: 700; color: var(--mbb-primary)">${label}</div>
-      </div>`).join('')}
+  <div class="acts">
+    ${actions.map(([label, icon]) => `
+      <div class="a"><span class="ico">${icon(26)}</span><span class="l">${label}</span></div>`).join('')}
   </div>
 
   <div style="position: absolute; left: 16px; right: 16px; bottom: 26px">
