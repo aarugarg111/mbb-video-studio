@@ -234,3 +234,24 @@ shots:
   assert.ok(r.errors.some(e => /shot 2/.test(e)));
   assert.ok(r.warnings.some(w => /shot 1/.test(w) && /short/i.test(w)));
 });
+
+test('items present but not a list is an error', () => {
+  const r = parse(`
+items: Salt
+shots:
+  - screen: home
+    duration: 2.0
+`, CATALOGUE);
+  assert.ok(r.errors, 'expected errors');
+  assert.ok(r.errors.some(e => /items/.test(e) && /list/.test(e)));
+});
+
+test('an absent items key stays valid', () => {
+  const r = parse(`
+shots:
+  - screen: home
+    duration: 2.0
+`, CATALOGUE);
+  assert.ok(!r.errors, 'a screen with no bill on it is legitimate');
+  assert.deepEqual(r.recipe.items, []);
+});

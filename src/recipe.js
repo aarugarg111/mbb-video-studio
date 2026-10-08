@@ -37,6 +37,14 @@ export function parse(text, catalogue) {
     shots: []
   };
 
+  /* Present but not a list is an error, for the same reason a malformed
+   * "actions" is: silently emptying it makes every later addItem complain the
+   * recipe lists 0 items, which points the author at the wrong line. An absent
+   * items key stays valid - a shot can be about a screen with no bill on it. */
+  if (doc.items != null && !Array.isArray(doc.items)) {
+    errors.push(`"items" must be a list, got ${typeof doc.items}.`);
+  }
+
   if (!Array.isArray(doc.shots) || doc.shots.length === 0) {
     errors.push('The recipe needs a "shots" list with at least one shot.');
     return { errors, warnings };
