@@ -4,3 +4,7 @@
 node_modules/
 out/
 .next/
+
+# large binary reference material - keep locally, do not commit
+reference/*.mp4
+reference/frames/
