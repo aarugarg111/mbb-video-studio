@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { stateAt, totalDuration, TRANSITION_SECONDS } from '../src/timeline.js';
+import { SCREENS } from '../screens/index.js';
 
 const RECIPE = {
   video: 'demo',
@@ -79,12 +80,33 @@ test('the total is mid-way while an item is landing', () => {
   assert.ok(mid > 0 && mid < 280, `expected a partial total, got ${mid}`);
 });
 
+/* The coordinates come from the screen that owns the target. Asserting them as
+ * literals here duplicates the screen's layout in a second place, and when the
+ * dashboard was rebuilt that stale copy silently pulled the real screen back to
+ * the old position. Read them from the registry instead. */
 test('a tap produces a ripple at the target coordinates', () => {
   const f = stateAt(RECIPE, 1.2);
+  const target = SCREENS.home.targets['create-invoice-cta'];
+
   assert.ok(f.ripple, 'expected a ripple shortly after the tap');
-  assert.equal(f.ripple.x, 195);
-  assert.equal(f.ripple.y, 707);
+  assert.equal(f.ripple.x, target.x);
+  assert.equal(f.ripple.y, target.y);
   assert.ok(f.ripple.progress > 0 && f.ripple.progress < 1);
+});
+
+test('the ripple follows the named target, not a fixed point', () => {
+  const recipe = {
+    ...RECIPE,
+    shots: [{ screen: 'home', duration: 2.0, actions: [
+      { at: 1.0, do: 'tap', target: 'received-payment' }
+    ]}]
+  };
+  const f = stateAt(recipe, 1.2);
+  const target = SCREENS.home.targets['received-payment'];
+
+  assert.equal(f.ripple.x, target.x);
+  assert.equal(f.ripple.y, target.y);
+  assert.notEqual(f.ripple.x, SCREENS.home.targets['create-invoice-cta'].x);
 });
 
 test('there is no ripple before or long after a tap', () => {

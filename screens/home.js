@@ -7,7 +7,7 @@ export const name = 'home';
  * element the ripple should land on. The CTA is the "+ Bill / Invoice" pill in
  * the floating action row, which sits right of centre. */
 export const targets = {
-  'create-invoice-cta': { x: 195, y: 707 },
+  'create-invoice-cta': { x: 272, y: 746 },
   'received-payment': { x: 92, y: 746 }
 };
 
