@@ -64,3 +64,35 @@ test('text from the recipe is escaped, not injected', () => {
   assert.doesNotMatch(html, /<script>x/);
   assert.match(html, /&lt;script&gt;/);
 });
+
+/* The palette was measured from the real app and lives in kit/tokens.css. The
+ * hex test above only scans rendered HTML, so without this one a literal in
+ * the stylesheet would slip through - which is exactly what happened. */
+test('kit.css holds no colour literals, only tokens', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const { fileURLToPath } = await import('node:url');
+  const { dirname, join } = await import('node:path');
+
+  const here = dirname(fileURLToPath(import.meta.url));
+  const css = await readFile(join(here, '..', 'kit', 'kit.css'), 'utf8');
+
+  const literals = css.match(/#[0-9a-fA-F]{3,8}\b|\brgba?\s*\(/g) || [];
+  assert.deepEqual(literals, [], 'use var(--mbb-*) and add the value to tokens.css');
+});
+
+test('every token kit.css references is defined in tokens.css', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const { fileURLToPath } = await import('node:url');
+  const { dirname, join } = await import('node:path');
+
+  const here = dirname(fileURLToPath(import.meta.url));
+  const kit = await readFile(join(here, '..', 'kit', 'kit.css'), 'utf8');
+  const tokens = await readFile(join(here, '..', 'kit', 'tokens.css'), 'utf8');
+
+  const defined = new Set((tokens.match(/--mbb-[a-z0-9-]+(?=\s*:)/g) || []));
+  const used = new Set((kit.match(/var\(\s*(--mbb-[a-z0-9-]+)/g) || [])
+    .map(m => m.replace(/var\(\s*/, '')));
+
+  const missing = [...used].filter(t => !defined.has(t));
+  assert.deepEqual(missing, [], 'a typo here fails silently as an unstyled element');
+});

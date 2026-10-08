@@ -51,6 +51,15 @@
   --mbb-tile-red:   #FBEDEE;  /* CONFIRMED - To Pay       */
   --mbb-banner:     #DEEFFB;  /* SAMPLED   - promo banner */
 
+  /* --- text and marks that sit ON the primary colour -------------------- */
+  /* These are white and translucent white. They are tokens rather than
+   * literals so that kit.css can hold no colour values of its own - the whole
+   * palette stays in this one file. */
+  --mbb-on-primary:        #FFFFFF;
+  --mbb-on-primary-muted:  rgba(255, 255, 255, 0.78);
+  --mbb-ripple-fill:       rgba(255, 255, 255, 0.34);
+  --mbb-ripple-edge:       rgba(255, 255, 255, 0.80);
+
   /* --- transaction status and the green action button ------------------- */
   --mbb-paid-ink:    #1E7A46;  /* SAMPLED - "Paid" pill text, outlined style */
   --mbb-paid-border: #9AD3B2;  /* SAMPLED - "Paid" pill border               */
