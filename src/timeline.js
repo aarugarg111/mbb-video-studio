@@ -4,6 +4,13 @@
  * Pure. No clock, no DOM, no randomness. This is what makes every render of the
  * same recipe byte-identical, and what lets the whole behaviour be tested
  * without producing a single frame.
+ *
+ * Screen state ACCUMULATES across shots: every shot up to and including the
+ * current one contributes, earlier ones applied at their full duration. A bill,
+ * once built, stays built. Without this the bill emptied itself as it slid off
+ * screen during a transition, and the success screen reported a total of zero.
+ * The ripple is the exception - it comes from the current shot alone, or one
+ * tap would leave a ring on screen for the rest of the video.
  */
 
 import { clamp01, easeOut, ramp } from './ease.js';
