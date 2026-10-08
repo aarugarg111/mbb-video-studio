@@ -39,7 +39,11 @@
   border-bottom: 1px solid var(--mbb-line);
   display: flex;
   align-items: center;
+  gap: 12px;
 }
+/* Without this the long item names run straight into the stepper. */
+.listrow .grow { min-width: 0; }
+.listrow .grow > div { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .label { font-size: 11px; font-weight: 500; color: var(--mbb-ink-muted); }
 .value { font-size: 18px; font-weight: 700; color: var(--mbb-primary); margin-top: 5px; }
@@ -82,15 +86,15 @@
 /* --- dashboard ---------------------------------------------------------- */
 
 .tiles {
-  padding: 14px 16px 0;
+  padding: 12px 16px 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 11px;
+  gap: 9px;
 }
 .tile {
   border-radius: 13px;
-  padding: 16px 14px;
-  min-height: 78px;
+  padding: 12px 14px;
+  min-height: 62px;
   display: flex;
   align-items: center;
 }
@@ -153,6 +157,7 @@
 }
 
 .stepper {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -166,6 +171,7 @@
 .stepper .qty { color: var(--mbb-ink); min-width: 14px; text-align: center; }
 
 .addbtn {
+  flex-shrink: 0;
   border: 1px solid var(--mbb-primary);
   border-radius: 9px;
   padding: 7px 14px;
@@ -179,7 +185,7 @@
   width: 84px; height: 84px;
   border-radius: 50%;
   background: var(--mbb-ripple-fill);
-  border: 2px solid var(--mbb-ripple-edge);
+  border: 3px solid var(--mbb-ripple-edge);
   pointer-events: none;
   z-index: 60;
 }

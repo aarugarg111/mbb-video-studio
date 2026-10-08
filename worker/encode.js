@@ -3,6 +3,22 @@
 
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
+import { existsSync } from 'node:fs';
+import { homedir } from 'node:os';
+
+/* winget installs ffmpeg and updates the user PATH, but shells already running
+ * keep the environment they started with - so "ffmpeg" is missing until the
+ * terminal is reopened, and the render fails at the last step after a minute of
+ * work. Look in the known install location before giving up. */
+function ffmpegPath() {
+  const fallbacks = [
+    join(homedir(), 'AppData', 'Local', 'Microsoft', 'WinGet', 'Links', 'ffmpeg.exe'),
+    join(homedir(), 'AppData', 'Local', 'Microsoft', 'WinGet', 'Packages',
+      'Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe',
+      'ffmpeg-9.0.2-full_build', 'bin', 'ffmpeg.exe')
+  ];
+  return fallbacks.find(p => existsSync(p)) || 'ffmpeg';
+}
 
 export function encode(framesDir, outPath, { fps = 30 } = {}) {
   const args = [
@@ -16,7 +32,7 @@ export function encode(framesDir, outPath, { fps = 30 } = {}) {
   ];
 
   return new Promise((resolve, reject) => {
-    const ff = spawn('ffmpeg', args, { stdio: ['ignore', 'ignore', 'pipe'] });
+    const ff = spawn(ffmpegPath(), args, { stdio: ['ignore', 'ignore', 'pipe'] });
 
     let stderr = '';
     ff.stderr.on('data', chunk => { stderr += chunk; });

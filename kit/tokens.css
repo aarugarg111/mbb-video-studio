@@ -57,8 +57,11 @@
    * palette stays in this one file. */
   --mbb-on-primary:        #FFFFFF;
   --mbb-on-primary-muted:  rgba(255, 255, 255, 0.78);
-  --mbb-ripple-fill:       rgba(255, 255, 255, 0.34);
-  --mbb-ripple-edge:       rgba(255, 255, 255, 0.80);
+  /* The ring has to read on BOTH a white card and the purple CTA pill, so the
+   * fill is white (visible on purple) and the edge is ink (visible on white).
+   * A single-colour ripple disappears against one or the other. */
+  --mbb-ripple-fill:       rgba(255, 255, 255, 0.35);
+  --mbb-ripple-edge:       rgba(53, 52, 82, 0.45);
 
   /* --- transaction status and the green action button ------------------- */
   --mbb-paid-ink:    #1E7A46;  /* SAMPLED - "Paid" pill text, outlined style */

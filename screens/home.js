@@ -7,8 +7,8 @@ export const name = 'home';
  * element the ripple should land on. The CTA is the "+ Bill / Invoice" pill in
  * the floating action row, which sits right of centre. */
 export const targets = {
-  'create-invoice-cta': { x: 272, y: 746 },
-  'received-payment': { x: 92, y: 746 }
+  'create-invoice-cta': { x: 316, y: 746 },
+  'received-payment': { x: 90, y: 746 }
 };
 
 /* Laid out from reference/frames/mbb-dashboard.png. Labels are the app's own
@@ -19,7 +19,7 @@ export function render(data, state) {
   const tile = (fill, title, sub, titleColour) => `
     <div class="tile" style="background: ${fill}">
       <div class="grow">
-        <div style="font-size: 17px; font-weight: 700; color: ${titleColour}">${title}</div>
+        <div style="font-size: 16px; font-weight: 700; color: ${titleColour}">${title}</div>
         <div class="label" style="margin-top: 4px">${sub}</div>
       </div>
       <span class="chev">›</span>
@@ -45,9 +45,9 @@ export function render(data, state) {
     <span style="margin-left: 8px; color: var(--mbb-primary); font-size: 13px">▾</span>
   </div>
 
-  <div style="margin: 0 16px; padding: 16px; border-radius: 14px; background: var(--mbb-banner)">
-    <div style="font-size: 14px; font-weight: 700">Manage staff with attendance &amp; live field activity</div>
-    <div style="margin-top: 10px; display: inline-block; padding: 8px 14px; border-radius: 9px; background: var(--mbb-surface); font-size: 12px; font-weight: 700; color: var(--mbb-ink)">Manage Staff Now →</div>
+  <div style="margin: 0 16px; padding: 13px 14px; border-radius: 13px; background: var(--mbb-banner)">
+    <div style="font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Manage staff with attendance &amp; live field activity</div>
+    <div style="margin-top: 8px; display: inline-block; padding: 6px 12px; border-radius: 9px; background: var(--mbb-surface); font-size: 12px; font-weight: 700; color: var(--mbb-ink)">Manage Staff Now →</div>
   </div>
 
   <div class="tiles">
@@ -59,12 +59,12 @@ export function render(data, state) {
     ${tile('var(--mbb-tile-blue)', 'Reports', 'Sales, Party, GST…', 'var(--mbb-ink)')}
   </div>
 
-  <div class="row" style="padding: 18px 16px 10px">
+  <div class="row" style="padding: 12px 16px 8px">
     <span class="grow" style="font-size: 15px; font-weight: 500; color: var(--mbb-ink-muted)">Transactions</span>
     <span style="font-size: 13px; font-weight: 700; color: var(--mbb-primary-light)">LAST 365 DAYS</span>
   </div>
 
-  <div style="padding: 0 16px">
+  <div style="padding: 0 16px 150px">
     ${txn('Cash Sale', 'Sales Invoice #5944', '08 Oct', formatINR(5), true)}
     ${txn('ASHOK POLITHIN CENTER', 'Sales Invoice #5943', '04 Oct', formatINR(21846), false)}
   </div>
