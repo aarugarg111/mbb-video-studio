@@ -1,0 +1,184 @@
+/* Shared myBillBook UI pieces. Every value here resolves to a token in
+ * tokens.css - no literal colours in this file either. */
+
+.screen {
+  position: absolute;
+  inset: 0;
+  background: var(--mbb-tint-100);
+  color: var(--mbb-ink);
+  font-family: var(--mbb-font);
+  overflow: hidden;
+}
+
+.appbar {
+  height: 92px;
+  box-sizing: border-box;
+  padding: 18px 16px 0;
+  background: var(--mbb-primary);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.appbar h1 { margin: 0; font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
+.appbar .sub { font-size: 11px; color: rgba(255, 255, 255, 0.78); margin-top: 3px; }
+
+.body { padding: 14px; display: flex; flex-direction: column; gap: 11px; }
+
+.card {
+  background: var(--mbb-surface);
+  border: 1px solid var(--mbb-border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.row { display: flex; align-items: center; }
+.row .grow { flex-grow: 1; }
+
+.listrow {
+  padding: 13px 15px;
+  border-bottom: 1px solid var(--mbb-line);
+  display: flex;
+  align-items: center;
+}
+
+.label { font-size: 11px; font-weight: 500; color: var(--mbb-ink-muted); }
+.value { font-size: 18px; font-weight: 700; color: var(--mbb-primary); margin-top: 5px; }
+.big { font-size: 30px; font-weight: 700; letter-spacing: -0.8px; }
+
+.btn {
+  width: 100%;
+  height: 54px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--mbb-primary);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+}
+.btn[disabled] { background: var(--mbb-line); color: var(--mbb-ink-muted); }
+
+.bottomnav {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 64px;
+  background: var(--mbb-surface);
+  border-top: 1px solid var(--mbb-border);
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: center;
+}
+.bottomnav div { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 10px; font-weight: 500; color: var(--mbb-ink-muted); }
+.bottomnav div.on { color: var(--mbb-primary); }
+
+.avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--mbb-tint-300);
+  color: var(--mbb-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+}
+
+/* --- dashboard ---------------------------------------------------------- */
+
+.tiles {
+  padding: 14px 16px 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+.tile {
+  border-radius: 13px;
+  padding: 16px 14px;
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+}
+.tile .chev { color: var(--mbb-ink-muted); font-size: 20px; margin-left: 6px; }
+
+.pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.pill.paid { color: var(--mbb-paid-ink); border: 1px solid var(--mbb-paid-border); background: var(--mbb-surface); }
+.pill.unpaid { color: var(--mbb-surface); background: var(--mbb-unpaid); }
+
+.fab-row {
+  position: absolute;
+  left: 0; right: 0; bottom: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.fab-dark, .fab-primary {
+  padding: 15px 22px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mbb-surface);
+}
+.fab-dark { background: var(--mbb-ink); }
+.fab-primary { background: var(--mbb-primary); }
+.fab-plus {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--mbb-green); color: var(--mbb-surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 500;
+}
+
+/* --- billing ------------------------------------------------------------ */
+
+.searchbar {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--mbb-surface);
+  border: 1px solid var(--mbb-border);
+  border-radius: 11px;
+  padding: 13px 14px;
+}
+/* A static caret. It does not blink: a blinking cursor would make frames at
+ * the same t differ, which is exactly what this design avoids. */
+.searchbar .caret {
+  display: inline-block;
+  width: 2px;
+  height: 17px;
+  background: var(--mbb-primary);
+  margin-left: 1px;
+  vertical-align: middle;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--mbb-primary);
+  border-radius: 9px;
+  padding: 6px 11px;
+  color: var(--mbb-primary);
+  font-size: 15px;
+  font-weight: 700;
+}
+.stepper .qty { color: var(--mbb-ink); min-width: 14px; text-align: center; }
+
+.addbtn {
+  border: 1px solid var(--mbb-primary);
+  border-radius: 9px;
+  padding: 7px 14px;
+  color: var(--mbb-primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ripple {
+  position: absolute;
+  width: 84px; height: 84px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.34);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+  z-index: 60;
+}
