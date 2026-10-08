@@ -129,7 +129,7 @@ shots:
     duration: 61
 `, CATALOGUE);
   assert.ok(!r.errors);
-  assert.ok(r.warnings.some(w => /limit/.test(w)));
+  assert.ok(r.warnings.some(w => /probably wrong/.test(w)));
 });
 
 test('missing optional sections default to empty', () => {
@@ -340,37 +340,93 @@ test('brand: unknown key warns but still parses', () => {
   assert.ok(warnings.some(w => /brand\.sparkle/.test(w)));
 });
 
-test('a clip over the ten second limit warns', () => {
+
+/* ---- pacing ----
+ * Length is an editorial call, so none of these are errors. They flag the two
+ * ways a clip loses a viewer: a beat too quick to read, or a stretch where
+ * nothing happens and they scroll past. */
+
+test('dead air mid-clip warns', () => {
   const r = parse(`
 shots:
   - screen: home
-    duration: 11
-`, CATALOGUE);
-  assert.ok(!r.errors, 'still renders - it is a guide, not an impossibility');
-  assert.ok(r.warnings.some(w => /10s limit/.test(w)));
-});
-
-test('the end card counts toward the limit', () => {
-  const r = parse(`
-brand:
-  endCard:
+    duration: 6.0
+    actions:
+      - { at: 0.5, do: tap, target: create-invoice-cta }
+  - screen: home
     duration: 2.0
-shots:
-  - screen: home
-    duration: 9
 `, CATALOGUE);
-  assert.ok(r.warnings.some(w => /11\.0s/.test(w)), '9s of shots plus a 2s card is 11s');
-  assert.ok(r.warnings.some(w => /end card/.test(w)), 'the message should explain what it is made of');
+  assert.ok(!r.errors);
+  assert.ok(r.warnings.some(w => /nothing happens/.test(w)), 'a 5.5s tail is dead air');
 });
 
-test('a clip inside the limit does not warn about length', () => {
+test('a trailing hold on the FINAL shot is not dead air', () => {
   const r = parse(`
-brand:
-  endCard:
-    duration: 1.5
 shots:
   - screen: home
-    duration: 8
+    duration: 2.0
+    actions:
+      - { at: 0.5, do: tap, target: create-invoice-cta }
+  - screen: home
+    duration: 6.0
+    actions:
+      - { at: 0.5, do: tap, target: received-payment }
 `, CATALOGUE);
-  assert.ok(!r.warnings.some(w => /limit/.test(w)), '9.5s is fine');
+  assert.ok(!r.warnings.some(w => /nothing happens/.test(w)),
+    'letting the last beat land is good pacing, not a defect');
+});
+
+test('actions crammed too close together warn', () => {
+  const r = parse(`
+shots:
+  - screen: home
+    duration: 3.0
+    actions:
+      - { at: 0.5, do: tap, target: create-invoice-cta }
+      - { at: 0.7, do: tap, target: received-payment }
+`, CATALOGUE);
+  assert.ok(r.warnings.some(w => /too quick to follow/.test(w)));
+});
+
+test('comfortably spaced actions do not warn', () => {
+  const r = parse(`
+shots:
+  - screen: home
+    duration: 3.0
+    actions:
+      - { at: 0.5, do: tap, target: create-invoice-cta }
+      - { at: 1.8, do: tap, target: received-payment }
+`, CATALOGUE);
+  assert.ok(!r.warnings.some(w => /too quick/.test(w)));
+});
+
+test('a brief shot with nothing happening warns', () => {
+  const r = parse(`
+shots:
+  - screen: home
+    duration: 0.8
+`, CATALOGUE);
+  assert.ok(r.warnings.some(w => /too brief to register/.test(w)));
+});
+
+test('a well-paced clip raises no warnings at all', () => {
+  const r = parse(`
+items:
+  - { name: TATA SALT 1KG, rate: 30, qty: 10, gst: 5 }
+shots:
+  - screen: home
+    duration: 2.0
+    actions:
+      - { at: 1.3, do: tap, target: create-invoice-cta }
+  - screen: create-invoice
+    duration: 4.6
+    actions:
+      - { at: 0.6, do: selectParty }
+      - { at: 2.4, do: addItem, index: 0 }
+      - { at: 4.0, do: tap, target: save-and-share }
+  - screen: home
+    duration: 1.8
+`, CATALOGUE);
+  assert.ok(!r.errors, JSON.stringify(r.errors));
+  assert.deepEqual(r.warnings, [], 'a well-paced clip should be silent');
 });

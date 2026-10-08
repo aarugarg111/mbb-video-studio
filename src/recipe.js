@@ -16,11 +16,18 @@ export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem'];
 
 const VIDEO_NAME = /^[A-Za-z0-9_-]+$/;
 
-const MIN_SHOT_SECONDS = 0.5;
-/* These clips run as creator ads, where the ceiling is ten seconds. Longer
- * still renders - this is a guide, not an impossibility - but a clip over the
- * limit cannot be used, so say so loudly. */
-const MAX_VIDEO_SECONDS = 10;
+const MIN_SHOT_SECONDS = 0.5;  // below this nothing is legible at all
+/* Length is an editorial call, not a technical one - rendering a 25s clip
+ * costs the same as a 10s one. This is a far outer bound: a whole creator
+ * script runs about 60s and the UI section is a slice of that, so anything
+ * past 45s means something is wrong rather than long. */
+const MAX_VIDEO_SECONDS = 45;
+
+/* Pacing. These are the two ways a clip loses the viewer: a beat too quick to
+ * read, or a stretch where nothing happens and they scroll on. */
+const MIN_READABLE_SECONDS = 1.0;
+const MAX_DEAD_AIR_SECONDS = 2.0;
+const MIN_ACTION_GAP_SECONDS = 0.6;
 
 export function parse(text, catalogue) {
   const errors = [];
@@ -218,6 +225,40 @@ export function parse(text, catalogue) {
       }
     });
 
+    /* Pacing. A shot loses the viewer in one of two ways, and neither stops it
+     * rendering - they are judgement calls the author may have made on purpose. */
+    const lastAt = actions.length > 0
+      ? Math.max(...actions.map(a => Number(a.at)).filter(Number.isFinite))
+      : null;
+
+    if (lastAt !== null) {
+      const deadAir = duration - lastAt;
+      /* A trailing hold on the final shot is good pacing - it lets the result
+       * land. Mid-clip it is just a stretch where nothing happens. */
+      const isFinalShot = i === doc.shots.length - 1;
+      if (!isFinalShot && deadAir > MAX_DEAD_AIR_SECONDS) {
+        warnings.push(
+          `${where}: nothing happens for the last ${deadAir.toFixed(1)}s. ` +
+          `Trim the shot or move the next beat earlier.`
+        );
+      }
+
+      const times = actions.map(a => Number(a.at)).filter(Number.isFinite).sort((a, b) => a - b);
+      for (let k = 1; k < times.length; k++) {
+        if (times[k] - times[k - 1] < MIN_ACTION_GAP_SECONDS) {
+          warnings.push(
+            `${where}: two actions ${(times[k] - times[k - 1]).toFixed(2)}s apart ` +
+            `at ${times[k - 1]}s - under ${MIN_ACTION_GAP_SECONDS}s is too quick to follow.`
+          );
+          break;
+        }
+      }
+    } else if (duration < MIN_READABLE_SECONDS) {
+      warnings.push(
+        `${where}: ${duration}s with nothing happening is too brief to register.`
+      );
+    }
+
     recipe.shots.push({ screen: shot.screen, duration, actions });
   });
 
@@ -231,7 +272,7 @@ export function parse(text, catalogue) {
       ? ` (${totalSeconds.toFixed(1)}s of shots plus a ${endCardSeconds}s end card)`
       : "";
     warnings.push(
-      `The whole clip is ${clipSeconds.toFixed(1)}s${madeOf}, over the ${MAX_VIDEO_SECONDS}s limit for a creator ad.`
+      `The whole clip is ${clipSeconds.toFixed(1)}s${madeOf}. Past ${MAX_VIDEO_SECONDS}s something is probably wrong - a creator script runs about 60s in total.`
     );
   }
 
