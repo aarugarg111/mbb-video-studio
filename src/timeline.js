@@ -48,34 +48,53 @@ export function stateAt(recipe, t) {
 
   let ripple = null;
 
-  for (const action of shot.actions) {
-    switch (action.do) {
-      case 'selectParty':
-        screenState.party = easeOut(ramp(localT, action.at, PARTY_SECONDS));
-        break;
+  /* A bill, once built, stays built: every earlier shot is applied at its full
+   * duration (its actions have finished), the current shot at localT. Only the
+   * current shot may contribute a ripple or typed text, so a tap or a half-typed
+   * field never lingers after the shot that made it. */
+  for (let i = 0; i <= index; i++) {
+    const s = recipe.shots[i];
+    const current = i === index;
+    const at = current ? localT : s.duration;
 
-      case 'addItem':
-        if (action.index < screenState.items.length) {
-          screenState.items[action.index] = easeOut(ramp(localT, action.at, ITEM_SECONDS));
+    for (const action of s.actions) {
+      switch (action.do) {
+        case 'selectParty':
+          screenState.party = easeOut(ramp(at, action.at, PARTY_SECONDS));
+          break;
+
+        case 'addItem':
+          if (action.index < screenState.items.length) {
+            screenState.items[action.index] = easeOut(ramp(at, action.at, ITEM_SECONDS));
+          }
+          break;
+
+        case 'type': {
+          if (!current) break;
+          const progress = ramp(at, action.at, action.duration ?? TYPE_SECONDS);
+          const shown = Math.round(progress * action.text.length);
+          screenState.typed = action.text.slice(0, shown);
+          break;
         }
-        break;
 
-      case 'type': {
-        const progress = ramp(localT, action.at, action.duration ?? TYPE_SECONDS);
-        const shown = Math.round(progress * action.text.length);
-        screenState.typed = action.text.slice(0, shown);
-        break;
-      }
-
-      case 'tap': {
-        const progress = (localT - action.at) / RIPPLE_SECONDS;
-        if (progress >= 0 && progress <= 1) {
-          const point = SCREENS[shot.screen].targets[action.target];
-          ripple = { x: point.x, y: point.y, progress: clamp01(progress) };
+        case 'tap': {
+          if (!current) break;
+          const targets = SCREENS[s.screen]?.targets;
+          if (!targets || !targets[action.target]) {
+            const known = targets ? Object.keys(targets).join(', ') : '(unknown screen)';
+            throw new Error(
+              `Shot ${i}: screen "${s.screen}" has no tap target "${action.target}". ` +
+              `Valid targets: ${known}`
+            );
+          }
+          const progress = (at - action.at) / RIPPLE_SECONDS;
+          if (progress >= 0 && progress <= 1) {
+            const point = targets[action.target];
+            ripple = { x: point.x, y: point.y, progress: clamp01(progress) };
+          }
+          break;
         }
-        break;
       }
-
     }
   }
 

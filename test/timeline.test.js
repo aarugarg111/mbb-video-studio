@@ -114,8 +114,75 @@ test('there is no ripple before or long after a tap', () => {
   assert.equal(stateAt(RECIPE, 1.95).ripple, null);
 });
 
-test('stateAt is pure - the same t gives the same frame', () => {
-  assert.deepEqual(stateAt(RECIPE, 3.33), stateAt(RECIPE, 3.33));
+function deepFreeze(o) {
+  if (o && typeof o === 'object' && !Object.isFrozen(o)) {
+    Object.freeze(o);
+    Object.values(o).forEach(deepFreeze);
+  }
+  return o;
+}
+
+test('stateAt is pure - no mutation, no state left behind between calls', () => {
+  const recipe = deepFreeze(structuredClone(RECIPE));
+  const before = structuredClone(RECIPE);
+
+  const ts = [];
+  for (let t = 0; t <= 8.5; t += 0.07) ts.push(t);
+  const first = ts.map(t => structuredClone(stateAt(recipe, t)));
+
+  // Re-call earlier times, out of order, after the whole sweep.
+  for (const i of [0, 5, 20, 40, 71, 3, 100]) {
+    if (i < ts.length) assert.deepEqual(stateAt(recipe, ts[i]), first[i], `t=${ts[i]}`);
+  }
+  assert.deepEqual(recipe, before, 'recipe unchanged after the sweep');
+});
+
+test('an item added in an earlier shot is still present in a later one', () => {
+  const later = stateAt(RECIPE, 6.5).screenState;
+  assert.ok(later.items[0] > 0.99 && later.items[1] > 0.99);
+  assert.ok(later.party > 0.99);
+});
+
+test('the total survives a shot change', () => {
+  assert.equal(Math.round(stateAt(RECIPE, 5.9).screenState.total), 1320);
+  assert.equal(Math.round(stateAt(RECIPE, 6.05).screenState.total), 1320);
+});
+
+test('the outgoing screen keeps its bill during the transition', () => {
+  const f = stateAt(RECIPE, 6.0 + TRANSITION_SECONDS / 2);
+  assert.equal(f.outgoing.screen, 'create-invoice');
+  assert.equal(Math.round(f.screenState.total), 1320);
+});
+
+test('the success screen shows the real bill total', () => {
+  assert.equal(Math.round(stateAt(RECIPE, 6.5).screenState.total), 1320);
+  assert.equal(Math.round(stateAt(RECIPE, 99).screenState.total), 1320);
+});
+
+test('a ripple from an earlier shot is not present in a later one', () => {
+  assert.ok(stateAt(RECIPE, 5.2).ripple, 'sanity: save-and-share ripple in shot 2');
+  assert.equal(stateAt(RECIPE, 6.5).ripple, null);
+  assert.equal(stateAt(RECIPE, 3.0).ripple, null, 'home tap does not linger in shot 2');
+});
+
+test('an unknown tap target throws an error naming screen, target and valid targets', () => {
+  const bad = { ...RECIPE, shots: [{ screen: 'home', duration: 2, actions: [
+    { at: 0.5, do: 'tap', target: 'nope' }
+  ]}]};
+  assert.throws(() => stateAt(bad, 1), err => {
+    assert.ok(!(err instanceof TypeError), 'not a bare TypeError');
+    assert.match(err.message, /home/);
+    assert.match(err.message, /nope/);
+    assert.match(err.message, /create-invoice-cta/);
+    return true;
+  });
+});
+
+test('an unknown screen throws a helpful error', () => {
+  const bad = { ...RECIPE, shots: [{ screen: 'ghost', duration: 2, actions: [
+    { at: 0.5, do: 'tap', target: 'x' }
+  ]}]};
+  assert.throws(() => stateAt(bad, 1), /ghost.*x/s);
 });
 
 test('typing reveals the text progressively', () => {
