@@ -5,8 +5,14 @@
  * neighbourhood was identical were counted, so these are true solid fills,
  * not antialiased edges.
  *
- * CONFIRMED = the same value appeared independently on two different pages.
- * SAMPLED   = read once, from a single page.
+ * CONFIRMED = the same value appeared independently in two or more sources.
+ * SAMPLED   = read once, from a single source.
+ *
+ * Cross-checked against live app screen recordings on 2026-10-08. The two
+ * load-bearing values agree across Figma and three video frames:
+ *   primary  Figma #4C3CCE   video #4B3BCF
+ *   ink      Figma #353452   video #343351
+ * The 1-2 per channel gap is H.264 chroma subsampling. Figma is authoritative.
  *
  * This is the only file that should need changing if the app is restyled, or
  * when real design-token values become available (blocked today: the Figma
@@ -33,6 +39,27 @@
   --mbb-surface: #FFFFFF;  /* CONFIRMED                        */
   --mbb-border:  #D8D8D8;  /* SAMPLED   - field and card border */
   --mbb-line:    #E0E0E0;  /* SAMPLED   - hairline divider      */
+
+  /* The app's page background is plain WHITE, not a tinted ground. Colour on
+   * the dashboard comes from the tinted tiles below, not from the backdrop.
+   * (Measured on the live app: #FFFFFF covers 402k px of one dashboard frame.) */
+  --mbb-page: #FFFFFF;     /* CONFIRMED - live app */
+
+  /* --- dashboard tile tints (live app) ---------------------------------- */
+  --mbb-tile-blue:  #F5F9FF;  /* CONFIRMED - Stock Value, Total Balance, Reports */
+  --mbb-tile-green: #EDF4EE;  /* CONFIRMED - To Collect   */
+  --mbb-tile-red:   #FBEDEE;  /* CONFIRMED - To Pay       */
+  --mbb-banner:     #DEEFFB;  /* SAMPLED   - promo banner */
+
+  /* --- transaction status and the green action button ------------------- */
+  --mbb-paid-ink:    #1E7A46;  /* SAMPLED - "Paid" pill text, outlined style */
+  --mbb-paid-border: #9AD3B2;  /* SAMPLED - "Paid" pill border               */
+  --mbb-unpaid:      #E8705F;  /* SAMPLED - "Unpaid" pill, solid fill        */
+  --mbb-green:       #4FAE7C;  /* SAMPLED - the round "+" action button      */
+
+  /* The dark pill ("Received Payment") is the same value as the ink token.
+   * Figma reads #353452, the live app #343351 - the gap is H.264 chroma
+   * error, not a second colour. */
 
   /* --- status ----------------------------------------------------------- */
   --mbb-danger:       #EB4F40;  /* SAMPLED - error text and fills  */
