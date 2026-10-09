@@ -330,3 +330,7 @@
 .bill .sig { margin: 12px 0 0 auto; width: 160px; text-align: center; font-size: 10px; }
 .bill .sig b { font-size: 10px; }
 .bill .sigbox { height: 38px; border: 1px solid var(--mbb-border); border-radius: 4px; margin-bottom: 3px; }
+
+/* The tile arrows are inline SVG rather than Unicode glyphs, so they sit on
+ * the text baseline rather than aligning as a character would. */
+.tile-arrow { display: inline-flex; vertical-align: -2px; }

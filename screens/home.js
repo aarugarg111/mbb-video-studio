@@ -1,6 +1,7 @@
 import { formatINR } from '../src/money.js';
 import { invoiceOf } from '../src/invoice.js';
 import { esc } from '../src/esc.js';
+import { icons } from '../src/icons.js';
 
 export const name = 'home';
 
@@ -56,8 +57,8 @@ export function render(data, state) {
   </div>
 
   <div class="tiles">
-    ${tile('var(--mbb-tile-green)', formatINR(1494157), 'To Collect ↓', 'var(--mbb-ink)')}
-    ${tile('var(--mbb-tile-red)', formatINR(298729), 'To Pay ↑', 'var(--mbb-ink)')}
+    ${tile('var(--mbb-tile-green)', formatINR(1494157), `To Collect <span class="tile-arrow">${icons.arrowDown()}</span>`, 'var(--mbb-ink)')}
+    ${tile('var(--mbb-tile-red)', formatINR(298729), `To Pay <span class="tile-arrow">${icons.arrowUp()}</span>`, 'var(--mbb-ink)')}
     ${tile('var(--mbb-tile-blue)', 'Stock Value', 'Value of Items', 'var(--mbb-ink)')}
     ${tile('var(--mbb-tile-blue)', formatINR(5), "This week's sale", 'var(--mbb-ink)')}
     ${tile('var(--mbb-tile-blue)', 'Total Balance', 'Cash + Bank Balance', 'var(--mbb-ink)')}

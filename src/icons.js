@@ -14,6 +14,12 @@ export const icons = {
   chevDown: (s = 16) => svg(s, '<path d="M6 9l6 6 6-6"/>'),
   plus: (s = 16) => svg(s, '<path d="M12 5v14M5 12h14"/>'),
   minus: (s = 16) => svg(s, '<path d="M5 12h14"/>'),
+  /* The dashboard tiles used the Unicode arrows U+2193/U+2191, which are not
+   * in the embedded DM Sans subsets - so each machine drew them in whatever
+   * system font it happened to fall back to. Drawn here instead, they are the
+   * same everywhere. */
+  arrowDown: (s = 15) => svg(s, '<path d="M12 5v14M6 13l6 6 6-6"/>'),
+  arrowUp: (s = 15) => svg(s, '<path d="M12 19V5M6 11l6-6 6 6"/>'),
   person: (s = 24) => svg(s, '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/>', 'stroke-width="1.6"'),
   docSettings: (s = 26) => svg(s, '<path d="M6 3h9l4 4v6M6 3v18h8"/><path d="M9 10h5M9 14h3"/><circle cx="18" cy="17" r="2.5"/>', 'stroke-width="1.7"'),
   edit: (s = 26) => svg(s, '<path d="M4 20l1-4 11-11 3 3L8 19l-4 1zM14 7l3 3"/>', 'stroke-width="1.8"'),
