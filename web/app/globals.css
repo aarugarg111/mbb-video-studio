@@ -1,3 +1,6 @@
+@import url('/kit/tokens.css');
+@import url('/kit/kit.css');
+
 :root {
   --ink: #27303B;
   --orange: #DA6119;
@@ -70,3 +73,28 @@ select {
 .note.error { background: #FBEDEE; white-space: pre-wrap; }
 
 video { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 20px; display: block; }
+
+/* The offscreen stage. Mirrors stage/index.html; if one changes the other
+   must, or a browser render stops matching a CLI render. .logo-band and
+   .endcard come from kit.css. */
+.stage-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stage-phone {
+  padding: 11px;
+  background: var(--stage-phone-body);
+  border-radius: 46px;
+  transform: scale(1.8);
+}
+#stage-viewport {
+  position: relative;
+  width: 390px;
+  height: 844px;
+  border-radius: 36px;
+  overflow: hidden;
+  background: var(--mbb-tint-100);
+}
+#stage-viewport .layer { position: absolute; inset: 0; }
