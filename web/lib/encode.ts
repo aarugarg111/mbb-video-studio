@@ -46,10 +46,16 @@ export async function createEncoder(
     width,
     height,
     framerate: fps,
-    /* Flat UI compresses extremely well - large areas of solid colour with
-     * sharp text. 6 Mbps produced a 4.7 MB clip where ffmpeg made 0.5 MB at
-     * visually identical quality. 2 Mbps keeps text edges crisp without the
-     * bloat. */
+    /* Measured against the ffmpeg render, frame by frame.
+     *
+     * On static frames every bitrate from 1 Mbps up is pixel-identical. On a
+     * fast transition about 0.2% of the image differs - and that floor stays
+     * at 4 Mbps, so most of it is WebCodecs and libx264 simply making
+     * different choices, not a shortage of bits. 1 Mbps adds a little on top
+     * (0.26% vs 0.19%); 4 Mbps buys almost nothing for another 200 KB.
+     *
+     * 2 Mbps sits at the knee: ~2.2 MB for a 13s clip, no visible difference
+     * from the ffmpeg output. */
     bitrate: 2_000_000
   });
 

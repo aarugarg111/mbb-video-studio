@@ -36,6 +36,12 @@ export default function Page() {
   useEffect(() => {
     try { setApiKey(localStorage.getItem(KEY_NAME) ?? ''); } catch { /* private mode */ }
     setSupported(isSupported());
+
+    /* A testing hook. renderVideo is a pure function of a recipe and this page
+     * holds no secrets, so exposing it costs nothing and makes the render path
+     * measurable from outside - which is how the browser output gets compared
+     * against the ffmpeg one, frame by frame. */
+    (window as unknown as { renderVideo?: typeof renderVideo }).renderVideo = renderVideo;
   }, []);
 
   function saveKey() {
