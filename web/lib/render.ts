@@ -73,8 +73,21 @@ export async function renderVideo(recipe: any, opts: Options = {}): Promise<Blob
 
   const assets = await loadAssets();
 
-  /* The page's own copy of the font must be ready too, or the first frames
-   * lay out against a fallback before the embedded face takes over. */
+  /* The SVG embeds the font, but the LAYOUT happens here in the page - so if
+   * the page is still on a fallback face, every position is measured wrong
+   * and the embedded font then paints into the wrong boxes.
+   *
+   * document.fonts.ready alone is not enough: it resolves immediately when
+   * nothing has requested the font yet, which is the state the stage is in
+   * before the first frame is painted. Ask for each weight explicitly, and
+   * for the rupee sign, which lives in the latin-ext subset and is otherwise
+   * fetched lazily on first use - mid-render. */
+  await Promise.all(
+    ['400', '500', '700'].flatMap(w => [
+      document.fonts.load(`${w} 16px "DM Sans"`, 'A'),
+      document.fonts.load(`${w} 16px "DM Sans"`, '₹')
+    ])
+  ).catch(() => { /* offline: fall back rather than hang the render */ });
   await document.fonts.ready;
 
   const canvas = document.createElement('canvas');
