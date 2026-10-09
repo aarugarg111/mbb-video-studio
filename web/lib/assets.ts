@@ -5,6 +5,8 @@
  * load, and the failure is silent - text falls back to a system face and
  * images vanish. So it all gets embedded. */
 
+import { asset } from './base-path';
+
 export type Assets = {
   css: string;
   fontFaces: string;
@@ -40,11 +42,6 @@ async function fetchText(url: string): Promise<string> {
   return res.text();
 }
 
-/* GitHub Pages serves a project repository under /<repo>/, so an absolute
- * "/kit/..." would 404 there. Everything is resolved against the base path
- * Next was built with instead. */
-const BASE = (process.env.NEXT_PUBLIC_BASE_PATH ?? '').replace(/\/+$/, '');
-const asset = (path: string) => `${BASE}${path}`;
 
 let cached: Promise<Assets> | null = null;
 

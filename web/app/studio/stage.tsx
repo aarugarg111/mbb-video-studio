@@ -5,6 +5,7 @@
  * because display:none has no layout and would rasterise blank. */
 
 import { forwardRef } from 'react';
+import { asset } from '../../lib/base-path';
 
 export const STAGE_W = 1080;
 export const STAGE_H = 1920;
@@ -35,7 +36,7 @@ export const Stage = forwardRef<HTMLDivElement>(function Stage(_props, ref) {
         }}
       >
         <div className="logo-band">
-          <img src="/kit/brand/mybillbook-logo-reverse.png" alt="myBillBook" />
+          <img src={asset("/kit/brand/mybillbook-logo-reverse.png")} alt="myBillBook" />
         </div>
         <div className="stage-area">
           <div className="stage-phone">
