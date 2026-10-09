@@ -6,6 +6,7 @@
  * images vanish. So it all gets embedded. */
 
 import { asset } from './base-path';
+import { STAGE_CSS } from './stage-css';
 
 export type Assets = {
   css: string;
@@ -61,7 +62,7 @@ export function loadAssets(): Promise<Assets> {
     FONT_SUBSETS.forEach((s, i) => { bySubset[s.name] = fonts[i]; });
 
     return {
-      css: tokens + kit,
+      css: tokens + kit + STAGE_CSS,
       fontFaces: buildFontFaces(bySubset),
       logoDataUrl: `data:image/png;base64,${logo}`
     };

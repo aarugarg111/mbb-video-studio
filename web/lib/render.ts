@@ -1,6 +1,7 @@
 import { SCREENS as UNTYPED_SCREENS } from '../../screens/index.js';
 import { stateAt, totalDuration } from '../../src/timeline.js';
 import { loadAssets } from './assets';
+import { asset } from './base-path';
 import { rasterise } from './rasterise';
 import { createEncoder } from './encode';
 import { STAGE_W, STAGE_H } from '../app/studio/stage';
@@ -57,7 +58,7 @@ function paint(frame: any, recipe: any, viewport: HTMLElement, endcardRoot: HTML
 
   endcardRoot.innerHTML = frame.endCard
     ? `<div class="endcard" style="opacity: ${frame.endCard.progress.toFixed(3)}">` +
-      `<img src="/kit/brand/mybillbook-logo-reverse.png" alt="myBillBook">` +
+      `<img src="${asset("/kit/brand/mybillbook-logo-reverse.png")}" alt="myBillBook">` +
       `<p class="endcard-tagline">${escapeHtml(recipe.brand.endCard.tagline)}</p></div>`
     : '';
 }

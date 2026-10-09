@@ -1,8 +1,8 @@
 import { Muxer, ArrayBufferTarget } from 'mp4-muxer';
 
-/* Baseline profile, level 3.1. Higher profiles encode a little smaller but
+/* Baseline profile, level 4.2 (3.1 caps the frame at 921600 px; 1080x1920 needs more). Higher profiles encode a little smaller but
  * are refused by some editors and older players; this one is universal. */
-export const CODEC = 'avc1.42001f';
+export const CODEC = 'avc1.42002a';
 
 export const keyFrameEvery = (fps: number) => fps;
 export const timestampFor = (frame: number, fps: number) =>

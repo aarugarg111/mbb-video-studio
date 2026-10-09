@@ -1,12 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { THEMES } from '@/lib/schema';
+import { proposeRecipe } from '@/lib/claude';
+import { renderVideo } from '@/lib/render';
+import { isSupported } from '@/lib/encode';
+import { Stage } from './studio/stage';
+// The renderer's own validator - the same one the CLI uses.
+import { parse } from '../../src/recipe.js';
+import { catalogue } from '../../screens/index.js';
 
-type Stage = 'fill' | 'check' | 'rendering' | 'done';
+type Step = 'fill' | 'check' | 'rendering' | 'done';
+const KEY_NAME = 'mbb-anthropic-key';
 
 export default function Page() {
-  const [stage, setStage] = useState<Stage>('fill');
+  const [step, setStep] = useState<Step>('fill');
   const [script, setScript] = useState('');
   const [business, setBusiness] = useState('');
   const [party, setParty] = useState('');
@@ -16,29 +24,45 @@ export default function Page() {
   const [warnings, setWarnings] = useState<string[]>([]);
   const [videoUrl, setVideoUrl] = useState('');
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState({ done: 0, total: 0 });
+  const [apiKey, setApiKey] = useState('');
+  const [keyDraft, setKeyDraft] = useState('');
+  const [editingKey, setEditingKey] = useState(false);
+  const [supported, setSupported] = useState(true);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const urlRef = useRef('');
+
+  useEffect(() => {
+    try { setApiKey(localStorage.getItem(KEY_NAME) ?? ''); } catch { /* private mode */ }
+    setSupported(isSupported());
+  }, []);
+
+  function saveKey() {
+    const k = keyDraft.trim();
+    if (!k) return;
+    try { localStorage.setItem(KEY_NAME, k); } catch { /* kept in memory only */ }
+    setApiKey(k);
+    setKeyDraft('');
+    setEditingKey(false);
+  }
 
   async function propose() {
     setBusy(true);
     setError('');
     try {
-      const res = await fetch('/api/recipe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        /* Only send what was actually filled in - an empty field must not
-         * overwrite something the script got right. */
-        body: JSON.stringify({
-          script,
-          details: {
-            ...(business ? { business: { name: business } } : {}),
-            ...(party ? { party: { name: party } } : {}),
-            ...(theme ? { invoice: { theme } } : {})
-          }
-        })
+      const text = await proposeRecipe({
+        apiKey,
+        script,
+        /* Only send what was filled in - an empty field must not overwrite
+         * something the script got right. */
+        details: {
+          ...(business ? { business: { name: business } } : {}),
+          ...(party ? { party: { name: party } } : {}),
+          ...(theme ? { invoice: { theme } } : {})
+        }
       });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.error ?? 'Could not read that script.');
-      setRecipe(body.recipe);
-      setStage('check');
+      setRecipe(text);
+      setStep('check');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong.');
     } finally {
@@ -47,59 +71,82 @@ export default function Page() {
   }
 
   async function render() {
-    setBusy(true);
     setError('');
-    try {
-      const res = await fetch('/api/render', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipe })
-      });
-      const body = await res.json();
-      if (!res.ok) {
-        setError((body.errors ?? [body.error ?? 'Could not start the render.']).join('\n'));
-        return;
-      }
+    setWarnings([]);
 
-      setWarnings(body.warnings ?? []);
-      setStage('rendering');
-      await poll(body.id);
+    let checked: any;
+    try {
+      checked = parse(recipe, catalogue());
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something went wrong.');
-      setStage('check');
+      setError(e instanceof Error ? e.message : 'The shot list could not be read.');
+      return;
+    }
+    if (checked.errors) {
+      setError(checked.errors.join('\n'));
+      return;
+    }
+    setWarnings(checked.warnings ?? []);
+
+    /* Free the previous video before making another, or repeated renders
+     * hold every MP4 in memory until the tab dies. */
+    if (urlRef.current) {
+      URL.revokeObjectURL(urlRef.current);
+      urlRef.current = '';
+      setVideoUrl('');
+    }
+
+    setBusy(true);
+    setProgress({ done: 0, total: 0 });
+    setStep('rendering');
+    try {
+      const blob = await renderVideo(checked.recipe, {
+        onProgress: (done, total) => setProgress({ done, total })
+      });
+      const url = URL.createObjectURL(blob);
+      urlRef.current = url;
+      setVideoUrl(url);
+      setStep('done');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'The render failed.');
+      setStep('check');
     } finally {
       setBusy(false);
     }
   }
 
-  async function poll(id: string) {
-    /* A run takes about two and a half minutes including the runner starting
-     * up. Three seconds between checks is responsive without hammering the
-     * GitHub API, whose rate limit is shared across everyone using this. */
-    for (;;) {
-      await new Promise(r => setTimeout(r, 3000));
-      const res = await fetch(`/api/render/${id}`);
-      const body = await res.json();
-
-      if (body.status === 'done') {
-        setVideoUrl(`/api/render/${id}/file`);
-        setStage('done');
-        return;
-      }
-      if (body.status === 'failed') {
-        setError(body.error ?? 'The render failed.');
-        setStage('check');
-        return;
-      }
-    }
-  }
+  const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
+  const needKey = !apiKey || editingKey;
 
   return (
     <main>
+      <Stage ref={stageRef} />
       <h1>myBillBook Video Studio</h1>
       <p className="sub">Paste a creator script. Everything else — the shop, the customer, the items, the theme — is read out of it.</p>
 
-      {stage === 'fill' && (
+      {!supported && (
+        <div className="note error">
+          This browser cannot make the video. Use Chrome or Edge on a computer — Safari cannot encode H.264 video, so a render would fail at the end.
+        </div>
+      )}
+
+      {needKey && (
+        <div className="keybox">
+          <p>
+            Paste your Anthropic API key. It stays in this browser and is sent only to Anthropic.
+            Get one at <a href="https://console.anthropic.com" target="_blank" rel="noreferrer">console.anthropic.com</a>.
+          </p>
+          <input type="password" value={keyDraft} onChange={e => setKeyDraft(e.target.value)}
+                 placeholder="sk-ant-..." aria-label="Anthropic API key" />
+          <button onClick={saveKey} disabled={!keyDraft.trim()}>Save key</button>
+        </div>
+      )}
+      {!needKey && (
+        <p className="sub">
+          Key saved in this browser. <a href="#" onClick={e => { e.preventDefault(); setEditingKey(true); }}>Change key</a>
+        </p>
+      )}
+
+      {step === 'fill' && (
         <>
           <label htmlFor="script">The script</label>
           <textarea id="script" value={script} onChange={e => setScript(e.target.value)}
@@ -126,39 +173,46 @@ export default function Page() {
             </select>
           </details>
 
-          <button onClick={propose} disabled={busy || !script.trim()}>
+          <button onClick={propose} disabled={busy || !script.trim() || !apiKey}>
             {busy ? 'Reading the script…' : 'Propose a shot list'}
           </button>
         </>
       )}
 
-      {stage === 'check' && (
+      {step === 'check' && (
         <>
           <label htmlFor="recipe">The shot list — change anything that looks wrong</label>
           <textarea id="recipe" className="recipe" value={recipe}
                     onChange={e => setRecipe(e.target.value)} />
 
           <div className="row">
-            <button onClick={render} disabled={busy}>Render the video</button>
-            <button className="secondary" onClick={() => setStage('fill')} disabled={busy}>
+            <button onClick={render} disabled={busy || !supported}>Render the video</button>
+            <button className="secondary" onClick={() => setStep('fill')} disabled={busy}>
               Back
             </button>
           </div>
         </>
       )}
 
-      {stage === 'rendering' && (
-        <p className="note warn">Rendering on a GitHub runner. This takes about two to three minutes.</p>
+      {step === 'rendering' && (
+        <>
+          <p className="note warn">
+            {progress.total
+              ? `Rendering frame ${progress.done} of ${progress.total}. Keep this tab open.`
+              : 'Getting ready. Keep this tab open.'}
+          </p>
+          <div className="bar"><div style={{ width: `${pct}%` }} /></div>
+        </>
       )}
 
-      {stage === 'done' && (
+      {step === 'done' && (
         <>
           <p className="note warn">Done.</p>
           <video src={videoUrl} controls />
-          <a href={videoUrl} download>
+          <a href={videoUrl} download="video.mp4">
             <button>Download the MP4</button>
           </a>
-          <button className="secondary" onClick={() => setStage('check')}>
+          <button className="secondary" onClick={() => setStep('check')}>
             Change the shot list
           </button>
         </>

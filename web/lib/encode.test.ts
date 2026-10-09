@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { CODEC, keyFrameEvery, timestampFor } from './encode';
 
 test('the codec is baseline h264, which plays everywhere', () => {
-  assert.equal(CODEC, 'avc1.42001f');
+  assert.equal(CODEC, 'avc1.42002a');
 });
 
 test('timestamps are in microseconds', () => {

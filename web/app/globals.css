@@ -96,3 +96,8 @@ video { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 20px; di
   background: var(--mbb-tint-100);
 }
 #stage-viewport .layer { position: absolute; inset: 0; }
+
+.bar { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin-top: 14px; }
+.bar > div { height: 100%; background: var(--orange); transition: width 120ms linear; }
+.keybox { border: 1px solid var(--line); border-radius: 9px; padding: 14px; margin-bottom: 22px; }
+.keybox p { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
