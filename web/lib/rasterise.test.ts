@@ -1,0 +1,38 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { prepareHtml } from './rasterise';
+
+const LOGO = 'data:image/png;base64,ZZZ';
+
+test('every inline svg gets the svg namespace', () => {
+  const out = prepareHtml('<div><svg width="24"><path d="M0 0"/></svg></div>', LOGO);
+  assert.match(out, /<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" width="24"/);
+});
+
+test('an svg that already declares a namespace is left alone', () => {
+  const src = '<svg xmlns="http://www.w3.org/2000/svg" width="8"></svg>';
+  const out = prepareHtml(src, LOGO);
+  assert.equal((out.match(/xmlns=/g) ?? []).length, 1, 'must not be declared twice');
+});
+
+test('several icons all get the namespace', () => {
+  const out = prepareHtml('<svg></svg><i></i><svg></svg><svg></svg>', LOGO);
+  assert.equal((out.match(/xmlns="http:\/\/www\.w3\.org\/2000\/svg"/g) ?? []).length, 3);
+});
+
+test('void elements are closed for the xml parser', () => {
+  const out = prepareHtml('<div><img src="/kit/brand/mybillbook-logo-reverse.png"><br></div>', LOGO);
+  assert.doesNotMatch(out, /<img[^/]*[^/]>/, 'an unclosed img breaks the whole frame');
+  assert.match(out, /<br\s*\/>/);
+});
+
+test('an already-closed void element is not doubly closed', () => {
+  const out = prepareHtml('<br/>', LOGO);
+  assert.doesNotMatch(out, /\/\/>/);
+});
+
+test('the logo path becomes the embedded data uri', () => {
+  const out = prepareHtml('<img src="/kit/brand/mybillbook-logo-reverse.png"/>', LOGO);
+  assert.match(out, /src="data:image\/png;base64,ZZZ"/);
+  assert.doesNotMatch(out, /\.png/, 'a surviving path would silently not load');
+});
