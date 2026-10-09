@@ -1,0 +1,52 @@
+name: pages
+
+# Deploys the static site. Separate from render.yml (the old runner-side
+# renderer, kept as a fallback): different trigger, different concurrency group.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci --prefix web
+      # GitHub Pages serves a project repo at /<repo>/, so the build needs to
+      # know the repo name. next.config.mjs (basePath) and web/lib/base-path.ts
+      # both read NEXT_PUBLIC_BASE_PATH; without it the page loads unstyled.
+      - name: Build static site
+        run: |
+          export NEXT_PUBLIC_BASE_PATH="/${GITHUB_REPOSITORY#*/}"
+          echo "base path: $NEXT_PUBLIC_BASE_PATH"
+          npm run build --prefix web
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
