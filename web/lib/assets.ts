@@ -40,6 +40,12 @@ async function fetchText(url: string): Promise<string> {
   return res.text();
 }
 
+/* GitHub Pages serves a project repository under /<repo>/, so an absolute
+ * "/kit/..." would 404 there. Everything is resolved against the base path
+ * Next was built with instead. */
+const BASE = (process.env.NEXT_PUBLIC_BASE_PATH ?? '').replace(/\/+$/, '');
+const asset = (path: string) => `${BASE}${path}`;
+
 let cached: Promise<Assets> | null = null;
 
 /* Memoised: several hundred frames must not refetch the fonts. */
@@ -48,10 +54,10 @@ export function loadAssets(): Promise<Assets> {
 
   cached = (async () => {
     const [tokens, kit, logo, ...fonts] = await Promise.all([
-      fetchText('/kit/tokens.css'),
-      fetchText('/kit/kit.css'),
-      fetchBase64('/kit/brand/mybillbook-logo-reverse.png'),
-      ...FONT_SUBSETS.map(s => fetchBase64(`/kit/fonts/${s.file}`))
+      fetchText(asset('/kit/tokens.css')),
+      fetchText(asset('/kit/kit.css')),
+      fetchBase64(asset('/kit/brand/mybillbook-logo-reverse.png')),
+      ...FONT_SUBSETS.map(s => fetchBase64(asset(`/kit/fonts/${s.file}`)))
     ]);
 
     const bySubset: Record<string, string> = {};
