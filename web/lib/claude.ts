@@ -1,12 +1,10 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import * as yaml from 'js-yaml';
-import { RecipeSchema, SCREENS, ACTIONS, THEMES } from '@/lib/schema';
+import { RecipeSchema, SCREENS, ACTIONS, THEMES } from './schema';
 
-export const maxDuration = 300;
-
-const client = new Anthropic();
-
+/* The prompt is carried over verbatim from the server route. It has been
+ * corrected several times against real scripts; rewriting it loses that. */
 const SYSTEM = `You turn a creator ad script for the myBillBook app into a complete shot list for a video renderer.
 
 THE SCRIPT IS THE SOURCE OF TRUTH. Read everything out of it that you can, and only invent what it genuinely does not say:
@@ -42,45 +40,33 @@ Rules you must follow:
 - Details supplied alongside the script are OVERRIDES. Where one is given it wins over what the script says; where it is blank, take the value from the script.
 - If the script describes something the renderer has no screen for, cover what you can with the screens above and keep the video short rather than inventing a screen.`;
 
-export async function POST(req: Request) {
-  const { script, details } = await req.json();
+export async function proposeRecipe(
+  { apiKey, script, details }: { apiKey: string; script: string; details: unknown }
+): Promise<string> {
+  /* The key is the user's own, held in their browser and sent only to
+   * Anthropic. There is no server here to hold it instead. */
+  const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
 
-  if (!script || typeof script !== 'string') {
-    return Response.json({ error: 'A script is required.' }, { status: 400 });
-  }
-
-  try {
-    const response = await client.messages.parse({
-      model: 'claude-opus-5-5',
-      max_tokens: 16000,
-      system: SYSTEM,
-      messages: [
-        {
-          role: 'user',
-          content: `Overrides (may be empty - anything absent comes from the script):\n${JSON.stringify(details, null, 2)}\n\nScript:\n${script}`
-        }
-      ],
-      output_config: {
-        /* Thinking is always on with this model and defaults to medium
-         * effort. This task is structured extraction against a fixed schema
-         * with a detailed prompt - not hard reasoning - so low effort cuts
-         * the thinking tokens, which are most of what a call costs here.
-         * Raise it if the shot lists come back sloppy. */
-        effort: "low",
-        format: zodOutputFormat(RecipeSchema)
-      }
-    });
-
-    if (!response.parsed_output) {
-      return Response.json(
-        { error: 'The model did not return a usable shot list. Try again.' },
-        { status: 502 }
-      );
+  const response = await client.messages.parse({
+    model: 'claude-opus-5-5',
+    max_tokens: 16000,
+    system: SYSTEM,
+    messages: [{
+      role: 'user',
+      content: `Overrides (may be empty - anything absent comes from the script):\n` +
+        `${JSON.stringify(details, null, 2)}\n\nScript:\n${script}`
+    }],
+    output_config: {
+      /* Low effort: structured extraction against a fixed schema, not hard
+       * reasoning. Raise it if the shot lists come back sloppy. */
+      effort: 'low',
+      format: zodOutputFormat(RecipeSchema)
     }
+  });
 
-    return Response.json({ recipe: yaml.dump(response.parsed_output) });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return Response.json({ error: message }, { status: 502 });
+  if (!response.parsed_output) {
+    throw new Error('The model did not return a usable shot list. Try again.');
   }
+
+  return yaml.dump(response.parsed_output);
 }
