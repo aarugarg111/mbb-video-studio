@@ -46,9 +46,11 @@ export async function createEncoder(
     width,
     height,
     framerate: fps,
-    /* ~6 Mbps at 1080x1920. Flat UI compresses well; this is generous enough
-     * that text edges stay crisp. */
-    bitrate: 6_000_000
+    /* Flat UI compresses extremely well - large areas of solid colour with
+     * sharp text. 6 Mbps produced a 4.7 MB clip where ffmpeg made 0.5 MB at
+     * visually identical quality. 2 Mbps keeps text edges crisp without the
+     * bloat. */
+    bitrate: 2_000_000
   });
 
   const gop = keyFrameEvery(fps);

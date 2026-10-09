@@ -42,6 +42,16 @@ export const RecipeSchema = z.object({
       unit: z.string()
     })
   ),
+  /* Nullable rather than optional: a strict output schema is more reliable
+   * when every field is always present, so the model emits endCard: null when
+   * the clip should not close on a branded card. Without this field at all,
+   * no proposed recipe could ever have one. */
+  brand: z.object({
+    endCard: z.object({
+      duration: z.number(),
+      tagline: z.string()
+    }).nullable()
+  }),
   shots: z.array(
     z.object({
       screen: z.enum(SCREEN_NAMES),

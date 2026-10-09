@@ -16,6 +16,7 @@ THE SCRIPT IS THE SOURCE OF TRUTH. Read everything out of it that you can, and o
 - The theme. If the script is tied to a festival or occasion - Diwali, Rakhi, Independence Day, Ganesh Chaturthi - set invoice.theme to the matching theme from the list below. If it mentions no occasion, use "none". Never guess a theme that is not on the list.
 
 Available themes: ${THEMES.join(', ')}.
+- The end card. Set brand.endCard when the script ends on a call to action or a brand line - 1.5 seconds and a short tagline. Set brand.endCard to null when the script just ends on the result.
 
 The renderer can show exactly these screens, with exactly these tap targets:
 ${Object.entries(SCREENS).map(([s, t]) => `- ${s}: ${t.join(', ')}`).join('\n')}
