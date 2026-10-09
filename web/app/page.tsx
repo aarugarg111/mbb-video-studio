@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { asset } from '../lib/base-path';
 import { THEMES } from '@/lib/schema';
 import { proposeRecipe } from '@/lib/claude';
 import { renderVideo } from '@/lib/render';
@@ -120,7 +121,10 @@ export default function Page() {
   return (
     <main>
       <Stage ref={stageRef} />
-      <h1>myBillBook Video Studio</h1>
+      <header className="masthead">
+        <img src={asset("/kit/brand/mybillbook-logo.webp")} alt="myBillBook" />
+        <h1>Video Studio</h1>
+      </header>
       <p className="sub">Paste a creator script. Everything else — the shop, the customer, the items, the theme — is read out of it.</p>
 
       {!supported && (
