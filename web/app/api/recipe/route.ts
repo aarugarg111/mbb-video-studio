@@ -60,7 +60,15 @@ export async function POST(req: Request) {
           content: `Overrides (may be empty - anything absent comes from the script):\n${JSON.stringify(details, null, 2)}\n\nScript:\n${script}`
         }
       ],
-      output_config: { format: zodOutputFormat(RecipeSchema) }
+      output_config: {
+        /* Thinking is always on with this model and defaults to medium
+         * effort. This task is structured extraction against a fixed schema
+         * with a detailed prompt - not hard reasoning - so low effort cuts
+         * the thinking tokens, which are most of what a call costs here.
+         * Raise it if the shot lists come back sloppy. */
+        effort: "low",
+        format: zodOutputFormat(RecipeSchema)
+      }
     });
 
     if (!response.parsed_output) {
