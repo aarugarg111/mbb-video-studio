@@ -124,3 +124,65 @@ video { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 20px; di
   padding-left: 14px;
   border-left: 1px solid var(--line);
 }
+
+/* --- the step rail ---------------------------------------------------------
+   Three steps, so it is clear at a glance where you are and how much is left.
+   Rendering is not a step of its own: it is the shot list still running. */
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  list-style: none;
+  margin: 0 0 26px;
+  padding: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.steps li { display: flex; align-items: center; gap: 9px; }
+.steps .dot {
+  width: 23px;
+  height: 23px;
+  border-radius: 99px;
+  background: var(--line);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.steps li.now { color: var(--ink); font-weight: 700; }
+.steps li.now .dot { background: var(--orange); }
+.steps li.past .dot { background: var(--ink); }
+
+.hint { margin: 9px 0 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+.rendering { margin: 4px 0 0; font-size: 15px; font-weight: 700; }
+
+.note.good { background: #E8F5EC; }
+
+/* Buttons sit in a row and wrap on a phone rather than stacking full-width. */
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.actions button { margin-top: 0; }
+.btnlink { text-decoration: none; }
+
+/* Sign out belongs in the masthead. As a blue underlined link mid-page it read
+   as the most important thing on the screen, which it is not. */
+.masthead .linkbtn {
+  margin: 0 0 0 auto;
+  padding: 7px 13px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  body { padding: 24px 16px 60px; }
+  .steps { gap: 6px 14px; font-size: 12px; }
+  .actions button, .btnlink, .actions .btnlink button { width: 100%; }
+  .row { flex-direction: column; align-items: stretch; }
+}

@@ -14,6 +14,14 @@ import { parse } from '../../src/recipe.js';
 import { catalogue } from '../../screens/index.js';
 
 type Step = 'fill' | 'check' | 'rendering' | 'done';
+
+/* The rail along the top. Rendering is not a step of its own - it is the
+   second step still running - so it shares the shot list's place. */
+const STEPS: [Step, string][] = [
+  ['fill', 'Paste the script'],
+  ['check', 'Check the shot list'],
+  ['done', 'Your video']
+];
 const KEY_NAME = 'mbb-anthropic-key';
 
 export default function Page() {
@@ -80,6 +88,27 @@ export default function Page() {
   async function leave() {
     await signOut();
     setSignedIn(false);
+  }
+
+  /* Clears the whole run so the next video starts from an empty form. The
+   * object URL has to go with it, or every video made in this tab stays in
+   * memory until the tab is closed. */
+  function startOver() {
+    if (urlRef.current) {
+      URL.revokeObjectURL(urlRef.current);
+      urlRef.current = '';
+    }
+    setVideoUrl('');
+    setScript('');
+    setBusiness('');
+    setParty('');
+    setTheme('');
+    setRecipe('');
+    setUnsupported([]);
+    setWarnings([]);
+    setError('');
+    setProgress({ done: 0, total: 0 });
+    setStep('fill');
   }
 
   async function propose() {
@@ -152,6 +181,7 @@ export default function Page() {
   }
 
   const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
+  const stepIndex = step === 'fill' ? 0 : step === 'done' ? 2 : 1;
   const needKey = !TEAM_MODE && (!apiKey || editingKey);
   /* The studio is unusable until Claude can be reached, whichever way that
    * is - so the script form waits behind the same gate in both modes. */
@@ -163,6 +193,9 @@ export default function Page() {
       <header className="masthead">
         <img src={asset("/kit/brand/mybillbook-logo.webp")} alt="myBillBook" />
         <h1>Video Studio</h1>
+        {TEAM_MODE && signedIn && (
+          <button className="linkbtn" onClick={leave}>Sign out</button>
+        )}
       </header>
       <p className="sub">Paste a creator script. Everything else — the shop, the customer, the items, the theme — is read out of it.</p>
 
@@ -183,11 +216,7 @@ export default function Page() {
           </button>
         </div>
       )}
-      {TEAM_MODE && signedIn && (
-        <p className="sub">
-          Signed in. <a href="#" onClick={e => { e.preventDefault(); leave(); }}>Sign out</a>
-        </p>
-      )}
+
 
       {needKey && (
         <div className="keybox">
@@ -206,11 +235,22 @@ export default function Page() {
         </p>
       )}
 
+      {ready && (
+        <ol className="steps" aria-label="Progress">
+          {STEPS.map(([key, label], i) => (
+            <li key={key} className={stepIndex === i ? 'now' : stepIndex > i ? 'past' : ''}>
+              <span className="dot">{stepIndex > i ? '✓' : i + 1}</span>{label}
+            </li>
+          ))}
+        </ol>
+      )}
+
       {ready && step === 'fill' && (
         <>
-          <label htmlFor="script">The script</label>
+          <label htmlFor="script">Paste the script</label>
           <textarea id="script" value={script} onChange={e => setScript(e.target.value)}
                     placeholder="Paste the finalized script, including its [Internal team adds: UI — ...] markers." />
+          <p className="hint">The shop, the customer, the items and the theme are all read out of the script. Only fill in an override below if the script gets one of them wrong.</p>
 
           <details className="overrides">
             <summary>Overrides — only if the script gets something wrong</summary>
@@ -234,7 +274,7 @@ export default function Page() {
           </details>
 
           <button onClick={propose} disabled={busy || !script.trim() || !ready}>
-            {busy ? 'Reading the script…' : 'Propose a shot list'}
+            {busy ? 'Reading the script…' : 'Read the script'}
           </button>
         </>
       )}
@@ -262,25 +302,31 @@ export default function Page() {
 
       {step === 'rendering' && (
         <>
-          <p className="note warn">
+          <p className="rendering">
             {progress.total
-              ? `Rendering frame ${progress.done} of ${progress.total}. Keep this tab open.`
-              : 'Getting ready. Keep this tab open.'}
+              ? `Making your video — frame ${progress.done} of ${progress.total}.`
+              : 'Getting ready…'}
           </p>
           <div className="bar"><div style={{ width: `${pct}%` }} /></div>
+          <p className="hint">This happens on your own computer, so keep this tab open and in front until it finishes.</p>
         </>
       )}
 
       {step === 'done' && (
         <>
-          <p className="note warn">Done.</p>
+          <div className="note good">Your video is ready. Play it below, then download it.</div>
           <video src={videoUrl} controls />
-          <a href={videoUrl} download="video.mp4">
-            <button>Download the MP4</button>
-          </a>
-          <button className="secondary" onClick={() => setStep('check')}>
-            Change the shot list
-          </button>
+          <div className="actions">
+            <a className="btnlink" href={videoUrl} download="video.mp4">
+              <button>Download the video</button>
+            </a>
+            <button className="secondary" onClick={() => setStep('check')}>
+              Change the shot list
+            </button>
+            <button className="secondary" onClick={startOver}>
+              Make another video
+            </button>
+          </div>
         </>
       )}
 
