@@ -1,0 +1,34 @@
+# A shopkeeper opens Parties to see who owes what, and sends a reminder.
+# Every name and figure here is invented.
+video: party-ledger
+
+invoice:
+  number: 3140
+  date: "10/10/2026"
+  theme: none
+
+business:
+  name: BALAJI TRADING CO
+  gstin: 09ABCDE1234F1Z5
+  address: Hazratganj, Lucknow, Uttar Pradesh, 226001
+
+party:
+  name: Rakesh Kumar
+  phone: 98765 43210
+  address: Aliganj, Lucknow, Uttar Pradesh, 226024
+  balance: 6259
+
+items:
+  - { name: SUGAR 5KG, rate: 310, qty: 2, gst: 5, unit: PKT, purchase: 272, stock: 48 }
+  - { name: TATA SALT 1KG, rate: 28, qty: 6, gst: 5, unit: PKT, purchase: 24, stock: 120 }
+
+shots:
+  - screen: parties
+    duration: 3.2
+    actions:
+      - { at: 1.6, do: tap, target: party-row-0 }
+
+  - screen: parties
+    duration: 2.6
+    actions:
+      - { at: 1.2, do: tap, target: send-reminder-0 }

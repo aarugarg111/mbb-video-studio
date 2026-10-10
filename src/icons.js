@@ -35,6 +35,13 @@ export const icons = {
   sliders: (s = 22) => svg(s, '<path d="M3 6h18M3 12h18M3 18h18"/><circle cx="15" cy="6" r="2" fill="var(--mbb-surface)"/><circle cx="9" cy="12" r="2" fill="var(--mbb-surface)"/><circle cx="15" cy="18" r="2" fill="var(--mbb-surface)"/>', 'stroke-width="1.8"'),
   filter: (s = 16) => svg(s, '<path d="M3 7h18M6 12h12M10 17h4"/>', 'stroke-width="2"'),
   plusCircle: (s = 24) => svg(s, '<circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="M12 7v10M7 12h10" stroke="var(--mbb-primary)"/>'),
+  /* The Parties app bar, where it opens shared ledgers. */
+  linkChain: (s = 22) => svg(s, '<path d="M10 13a4 4 0 0 0 6 .5l2-2a4 4 0 0 0-5.7-5.7l-1.1 1.1"/><path d="M14 11a4 4 0 0 0-6-.5l-2 2a4 4 0 0 0 5.7 5.7l1.1-1.1"/>', 'stroke-width="1.9"'),
+  ledger: (s = 22) => svg(s, '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/>', 'stroke-width="1.8"'),
+  /* WhatsApp's handset-in-a-bubble, drawn rather than imported: it is a
+   * generic glyph here, and an image would need a licence and a network
+   * fetch the rasteriser cannot make. */
+  whatsapp: (s = 22) => svg(s, '<path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3z"/><path d="M9 8.5c.4-.1.7 0 .9.4l.6 1.2c.1.3 0 .6-.2.8l-.4.4a5.5 5.5 0 0 0 2.8 2.8l.4-.4c.2-.2.5-.3.8-.2l1.2.6c.4.2.5.5.4.9-.2.8-1 1.3-1.9 1.2A7.6 7.6 0 0 1 7.8 10c-.1-.9.4-1.3 1.2-1.5z"/>', 'stroke-width="1.5"'),
   folderUp: (s = 24) => svg(s, '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 17v-6M9 13.5l3-3 3 3"/>', 'stroke-width="1.7"'),
   navDashboard: (s = 24) => svg(s, '<path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/>', 'stroke-width="1.6"'),
   navParties: (s = 24) => svg(s, '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>', 'stroke-width="1.6"'),

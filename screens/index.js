@@ -4,6 +4,7 @@ import * as createInvoice from './create-invoice.js';
 import * as invoiceCreated from './invoice-created.js';
 import * as themeStore from './theme-store.js';
 import * as items from './items.js';
+import * as parties from './parties.js';
 import * as createItem from './create-item.js';
 import * as shareSheet from './share-sheet.js';
 import * as waAttach from './wa-attach.js';
@@ -16,6 +17,7 @@ export const SCREENS = {
   [invoiceCreated.name]: invoiceCreated,
   [themeStore.name]: themeStore,
   [items.name]: items,
+  [parties.name]: parties,
   [createItem.name]: createItem,
   [shareSheet.name]: shareSheet,
   [waAttach.name]: waAttach,

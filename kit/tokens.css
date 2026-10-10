@@ -181,6 +181,23 @@
 /* --- Theme Store (sampled from reference/frames/th-9.0.png and th-15.0.png,
  * 720x1560 phone frames; solid-fill modes, not eyeballed) ----------------- */
 :root {
+  /* ---------- Parties ----------
+   * SAMPLED from reference/frames/party-t28.png, as the modal colour of a
+   * small box rather than one pixel, so text and antialiasing cannot skew a
+   * reading. The pill grey, the pink avatar, the ink of the round button and
+   * the purple of Create Party all came back as tokens that already existed,
+   * so they are reused rather than duplicated here. */
+  --mbb-party-ground:     #F8F7FE;  /* SAMPLED - behind the cards        */
+  --mbb-party-avatar-green: #D9EFDB;
+  --mbb-party-avatar-blue:  #DBEAF0;
+  --mbb-party-avatar-beige: #ECEBDA;
+  --mbb-party-amount:     #299C4B;  /* SAMPLED - balance and its arrow   */
+  --mbb-party-remind:     #008869;  /* SAMPLED - Send Reminder, WhatsApp */
+  --mbb-party-ledger:     #0B8AE9;  /* SAMPLED - the SharedLedgers pill  */
+  --mbb-party-sub:        #979797;  /* SAMPLED - "Customer" / "Supplier" */
+  --mbb-party-promo:      #38332C;  /* SAMPLED - the dark promo banner   */
+  --mbb-party-promo-btn:  #FEFBE1;  /* SAMPLED - its cream button        */
+
   --mbb-store-sheet-top:    #F4ECF1;  /* SAMPLED - blush at the sheet's top edge, fades to white */
   --mbb-store-maroon:       #511E38;  /* SAMPLED - Unlock Themes button            */
   --mbb-store-chip:         #F5EAF0;  /* SAMPLED - the chosen variant chip fill     */

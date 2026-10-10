@@ -14,6 +14,7 @@ export const SCREENS = {
   'invoice-created': ['share', 'done'],
   'theme-store': ['theme-0', 'theme-1', 'theme-2', 'theme-3', 'theme-4', 'theme-5', 'variant-1', 'variant-2', 'unlock', 'close'],
   items: ['create-new-item', 'bulk-action', 'item-row-0'],
+  parties: ['party-row-0', 'party-row-1', 'send-reminder-0', 'shared-ledgers', 'create-party', 'search'],
   'create-item': ['item-name', 'hsn', 'tab-stock', 'batching', 'save'],
   'share-sheet': ['contact-0', 'contact-1', 'send'],
   'wa-attach': ['caption', 'send'],
