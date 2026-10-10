@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import * as yaml from 'js-yaml';
 import type { Recipe } from './schema';
+import { TEAM_MODE, proxyBaseUrl } from './team';
 import { RecipeSchema, SCREENS, ACTIONS, THEMES } from './schema';
 
 /* The prompt is carried over verbatim from the server route. It has been
@@ -56,11 +57,16 @@ export function splitRecipe(parsed: Recipe): { recipe: string; unsupported: stri
 }
 
 export async function proposeRecipe(
-  { apiKey, script, details }: { apiKey: string; script: string; details: unknown }
+  { apiKey, script, details }: { apiKey?: string; script: string; details: unknown }
 ): Promise<{ recipe: string; unsupported: string[] }> {
-  /* The key is the user's own, held in their browser and sent only to
-   * Anthropic. There is no server here to hold it instead. */
-  const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+  /* Two ways to reach Anthropic, and the request below is identical either
+   * way. In team mode the studio posts to its own Worker, which holds the key
+   * and checks the session cookie; the placeholder below is never read by
+   * anything, but the SDK refuses to start without some key. Otherwise the
+   * key is the viewer's own, held in their browser and sent only to Anthropic. */
+  const client = TEAM_MODE
+    ? new Anthropic({ apiKey: 'held-by-the-worker', baseURL: proxyBaseUrl(), dangerouslyAllowBrowser: true })
+    : new Anthropic({ apiKey: apiKey ?? '', dangerouslyAllowBrowser: true });
 
   const response = await client.messages.parse({
     model: 'claude-opus-5-5',

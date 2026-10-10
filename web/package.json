@@ -8,7 +8,8 @@
     "prebuild": "node scripts/copy-kit.mjs",
     "build": "next build",
     "start": "next start",
-    "test": "tsx --test \"lib/**/*.test.ts\""
+    "test": "tsx --test \"lib/**/*.test.ts\"",
+    "build:team": "node scripts/copy-kit.mjs && node scripts/build-team.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.132.1",

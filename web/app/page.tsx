@@ -5,6 +5,7 @@ import { asset } from '../lib/base-path';
 import { ctaImageExists } from '../lib/assets';
 import { THEMES } from '@/lib/schema';
 import { proposeRecipe } from '@/lib/claude';
+import { TEAM_MODE, signIn, signOut, isSignedIn } from '@/lib/team';
 import { renderVideo } from '@/lib/render';
 import { isSupported } from '@/lib/encode';
 import { Stage } from './studio/stage';
@@ -31,12 +32,19 @@ export default function Page() {
   const [apiKey, setApiKey] = useState('');
   const [keyDraft, setKeyDraft] = useState('');
   const [editingKey, setEditingKey] = useState(false);
+  const [password, setPassword] = useState('');
+  const [signedIn, setSignedIn] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(TEAM_MODE);
   const [supported, setSupported] = useState(true);
   const stageRef = useRef<HTMLDivElement>(null);
   const urlRef = useRef('');
 
   useEffect(() => {
-    try { setApiKey(localStorage.getItem(KEY_NAME) ?? ''); } catch { /* private mode */ }
+    if (TEAM_MODE) {
+      isSignedIn().then(setSignedIn).finally(() => setCheckingSession(false));
+    } else {
+      try { setApiKey(localStorage.getItem(KEY_NAME) ?? ''); } catch { /* private mode */ }
+    }
     setSupported(isSupported());
 
     /* A testing hook. renderVideo is a pure function of a recipe and this page
@@ -55,12 +63,31 @@ export default function Page() {
     setEditingKey(false);
   }
 
+  async function submitPassword() {
+    setBusy(true);
+    setError('');
+    try {
+      await signIn(password);
+      setPassword('');
+      setSignedIn(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not sign in.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function leave() {
+    await signOut();
+    setSignedIn(false);
+  }
+
   async function propose() {
     setBusy(true);
     setError('');
     try {
       const proposed = await proposeRecipe({
-        apiKey,
+        ...(TEAM_MODE ? {} : { apiKey }),
         script,
         /* Only send what was filled in - an empty field must not overwrite
          * something the script got right. */
@@ -125,7 +152,10 @@ export default function Page() {
   }
 
   const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
-  const needKey = !apiKey || editingKey;
+  const needKey = !TEAM_MODE && (!apiKey || editingKey);
+  /* The studio is unusable until Claude can be reached, whichever way that
+   * is - so the script form waits behind the same gate in both modes. */
+  const ready = TEAM_MODE ? signedIn : Boolean(apiKey);
 
   return (
     <main>
@@ -142,6 +172,23 @@ export default function Page() {
         </div>
       )}
 
+      {TEAM_MODE && !signedIn && !checkingSession && (
+        <div className="keybox">
+          <p>Sign in with the team password to use the studio.</p>
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+                 onKeyDown={e => { if (e.key === 'Enter' && password.trim() && !busy) submitPassword(); }}
+                 placeholder="Team password" aria-label="Team password" />
+          <button onClick={submitPassword} disabled={busy || !password.trim()}>
+            {busy ? 'Signing in…' : 'Sign in'}
+          </button>
+        </div>
+      )}
+      {TEAM_MODE && signedIn && (
+        <p className="sub">
+          Signed in. <a href="#" onClick={e => { e.preventDefault(); leave(); }}>Sign out</a>
+        </p>
+      )}
+
       {needKey && (
         <div className="keybox">
           <p>
@@ -153,13 +200,13 @@ export default function Page() {
           <button onClick={saveKey} disabled={!keyDraft.trim()}>Save key</button>
         </div>
       )}
-      {!needKey && (
+      {!TEAM_MODE && !needKey && (
         <p className="sub">
           Key saved in this browser. <a href="#" onClick={e => { e.preventDefault(); setEditingKey(true); }}>Change key</a>
         </p>
       )}
 
-      {step === 'fill' && (
+      {ready && step === 'fill' && (
         <>
           <label htmlFor="script">The script</label>
           <textarea id="script" value={script} onChange={e => setScript(e.target.value)}
@@ -186,7 +233,7 @@ export default function Page() {
             </select>
           </details>
 
-          <button onClick={propose} disabled={busy || !script.trim() || !apiKey}>
+          <button onClick={propose} disabled={busy || !script.trim() || !ready}>
             {busy ? 'Reading the script…' : 'Propose a shot list'}
           </button>
         </>

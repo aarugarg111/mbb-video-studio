@@ -1,0 +1,10 @@
+name = "mbb-video-studio"
+main = "src/worker.js"
+compatibility_date = "2026-01-01"
+
+# The studio is a static site; the Worker exists only to hold the API key and
+# the team password. Everything not under /api/ is served straight from the
+# Next export, so a render still costs nothing and runs in the viewer's browser.
+[assets]
+directory = "../web/out"
+binding = "ASSETS"

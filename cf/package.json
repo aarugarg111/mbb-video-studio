@@ -1,0 +1,14 @@
+{
+  "name": "mbb-video-studio-cf",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "predeploy": "npm run build:team --prefix ../web",
+    "predev": "npm run build:team --prefix ../web"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

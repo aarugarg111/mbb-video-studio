@@ -14,3 +14,8 @@ reference/frames/
 # screenshots and the internal specs. They live in ../mbb-private-docs.
 reference/
 docs/
+
+# Local Worker secrets - never committed
+cf/.dev.vars
+cf/.wrangler/
+cf/node_modules/
