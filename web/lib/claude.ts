@@ -7,7 +7,7 @@ import { RecipeSchema, SCREENS, ACTIONS, THEMES } from './schema';
 
 /* The prompt is carried over verbatim from the server route. It has been
  * corrected several times against real scripts; rewriting it loses that. */
-const SYSTEM = `You turn a creator ad script for the myBillBook app into a complete shot list for a video renderer.
+export const SYSTEM = `You turn a creator ad script for the myBillBook app into a complete shot list for a video renderer.
 
 THE SCRIPT IS THE SOURCE OF TRUTH. Read everything out of it that you can, and only invent what it genuinely does not say:
 

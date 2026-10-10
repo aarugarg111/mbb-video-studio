@@ -9,6 +9,7 @@ import { TEAM_MODE, signIn, signOut, isSignedIn } from '@/lib/team';
 import { renderVideo } from '@/lib/render';
 import { isSupported } from '@/lib/encode';
 import { renderRemotely, canRenderRemotely } from '@/lib/render-remote';
+import { briefingFor } from '@/lib/briefing';
 import { Stage } from './studio/stage';
 // The renderer's own validator - the same one the CLI uses.
 import { parse } from '../../src/recipe.js';
@@ -49,6 +50,14 @@ export default function Page() {
      assumed, so a browser that cannot encode is told what it can do instead of
      finding out at the end of a render. */
   const [canRemote, setCanRemote] = useState(false);
+  /* "Copied" on the button, briefly. Nothing else depends on it. */
+  const [copied, setCopied] = useState(false);
+  /* Only set when the browser refuses clipboard access, so the text can be
+     shown for copying by hand instead. */
+  const [fallbackBriefing, setFallbackBriefing] = useState('');
+  /* Set when the shot list came from somewhere other than the studio's own
+     Claude call, so the check step can explain what to do with an empty box. */
+  const [byHand, setByHand] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const urlRef = useRef('');
 
@@ -113,8 +122,35 @@ export default function Page() {
     setUnsupported([]);
     setWarnings([]);
     setError('');
+    setByHand(false);
     setProgress({ done: 0, total: 0 });
     setStep('fill');
+  }
+
+  /* The free path. The studio's own Claude call costs a few rupees a video;
+     this costs nothing and needs no key, at the price of three copy-pastes.
+     The shot list that comes back is checked by exactly the same validator,
+     so a weaker model means a clearer error, not a worse video. */
+  async function copyBriefing() {
+    const briefing = briefingFor(script, { business, party, theme });
+    try {
+      await navigator.clipboard.writeText(briefing);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      /* Clipboard access can be refused outright, and a button that silently
+         does nothing is worse than one that explains itself. */
+      setError('This browser would not let the page copy. Select the instructions below and copy them by hand.');
+      setFallbackBriefing(briefing);
+    }
+  }
+
+  function writeItMyself() {
+    setByHand(true);
+    setUnsupported([]);
+    setWarnings([]);
+    setError('');
+    setStep('check');
   }
 
   async function propose() {
@@ -193,8 +229,9 @@ export default function Page() {
   const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
   const stepIndex = step === 'fill' ? 0 : step === 'done' ? 2 : 1;
   const needKey = !TEAM_MODE && (!apiKey || editingKey);
-  /* The studio is unusable until Claude can be reached, whichever way that
-   * is - so the script form waits behind the same gate in both modes. */
+  /* Whether the studio can read a script ITSELF. The form no longer waits
+   * behind this: without a key there is still the free path, where another AI
+   * writes the shot list and the studio only renders it. */
   const ready = TEAM_MODE ? signedIn : Boolean(apiKey);
 
   return (
@@ -223,7 +260,7 @@ export default function Page() {
 
       {TEAM_MODE && !signedIn && !checkingSession && (
         <div className="keybox">
-          <p>Sign in with the team password to use the studio.</p>
+          <p>Sign in with the team password to have the studio read your scripts. You can skip this and still make videos — see &ldquo;use another AI&rdquo; below.</p>
           <input type="password" value={password} onChange={e => setPassword(e.target.value)}
                  onKeyDown={e => { if (e.key === 'Enter' && password.trim() && !busy) submitPassword(); }}
                  placeholder="Team password" aria-label="Team password" />
@@ -261,7 +298,7 @@ export default function Page() {
         </ol>
       )}
 
-      {ready && step === 'fill' && (
+      {step === 'fill' && (
         <>
           <label htmlFor="script">Paste the script</label>
           <textarea id="script" value={script} onChange={e => setScript(e.target.value)}
@@ -292,6 +329,38 @@ export default function Page() {
           <button onClick={propose} disabled={busy || !script.trim() || !ready}>
             {busy ? 'Reading the script…' : 'Read the script'}
           </button>
+          {!ready && (
+            <p className="hint">
+              {TEAM_MODE
+                ? 'Sign in above to have the studio read the script for you — or use the free way below, which needs no sign-in.'
+                : 'Add your Anthropic key above to have the studio read the script for you — or use the free way below, which needs no key.'}
+            </p>
+          )}
+
+          {/* The studio can read the script itself, or hand the job to
+              whatever chat tool you already have open. Both end at the same
+              shot list and the same validator. */}
+          <details className="freepath">
+            <summary>Or use another AI — free, no key needed</summary>
+            <p className="hint">
+              Copy the instructions — your script is already inside them — paste the lot into
+              ChatGPT, Gemini, Grok or whatever you use, and bring its answer back here. The studio
+              checks a pasted shot list exactly as it checks its own, so anything wrong is caught
+              before the video is made.
+            </p>
+            <div className="row">
+              <button className="secondary" onClick={copyBriefing} disabled={!script.trim()}>
+                {copied ? 'Copied' : 'Copy the instructions'}
+              </button>
+              <button className="secondary" onClick={writeItMyself}>
+                I have a shot list — paste it
+              </button>
+            </div>
+            {fallbackBriefing && (
+              <textarea className="recipe" readOnly value={fallbackBriefing}
+                        aria-label="The instructions, to copy by hand" />
+            )}
+          </details>
         </>
       )}
 
@@ -301,6 +370,12 @@ export default function Page() {
             <div className="note warn">
               <strong>Not in this video —</strong> the script asks for these and there are no screens for them yet:
               {unsupported.map((u, i) => <div key={i}>· {u}</div>)}
+            </div>
+          )}
+          {byHand && (
+            <div className="note">
+              Paste the shot list here. If you have not got one yet, go Back and copy the
+              instructions into the AI of your choice first.
             </div>
           )}
           <label htmlFor="recipe">The shot list — change anything that looks wrong</label>

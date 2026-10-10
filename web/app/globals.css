@@ -186,3 +186,12 @@ video { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 20px; di
   .actions button, .btnlink, .actions .btnlink button { width: 100%; }
   .row { flex-direction: column; align-items: stretch; }
 }
+
+/* The free path: another AI writes the shot list, the studio only renders it.
+   Styled like the overrides block so it reads as a quiet alternative rather
+   than a second main action. */
+.freepath { margin-top: 18px; border: 1px solid var(--line); border-radius: 9px; padding: 12px 14px; }
+.freepath summary { font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted); }
+.freepath[open] summary { margin-bottom: 8px; }
+.freepath .row { margin-top: 10px; }
+.freepath textarea { margin-top: 10px; }
