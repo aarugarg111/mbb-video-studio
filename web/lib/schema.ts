@@ -13,10 +13,13 @@ export const SCREENS = {
   'create-invoice': ['item-search', 'add-item-0', 'add-item-1', 'generate-bill'],
   'invoice-created': ['share', 'done'],
   items: ['create-new-item', 'bulk-action', 'item-row-0'],
-  'create-item': ['item-name', 'hsn', 'tab-stock', 'batching', 'save']
+  'create-item': ['item-name', 'hsn', 'tab-stock', 'batching', 'save'],
+  'share-sheet': ['contact-0', 'contact-1', 'send'],
+  'wa-attach': ['caption', 'send'],
+  'wa-chat': ['back', 'attachment']
 } as const;
 
-export const SCREEN_NAMES = ['home', 'create-bill', 'create-invoice', 'invoice-created', 'items', 'create-item'] as const;
+export const SCREEN_NAMES = ['home', 'create-bill', 'create-invoice', 'invoice-created', 'items', 'create-item', 'share-sheet', 'wa-attach', 'wa-chat'] as const;
 
 export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem'] as const;
 

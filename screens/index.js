@@ -4,6 +4,9 @@ import * as createInvoice from './create-invoice.js';
 import * as invoiceCreated from './invoice-created.js';
 import * as items from './items.js';
 import * as createItem from './create-item.js';
+import * as shareSheet from './share-sheet.js';
+import * as waAttach from './wa-attach.js';
+import * as waChat from './wa-chat.js';
 
 export const SCREENS = {
   [home.name]: home,
@@ -11,7 +14,10 @@ export const SCREENS = {
   [createInvoice.name]: createInvoice,
   [invoiceCreated.name]: invoiceCreated,
   [items.name]: items,
-  [createItem.name]: createItem
+  [createItem.name]: createItem,
+  [shareSheet.name]: shareSheet,
+  [waAttach.name]: waAttach,
+  [waChat.name]: waChat
 };
 
 /* The shape src/recipe.js validates against: screen name -> its target names. */

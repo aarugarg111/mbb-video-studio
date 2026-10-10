@@ -148,3 +148,32 @@
   --mbb-avatar-letter: #FFFFFF;                 /* the letter on that avatar  */
   --mbb-list-ground:   #F7F7FB;                 /* SAMPLED - behind the cards */
 }
+
+/* ==========================================================================
+ * ANDROID AND WHATSAPP - NOT myBillBook.
+ * Used only by share-sheet, wa-attach and wa-chat. Sampled by eye from the
+ * phone recording; darker and flatter than the app palette above. Never reach
+ * for one of these in a myBillBook screen.
+ * ========================================================================== */
+:root {
+  --wa-ground:       #0B1014;  /* the dark sheet behind every list and header */
+  --wa-ground-deep:  #11171B;  /* attachment preview ground                   */
+  --wa-field:        #191D21;  /* caption field and message input             */
+  --wa-chat:         #0B141A;  /* chat wallpaper tint                         */
+  --wa-hairline:     #1F262B;
+  --wa-text:         #E9EDEF;
+  --wa-text-muted:   #8696A0;
+  --wa-green:        #21C063;  /* send button                                 */
+  --wa-green-ink:    #4EB074;  /* tick on a chosen row                        */
+  --wa-bubble-out:   #134134;  /* outgoing bubble                             */
+  --wa-bubble-inner: #0E3328;  /* the document card inside the bubble         */
+  --wa-tick:         #53BDEB;  /* delivered                                   */
+  --wa-pdf:          #D0103A;
+  --wa-pdf-fold:     #8E0A28;
+  --wa-paper:        #F4F4F2;  /* the page in the thumbnail                   */
+  --wa-paper-line:   #C9CCD0;
+  --wa-avatar-a:     #2F4A44;
+  --wa-avatar-b:     #4A3F2F;
+  --wa-avatar-c:     #3A3A55;
+  --wa-bar:          #000000;  /* Android navigation bar                      */
+}

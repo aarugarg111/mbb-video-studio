@@ -25,6 +25,7 @@ ${Object.entries(SCREENS).map(([s, t]) => `- ${s}: ${t.join(', ')}`).join('\n')}
 The actions available are: ${ACTIONS.join(', ')}.
 - tap needs a target that exists on that shot's screen
 - type needs a target and the text to type
+- When the script mentions sharing or sending the invoice on WhatsApp, run the shots invoice-created (tap share), share-sheet (tap contact-0, then send), wa-attach (optionally type a caption into caption, then tap send) and wa-chat. The contact is the bill's party.
 - selectParty makes the chosen party appear on the bill
 - addItem needs the index of an item in the items list, counting from 0
 
@@ -41,7 +42,7 @@ Rules you must follow:
 - "video" must be a short name of letters, digits, hyphens and underscores only.
 - Details supplied alongside the script are OVERRIDES. Where one is given it wins over what the script says; where it is blank, take the value from the script.
 - If the script describes something the renderer has no screen for, cover what you can with the screens above and keep the video short rather than inventing a screen.
-- Put in "unsupported" every feature the script asks for that none of the available screens can show. Name the feature as the script describes it, briefly: "sharing the invoice on WhatsApp", "batch-wise stock records", "GST reports". Use an empty array when the screens cover the whole script.
+- Put in "unsupported" every feature the script asks for that none of the available screens can show. Name the feature as the script describes it, briefly: "batch-wise stock records", "GST reports". Use an empty array when the screens cover the whole script.
 - Still build the best shot list you can from the screens that do exist. The "unsupported" list is a warning to the author, not a refusal.`;
 
 /* Split the model's output into the recipe YAML and the unsupported list.

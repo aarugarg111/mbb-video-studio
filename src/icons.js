@@ -38,5 +38,31 @@ export const icons = {
   navParties: (s = 24) => svg(s, '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>', 'stroke-width="1.6"'),
   navItems: (s = 24) => svg(s, '<rect x="4" y="12" width="7" height="7" rx="1" fill="currentColor"/><rect x="13" y="12" width="7" height="7" rx="1" fill="currentColor"/><rect x="8.5" y="4" width="7" height="7" rx="1" fill="currentColor"/>', 'stroke-width="1"'),
   navForYou: (s = 24) => svg(s, '<circle cx="15" cy="7" r="3"/><path d="M3 20l4-5 5 1 6 2M3 15h5"/>', 'stroke-width="1.6"'),
-  navMore: (s = 24) => svg(s, '<circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/>', 'stroke-width="1.6"')
+  navMore: (s = 24) => svg(s, '<circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/>', 'stroke-width="1.6"'),
+  /* Android and WhatsApp screens (share-sheet, wa-attach, wa-chat). */
+  group: (s = 22) => svg(s, '<circle cx="9" cy="9" r="3" fill="currentColor" stroke="none"/><circle cx="17" cy="10" r="2.4" fill="currentColor" stroke="none"/><path d="M3 19c0-3.5 2.7-5 6-5s6 1.5 6 5zM15.5 14.4c3 0 5.5 1.2 5.5 4.6h-4" fill="currentColor" stroke="none"/>'),
+  personAdd: (s = 24) => svg(s, '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-5.5 6.5-5.5s6.5 1.9 6.5 5.5M19 5v6M16 8h6"/>', 'stroke-width="1.7"'),
+  check: (s = 18) => svg(s, '<path d="M5 12.5l4.5 4.5L19 7.5"/>', 'stroke-width="2.6"'),
+  doubleCheck: (s = 16) => svg(s, '<path d="M1.5 13l4.5 4.5L15 8M10 16.5l1 1L21 8"/>', 'stroke-width="2"'),
+  send: (s = 24) => svg(s, '<path d="M3 4l18 8-18 8 2.5-8z" fill="currentColor"/>', 'stroke-width="1"'),
+  attach: (s = 24) => svg(s, '<path d="M21.4 11.05l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.65 5.65l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>', 'stroke-width="1.8"'),
+  camera: (s = 24) => svg(s, '<path d="M4 8h3.5L9 5.5h6L16.5 8H20v11H4z"/><circle cx="12" cy="13" r="3.4"/>', 'stroke-width="1.7"'),
+  rupeeCircle: (s = 24) => svg(s, '<circle cx="12" cy="12" r="9"/><path d="M8.5 8h7M8.5 11h7M8.5 8c4.5 0 4.5 6.5 0 6.5l4.5 3"/>', 'stroke-width="1.7"'),
+  sticker: (s = 24) => svg(s, '<circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 2.4 3 4 3s3-1 4-3M9 9.5h.01M15 9.5h.01" stroke-linecap="round"/>', 'stroke-width="1.7"'),
+  videoCall: (s = 24) => svg(s, '<rect x="3" y="6.5" width="13" height="11" rx="2"/><path d="M16 10.5l5-3v9l-5-3"/>', 'stroke-width="1.8"'),
+  /* The red PDF tile WhatsApp draws for a document. The label is SVG text in
+   * ordinary ASCII, so it needs no glyph outside the embedded font. */
+  pdfFile: (s = 40) =>
+    '<svg width="' + s + '" height="' + s + '" viewBox="0 0 40 40" fill="none">' +
+    '<path d="M7 2h20l8 8v26a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="var(--wa-pdf)"/>' +
+    '<path d="M27 2l8 8h-6a2 2 0 0 1-2-2z" fill="var(--wa-pdf-fold)"/>' +
+    '<text x="20" y="28" text-anchor="middle" font-size="11" font-weight="700" fill="var(--wa-text)" font-family="var(--mbb-font)">PDF</text></svg>',
+  /* Android system bars. */
+  navRecents: (s = 22) => svg(s, '<path d="M6 5v14M12 5v14M18 5v14"/>', 'stroke-width="1.8"'),
+  navHome: (s = 22) => svg(s, '<circle cx="12" cy="12" r="7"/>', 'stroke-width="1.8"'),
+  navBack: (s = 22) => svg(s, '<path d="M15 5l-7 7 7 7"/>', 'stroke-width="1.8"'),
+  signal: (s = 14) => svg(s, '<path d="M4 20h2M9 20v-5M14 20V10M19 20V4"/>', 'stroke-width="2.4"'),
+  wifi: (s = 14) => svg(s, '<path d="M2 9a14 14 0 0 1 20 0M5.5 12.5a9 9 0 0 1 13 0M9 16a4 4 0 0 1 6 0"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/>', 'stroke-width="2"'),
+  battery: (s = 18) => svg(s, '<rect x="3" y="7" width="16" height="10" rx="2.5"/><path d="M21 10v4"/><rect x="5.5" y="9.5" width="9" height="5" rx="1" fill="currentColor" stroke="none"/>', 'stroke-width="1.6"')
+
 };

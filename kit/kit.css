@@ -393,3 +393,64 @@
 .itemform .sn .a { font-size: 11.5px; font-weight: 700; color: var(--mbb-primary); }
 .itemform .sn .b { font-size: 9.5px; color: var(--mbb-ink-muted); margin-top: 6px; }
 .itemform .savebtn { width: 218px; height: 45px; border-radius: 6px; background: var(--mbb-primary); color: var(--mbb-surface); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+
+/* ==========================================================================
+ * ANDROID AND WHATSAPP screens (share-sheet, wa-attach, wa-chat).
+ * Colours are the --wa-* tokens, not the myBillBook palette.
+ * ========================================================================== */
+.wa { background: var(--wa-ground) !important; color: var(--wa-text); }
+.wa .ico { color: var(--wa-text); }
+.wa-status { height: 36px; box-sizing: border-box; padding: 0 16px 0 14px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 500; color: var(--wa-text); }
+.wa-status .r { display: flex; align-items: center; gap: 5px; }
+.wa-nav { position: absolute; left: 0; right: 0; bottom: 0; height: 44px; background: var(--wa-bar); display: flex; align-items: center; justify-content: space-around; padding: 0 40px; }
+.wa-head { height: 54px; box-sizing: border-box; padding: 0 16px 0 14px; display: flex; align-items: center; gap: 18px; border-bottom: 1px solid var(--wa-hairline); }
+.wa-head .ttl { flex-grow: 1; font-size: 16px; font-weight: 500; margin-left: 4px; }
+.wa-head .ttl.one { font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.wa-av { flex: none; position: relative; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 500; color: var(--wa-text); background: var(--wa-avatar-a); }
+.wa-av.b { background: var(--wa-avatar-b); }
+.wa-av.c { background: var(--wa-avatar-c); }
+.wa-av.sm { width: 34px; height: 34px; font-size: 14px; }
+.wa-av .tick { position: absolute; right: -5px; bottom: -4px; width: 18px; height: 18px; border-radius: 50%; background: var(--wa-green-ink); color: var(--wa-ground); border: 2px solid var(--wa-ground); box-sizing: content-box; display: flex; align-items: center; justify-content: center; }
+.wa-fab { flex: none; width: 50px; height: 50px; border-radius: 50%; background: var(--wa-green); display: flex; align-items: center; justify-content: center; }
+.wa-fab svg { color: var(--wa-ground); }
+
+.wa-section { padding: 18px 15px 8px; font-size: 11.5px; color: var(--wa-text-muted); }
+.wa-row { height: 61px; box-sizing: border-box; padding: 0 14px; display: flex; align-items: center; gap: 16px; }
+.wa-row.on { background: var(--wa-field); }
+.wa-row .tx { min-width: 0; }
+.wa-row .n { font-size: 14px; color: var(--wa-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wa-row .s { font-size: 12px; color: var(--wa-text-muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wa-sendbar { position: absolute; left: 0; right: 0; bottom: 44px; height: 76px; box-sizing: border-box; padding: 0 16px 0 14px; display: flex; align-items: center; justify-content: space-between; background: var(--wa-ground); border-top: 1px solid var(--wa-hairline); }
+.wa-sendbar .chip { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 16px 0 5px; border-radius: 999px; background: var(--wa-field); font-size: 13px; color: var(--wa-text); }
+
+.wa-attach { background: var(--wa-ground-deep) !important; }
+.wa-doc { position: absolute; left: 0; right: 0; top: 250px; display: flex; flex-direction: column; align-items: center; padding: 0 26px; }
+.wa-doc .fn { margin-top: 16px; font-size: 16px; text-align: center; word-break: break-all; line-height: 1.3; color: var(--wa-text); }
+.wa-doc .fm { margin-top: 6px; font-size: 11.5px; color: var(--wa-text-muted); }
+.wa-cap { position: absolute; left: 8px; right: 8px; top: 650px; height: 52px; box-sizing: border-box; padding: 0 20px; border-radius: 26px; background: var(--wa-field); display: flex; align-items: center; font-size: 14px; color: var(--wa-text); }
+.wa-cap .ph { color: var(--wa-text-muted); }
+.wa-cap .caret { display: inline-block; width: 1.5px; height: 17px; margin-left: 1px; background: var(--wa-green); }
+.wa-to { position: absolute; left: 0; right: 0; top: 712px; height: 52px; box-sizing: border-box; padding: 0 12px 0 22px; display: flex; align-items: center; justify-content: space-between; }
+.wa-to .who { font-size: 11px; color: var(--wa-text); text-transform: uppercase; letter-spacing: 0.3px; }
+
+.wa-chat { background: var(--wa-chat) !important; }
+.wa-head.chat { gap: 12px; background: var(--wa-ground); height: 58px; }
+.wa-head .who { flex-grow: 1; min-width: 0; }
+.wa-head .who .n { font-size: 15.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wa-head .who .s { font-size: 11.5px; color: var(--wa-text-muted); margin-top: 1px; }
+.wa-wall { position: absolute; left: 0; right: 0; top: 94px; bottom: 112px; padding: 78px 12px 0; display: flex; flex-direction: column; align-items: flex-end; }
+.wa-bubble.out { width: 258px; box-sizing: border-box; padding: 4px; border-radius: 8px 0 8px 8px; background: var(--wa-bubble-out); }
+.wa-thumb { height: 150px; border-radius: 5px; overflow: hidden; background: var(--wa-bubble-inner); display: flex; justify-content: center; padding-top: 12px; box-sizing: border-box; }
+.wa-thumb .pg { width: 118px; height: 160px; box-sizing: border-box; padding: 10px 9px; background: var(--wa-paper); border-radius: 2px; display: flex; flex-direction: column; gap: 7px; }
+.wa-thumb .pg i { display: block; height: 4px; border-radius: 2px; background: var(--wa-paper-line); }
+.wa-thumb .pg i.h { height: 7px; width: 55%; background: var(--wa-text-muted); }
+.wa-thumb .pg i.s { width: 70%; }
+.wa-filecard { margin-top: 4px; border-radius: 5px; background: var(--wa-bubble-inner); padding: 8px; display: flex; align-items: center; gap: 8px; }
+.wa-filecard .tx { min-width: 0; }
+.wa-filecard .fn { font-size: 11.5px; line-height: 1.25; color: var(--wa-text); word-break: break-all; }
+.wa-filecard .fm { margin-top: 3px; font-size: 10px; color: var(--wa-text-muted); }
+.wa-bubble .meta { display: flex; justify-content: flex-end; align-items: center; gap: 4px; padding: 3px 4px 1px; font-size: 10px; color: var(--wa-text-muted); }
+.wa-bubble .meta .dt { color: var(--wa-tick); display: inline-flex; }
+.wa-input { position: absolute; left: 0; right: 0; bottom: 44px; height: 68px; box-sizing: border-box; padding: 0 10px; display: flex; align-items: center; gap: 8px; }
+.wa-input .box { flex: 1; height: 50px; border-radius: 25px; background: var(--wa-field); display: flex; align-items: center; gap: 14px; padding: 0 14px; box-sizing: border-box; }
+.wa-input .ph { flex-grow: 1; font-size: 15px; color: var(--wa-text-muted); }

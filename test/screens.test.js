@@ -408,3 +408,88 @@ test('catalogue includes the new screens and their targets', () => {
   assert.deepEqual(c.items, ['create-new-item', 'bulk-action', 'item-row-0']);
   assert.deepEqual(c['create-item'], ['item-name', 'hsn', 'tab-stock', 'batching', 'save']);
 });
+
+/* --- WhatsApp share flow ------------------------------------------------- */
+
+const WA = ['share-sheet', 'wa-attach', 'wa-chat'];
+const WA_DATA = { invoice: { number: 2301 }, party: { name: 'Meena Sharma' } };
+
+test('the WhatsApp screens render with no data and no state', () => {
+  for (const key of WA) {
+    const html = SCREENS[key].render({}, {});
+    assert.equal(typeof html, 'string');
+    assert.ok(html.length > 200, key);
+    assert.doesNotThrow(() => SCREENS[key].render(undefined, undefined), key);
+  }
+});
+
+test('the shared PDF name follows <number>_sales_invoice_<PARTY>.pdf', async () => {
+  const { invoiceFileName } = await import('../src/invoice.js');
+  assert.equal(invoiceFileName({ invoice: { number: 5946 }, party: { name: 'Anil Distributors' } }),
+    '5946_sales_invoice_ANIL_DISTRIBUTORS.pdf');
+  assert.match(SCREENS['wa-attach'].render(WA_DATA, {}), /2301_sales_invoice_MEENA_SHARMA\.pdf/);
+  assert.match(SCREENS['wa-chat'].render(WA_DATA, {}), /2301_sales_invoice_MEENA_SHARMA\.pdf/);
+});
+
+test('the file name escapes odd party names', async () => {
+  const { invoiceFileName } = await import('../src/invoice.js');
+  assert.equal(invoiceFileName({ party: { name: '<b>A&B  Co</b>' } }), '1001_sales_invoice_B_A_B_CO_B.pdf');
+});
+
+test('share-sheet says "1 selected" only when the state says so', () => {
+  assert.doesNotMatch(SCREENS['share-sheet'].render(WA_DATA, {}), /1 selected/);
+  assert.doesNotMatch(SCREENS['share-sheet'].render(WA_DATA, { selected: 0 }), /1 selected/);
+  assert.match(SCREENS['share-sheet'].render(WA_DATA, { selected: 1 }), /1 selected/);
+  assert.match(SCREENS['share-sheet'].render(WA_DATA, {}), /Send to\.\.\./);
+});
+
+test('a tap on a contact selects it in the share sheet', () => {
+  const recipe = { items: [], shots: [{ screen: 'share-sheet', duration: 3, actions: [
+    { at: 1, do: 'tap', target: 'contact-0' }] }] };
+  assert.equal(stateAt(recipe, 0.5).screenState.selected ?? 0, 0);
+  assert.equal(stateAt(recipe, 1.5).screenState.selected, 1);
+});
+
+test('wa-chat shows exactly one bubble', () => {
+  const html = SCREENS['wa-chat'].render(WA_DATA, {});
+  assert.equal((html.match(/class="wa-bubble/g) || []).length, 1);
+});
+
+test('wa-attach shows the caption the recipe types', () => {
+  assert.match(SCREENS['wa-attach'].render(WA_DATA, {}), /Add a caption\.\.\./);
+  const typed = SCREENS['wa-attach'].render(WA_DATA, { typed: 'Bill <3' });
+  assert.match(typed, /Bill &lt;3/);
+  assert.doesNotMatch(typed, /Add a caption/);
+});
+
+test('no WhatsApp screen emits a raw colour, in any state', () => {
+  for (const key of WA) {
+    for (const st of [{}, { selected: 1 }, { typed: 'x' }]) {
+      assert.doesNotMatch(SCREENS[key].render(WA_DATA, st), /#[0-9a-fA-F]{3,8}\b|rgba?\(/, key);
+    }
+  }
+});
+
+test('no WhatsApp screen carries a phone number', () => {
+  for (const key of WA) {
+    for (const st of [{}, { selected: 1 }]) {
+      const html = SCREENS[key].render({ party: { name: 'Rakesh Kumar', phone: '98765 43210' } }, st);
+      assert.doesNotMatch(html, /\+91 ?[0-9]/, key);
+      assert.doesNotMatch(html, /[0-9]{5} ?[0-9]{5}/, key);
+    }
+  }
+});
+
+test('the WhatsApp screens use the --wa tokens, kept apart from the myBillBook ones', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const tokens = await readFile(new URL('../kit/tokens.css', import.meta.url), 'utf8');
+  assert.match(tokens, /ANDROID AND WHATSAPP - NOT myBillBook/);
+  assert.match(SCREENS['wa-chat'].render(WA_DATA, {}), /var\(--wa-/);
+});
+
+test('catalogue lists the WhatsApp screens and their targets', () => {
+  const c = catalogue();
+  assert.deepEqual(c['share-sheet'], ['contact-0', 'contact-1', 'send']);
+  assert.deepEqual(c['wa-attach'], ['caption', 'send']);
+  assert.deepEqual(c['wa-chat'], ['back', 'attachment']);
+});
