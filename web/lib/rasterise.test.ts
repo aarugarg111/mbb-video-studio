@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { prepareHtml } from './rasterise';
+import { prepareHtml, escapeStyleText } from './rasterise';
 
 const LOGO = 'data:image/png;base64,ZZZ';
 
@@ -41,4 +41,22 @@ test('the cta artwork path becomes the embedded data uri', () => {
   const out = prepareHtml('<img src="/kit/cta/download-now.png"/>', LOGO, 'data:image/png;base64,CTA');
   assert.ok(out.includes('data:image/png;base64,CTA'));
   assert.ok(!out.includes('download-now.png'));
+});
+
+test('a literal < in the stylesheet is escaped', () => {
+  /* A CSS comment naming a file pattern - kit/themes/<slug>.png - made every
+   * browser frame fail to decode while the CLI path rendered fine. */
+  const out = escapeStyleText('/* kit/themes/<slug>.png */ .a { color: red }');
+  assert.ok(!out.includes('<'), 'a surviving < makes the whole frame undecodable');
+  assert.ok(out.includes('&lt;slug&gt;') || out.includes('&lt;slug>'));
+});
+
+test('a literal & in the stylesheet is escaped, and only once', () => {
+  const out = escapeStyleText('/* salt & pepper */');
+  assert.equal(out, '/* salt &amp; pepper */');
+});
+
+test('ordinary css survives escaping unchanged', () => {
+  const css = '.a > .b { width: calc(100% - 4px); content: "x" }';
+  assert.equal(escapeStyleText(css), css);
 });

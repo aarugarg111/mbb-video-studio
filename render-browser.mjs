@@ -22,9 +22,13 @@ const server = createServer(async (q, r) => {
     let p = decodeURIComponent(q.url.split('?')[0]);
     if (p === '/' || p.endsWith('/')) p += 'index.html';
     const f = join(OUT, p.replace(/^\/+/, ''));
+    /* Read before replying: writing the header first meant any miss - the CTA
+     * artwork absent, say - threw after the response had begun and took the
+     * whole render down with ERR_HTTP_HEADERS_SENT instead of a 404. */
+    const body = await readFile(f);
     r.writeHead(200, { 'Content-Type': TYPES[extname(f)] || 'application/octet-stream' });
-    r.end(await readFile(f));
-  } catch { r.writeHead(404).end('not found'); }
+    r.end(body);
+  } catch { if (!r.headersSent) r.writeHead(404); r.end('not found'); }
 });
 await new Promise(r => server.listen(0, '127.0.0.1', r));
 const base = `http://127.0.0.1:${server.address().port}`;

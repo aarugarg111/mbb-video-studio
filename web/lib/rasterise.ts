@@ -31,6 +31,17 @@ export function prepareHtml(outerHtml: string, logoDataUrl: string, ctaDataUrl: 
   return html;
 }
 
+/* Inside foreignObject the <style> element is XML, not HTML: its text is
+ * parsed, so a literal < or & anywhere in the stylesheet makes the entire
+ * frame undecodable, with nothing to say which frame or which rule. A
+ * "<slug>" inside a CSS comment was the real case. The CLI path parses the
+ * same stylesheet as HTML, where both characters are harmless, so this
+ * breaks the browser alone and breaks it silently. Escaping restores them
+ * as text, and the CSS parser then sees the stylesheet unchanged. */
+export function escapeStyleText(css: string): string {
+  return css.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+}
+
 /* Rasterises a live element at its natural size. The browser performs the
  * layout and painting, which is why this matches a real screenshot. */
 export async function rasterise(
@@ -40,7 +51,7 @@ export async function rasterise(
   h: number
 ): Promise<HTMLImageElement> {
   const html = prepareHtml(node.outerHTML, assets.logoDataUrl, assets.ctaDataUrl);
-  const style = assets.fontFaces + assets.css;
+  const style = escapeStyleText(assets.fontFaces + assets.css);
 
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">` +

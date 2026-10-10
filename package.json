@@ -7,7 +7,7 @@
     "node": ">=24"
   },
   "scripts": {
-    "test": "node --test \"test/**/*.test.js\"",
+    "test": "node --test \"test/**/*.test.js\" && npm run test --prefix web",
     "render": "node worker/cli.js"
   },
   "dependencies": {

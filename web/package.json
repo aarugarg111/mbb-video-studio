@@ -1,1 +1,30 @@
-{"name":"mbb-video-studio-web","private":true,"version":"0.0.0","scripts":{"predev":"node scripts/copy-kit.mjs","dev":"next dev","prebuild":"node scripts/copy-kit.mjs","build":"next build","start":"next start"},"dependencies":{"@anthropic-ai/sdk":"^0.132.1","fflate":"^0.8.3","js-yaml":"^5.4.3","mp4-muxer":"^5.2.2","next":"^16.4.0","react":"^19.3.0","react-dom":"^19.3.0","zod":"^4.6.5"},"devDependencies":{"@types/js-yaml":"^4.0.9","@types/node":"^26.6.4","@types/react":"^19.3.0","tsx":"^4.23.15","typescript":"^7.0.2"}}
+{
+  "name": "mbb-video-studio-web",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "predev": "node scripts/copy-kit.mjs",
+    "dev": "next dev",
+    "prebuild": "node scripts/copy-kit.mjs",
+    "build": "next build",
+    "start": "next start",
+    "test": "tsx --test \"lib/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.132.1",
+    "fflate": "^0.8.3",
+    "js-yaml": "^5.4.3",
+    "mp4-muxer": "^5.2.2",
+    "next": "^16.4.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
