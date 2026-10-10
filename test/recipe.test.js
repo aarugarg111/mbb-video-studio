@@ -430,3 +430,45 @@ shots:
   assert.ok(!r.errors, JSON.stringify(r.errors));
   assert.deepEqual(r.warnings, [], 'a well-paced clip should be silent');
 });
+
+/* ---- the WhatsApp payoff ----
+ * A generated video once ran WhatsApp -> back to the app -> WhatsApp again,
+ * which reads as a mistake. Sending the invoice is the payoff; the clip rests
+ * there. */
+
+test('returning to the app after the invoice is delivered warns', () => {
+  const r = parse(`
+shots:
+  - screen: home
+    duration: 2.0
+  - screen: wa-chat
+    duration: 2.0
+  - screen: home
+    duration: 2.0
+`, { ...CATALOGUE, 'wa-chat': ['back'] });
+  assert.ok(!r.errors, JSON.stringify(r.errors));
+  assert.ok(r.warnings.some(w => /after the invoice is delivered/.test(w)));
+  assert.ok(r.warnings.some(w => /home/.test(w)), 'should name the offending screen');
+});
+
+test('ending on the delivered chat does not warn', () => {
+  const r = parse(`
+shots:
+  - screen: home
+    duration: 2.0
+  - screen: wa-chat
+    duration: 2.0
+`, { ...CATALOGUE, 'wa-chat': ['back'] });
+  assert.ok(!r.warnings.some(w => /after the invoice is delivered/.test(w)));
+});
+
+test('another WhatsApp shot after the chat is fine', () => {
+  const r = parse(`
+shots:
+  - screen: wa-chat
+    duration: 2.0
+  - screen: wa-attach
+    duration: 1.5
+`, { ...CATALOGUE, 'wa-chat': ['back'], 'wa-attach': ['send'] });
+  assert.ok(!r.warnings.some(w => /after the invoice is delivered/.test(w)));
+});

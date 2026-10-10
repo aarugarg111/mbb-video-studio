@@ -281,6 +281,25 @@ export function parse(text, catalogue, options = {}) {
     recipe.shots.push({ screen: shot.screen, duration, actions });
   });
 
+  /* Sending the invoice is the payoff of a sharing script, so the delivered
+   * chat is where the clip should rest. Cutting back into the app afterwards
+   * reads as a mistake - which is exactly what it looked like the first time
+   * a generated video did it. */
+  const lastWhatsApp = recipe.shots.map(s => s.screen).lastIndexOf('wa-chat');
+  if (lastWhatsApp !== -1) {
+    const after = recipe.shots
+      .slice(lastWhatsApp + 1)
+      .map(s => s.screen)
+      .filter(s => !s.startsWith('wa-') && s !== 'share-sheet');
+
+    if (after.length > 0) {
+      warnings.push(
+        `The clip returns to ${after.join(', ')} after the invoice is delivered on WhatsApp. ` +
+        `Sending it is the payoff, so the clip should end there - move those shots before the sharing sequence.`
+      );
+    }
+  }
+
   /* The end card is part of the clip the viewer sees, so it counts toward the
    * limit. Measuring only the shots under-reports every branded video. */
   const endCardSeconds = recipe.brand.endCard ? recipe.brand.endCard.duration : 0;

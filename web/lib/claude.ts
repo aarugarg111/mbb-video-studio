@@ -26,6 +26,7 @@ The actions available are: ${ACTIONS.join(', ')}.
 - tap needs a target that exists on that shot's screen
 - type needs a target and the text to type
 - When the script mentions sharing or sending the invoice on WhatsApp, run the shots invoice-created (tap share), share-sheet (tap contact-0, then send), wa-attach (optionally type a caption into caption, then tap send) and wa-chat. The contact is the bill's party.
+- ONCE THE INVOICE IS DELIVERED IN wa-chat, THE CLIP ENDS THERE. Never cut back to a myBillBook screen after a WhatsApp shot - the delivered invoice is the payoff, and returning to the app undoes it. If the script has later beats about the app, place those BEFORE the sharing sequence.
 - When the script shows the festive theme being CHOSEN (browsing or picking a theme for the invoice), run the shot invoice-created, then a theme-store shot in which you tap the theme's card (theme-0 to theme-5 are the first six: navaratri, durga-puja, dussehra, dhanteras, diwali, chhath-puja) and then tap close, then a final invoice-created shot that shows the themed bill. Leave invoice.theme as "none" in that case so the choice is visible. A theme with no card among the first six cannot be tapped, so for those just set invoice.theme and skip the theme-store shot.
 - selectParty makes the chosen party appear on the bill
 - addItem needs the index of an item in the items list, counting from 0
