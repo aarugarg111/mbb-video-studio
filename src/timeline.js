@@ -33,8 +33,24 @@ function shotsDuration(recipe) {
   return recipe.shots.reduce((sum, shot) => sum + shot.duration, 0);
 }
 
+/* The card the clip closes on, or null. The download CTA wins over the plain
+ * end card; with its artwork missing it is drawn as the logo-and-tagline card
+ * ('logo') so a clip still closes. */
+export function closing(recipe) {
+  const cta = recipe.brand?.cta;
+  if (cta) {
+    return {
+      kind: cta.image === false ? 'logo' : 'cta',
+      duration: cta.duration,
+      tagline: cta.tagline ?? recipe.brand?.endCard?.tagline ?? ''
+    };
+  }
+  const card = recipe.brand?.endCard;
+  return card ? { kind: 'logo', duration: card.duration, tagline: card.tagline } : null;
+}
+
 export function totalDuration(recipe) {
-  return shotsDuration(recipe) + (recipe.brand?.endCard?.duration ?? 0);
+  return shotsDuration(recipe) + (closing(recipe)?.duration ?? 0);
 }
 
 function locate(recipe, t) {
@@ -56,10 +72,10 @@ export function stateAt(recipe, t) {
    * the end card stays valid and nothing can crash. */
   const { index, shot, localT } = locate(recipe, clamped);
 
-  const card = recipe.brand?.endCard;
+  const card = closing(recipe);
   const cardStart = shotsDuration(recipe);
   const endCard = card && clamped >= cardStart
-    ? { progress: clamp01((clamped - cardStart) / END_CARD_FADE_SECONDS) }
+    ? { progress: clamp01((clamped - cardStart) / END_CARD_FADE_SECONDS), kind: card.kind, tagline: card.tagline }
     : null;
 
   const screenState = {

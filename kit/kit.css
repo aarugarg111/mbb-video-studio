@@ -287,6 +287,8 @@
   background: var(--mbb-brand-slate);
 }
 .endcard img { width: 420px; height: auto; display: block; }
+.endcard-cta { gap: 0; }
+.endcard-cta img { width: 100%; height: 100%; object-fit: cover; }
 .endcard-tagline {
   margin: 0;
   font-family: var(--mbb-font);

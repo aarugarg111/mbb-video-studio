@@ -4,7 +4,7 @@ import type { Assets } from './assets';
  * accept. Pure, so the three fixes below can be tested without a browser -
  * each of them fails silently in production, which is exactly why they are
  * tested rather than eyeballed. */
-export function prepareHtml(outerHtml: string, logoDataUrl: string): string {
+export function prepareHtml(outerHtml: string, logoDataUrl: string, ctaDataUrl: string | null = null): string {
   let html = outerHtml;
 
   /* 1. Inside foreignObject everything inherits the XHTML namespace, so a
@@ -22,6 +22,12 @@ export function prepareHtml(outerHtml: string, logoDataUrl: string): string {
     `src="${logoDataUrl}"`
   );
 
+  /* 4. So is the download CTA artwork. Same silent failure: a path reference
+   *    draws nothing and raises no error. */
+  if (ctaDataUrl) {
+    html = html.replace(/src="[^"]*download-now\.png"/g, `src="${ctaDataUrl}"`);
+  }
+
   return html;
 }
 
@@ -33,7 +39,7 @@ export async function rasterise(
   w: number,
   h: number
 ): Promise<HTMLImageElement> {
-  const html = prepareHtml(node.outerHTML, assets.logoDataUrl);
+  const html = prepareHtml(node.outerHTML, assets.logoDataUrl, assets.ctaDataUrl);
   const style = assets.fontFaces + assets.css;
 
   const svg =

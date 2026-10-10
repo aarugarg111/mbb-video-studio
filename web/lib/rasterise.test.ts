@@ -36,3 +36,9 @@ test('the logo path becomes the embedded data uri', () => {
   assert.match(out, /src="data:image\/png;base64,ZZZ"/);
   assert.doesNotMatch(out, /\.png/, 'a surviving path would silently not load');
 });
+
+test('the cta artwork path becomes the embedded data uri', () => {
+  const out = prepareHtml('<img src="/kit/cta/download-now.png"/>', LOGO, 'data:image/png;base64,CTA');
+  assert.ok(out.includes('data:image/png;base64,CTA'));
+  assert.ok(!out.includes('download-now.png'));
+});

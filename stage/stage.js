@@ -59,9 +59,12 @@ window.setTime = function setTime(t) {
 
   /* Full-bleed: a child of #frame, not of the phone, above the logo band. */
   endcardRoot.innerHTML = frame.endCard
-    ? `<div class="endcard" style="opacity: ${frame.endCard.progress.toFixed(3)}">` +
-      `<img src="../kit/brand/mybillbook-logo-reverse.png" alt="myBillBook">` +
-      `<p class="endcard-tagline">${escapeHtml(recipe.brand.endCard.tagline)}</p></div>`
+    ? frame.endCard.kind === 'cta'
+      ? `<div class="endcard endcard-cta" style="opacity: ${frame.endCard.progress.toFixed(3)}">` +
+        `<img src="../kit/cta/download-now.png" alt="Download myBillBook"></div>`
+      : `<div class="endcard" style="opacity: ${frame.endCard.progress.toFixed(3)}">` +
+        `<img src="../kit/brand/mybillbook-logo-reverse.png" alt="myBillBook">` +
+        `<p class="endcard-tagline">${escapeHtml(frame.endCard.tagline)}</p></div>`
     : '';
 };
 

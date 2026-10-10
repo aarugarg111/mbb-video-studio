@@ -10,7 +10,10 @@ import yaml from 'js-yaml';
 import { DEFAULT_INVOICE } from './invoice.js';
 
 export const DEFAULT_END_CARD = { duration: 1.6, tagline: 'India ka No.1 Billing App' };
-const BRAND_KEYS = ['endCard'];
+export const DEFAULT_CTA = { duration: 1.8 };
+export const CTA_IMAGE_PATH = 'kit/cta/download-now.png';
+const BRAND_KEYS = ['endCard', 'cta'];
+const CTA_KEYS = ['duration'];
 const END_CARD_KEYS = ['duration', 'tagline'];
 
 export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem'];
@@ -59,7 +62,7 @@ export function parse(text, catalogue, options = {}) {
     business: { name: '', ...(doc.business || {}) },
     party: { name: '', ...(doc.party || {}) },
     items: Array.isArray(doc.items) ? doc.items : [],
-    brand: { endCard: null },
+    brand: { endCard: null, cta: { ...DEFAULT_CTA, image: true, tagline: DEFAULT_END_CARD.tagline } },
     shots: []
   };
 
@@ -105,6 +108,11 @@ export function parse(text, catalogue, options = {}) {
     }
   }
 
+  /* options.ctaImage: whether kit/cta/download-now.png exists. This file does
+   * no filesystem access, so the caller says. Left unspecified it is assumed
+   * present. */
+  const ctaImage = options.ctaImage !== false;
+
   if (doc.brand != null) {
     const brand = doc.brand;
     if (typeof brand !== 'object' || Array.isArray(brand)) {
@@ -142,6 +150,33 @@ export function parse(text, catalogue, options = {}) {
           }
           recipe.brand.endCard = endCard;
         }
+      }
+      if (Object.hasOwn(brand, 'cta')) {
+        const cta = brand.cta ?? {};   // "cta:" with nothing under it means all defaults
+        if (cta === false) {
+          recipe.brand.cta = null;
+        } else if (cta === true) {
+          // the default, spelled out
+        } else if (typeof cta !== 'object' || Array.isArray(cta)) {
+          errors.push('brand.cta must be a mapping with "duration", or false to turn it off.');
+        } else {
+          for (const key of Object.keys(cta)) {
+            if (!CTA_KEYS.includes(key)) {
+              warnings.push(`brand.cta.${key} is not a known setting and is ignored.`);
+            }
+          }
+          if (cta.duration != null) {
+            if (typeof cta.duration === 'number' && Number.isFinite(cta.duration) && cta.duration > 0) {
+              recipe.brand.cta.duration = cta.duration;
+            } else {
+              errors.push(`brand.cta.duration must be a positive number, got ${JSON.stringify(cta.duration)}.`);
+            }
+          }
+        }
+      }
+      if (recipe.brand.cta && recipe.brand.endCard) {
+        warnings.push('brand sets both cta and endCard. The CTA closes the clip; the endCard is used only for the tagline when the CTA image is missing.');
+        recipe.brand.cta.tagline = recipe.brand.endCard.tagline;
       }
     }
   }
@@ -300,9 +335,19 @@ export function parse(text, catalogue, options = {}) {
     }
   }
 
+  if (recipe.brand.cta) {
+    recipe.brand.cta.image = ctaImage;
+    if (!ctaImage) {
+      warnings.push(
+        `The download CTA image is missing, so the clip closes on the plain logo card instead. ` +
+        `Expected the file at ${CTA_IMAGE_PATH} - see kit/cta/README.md.`
+      );
+    }
+  }
+
   /* The end card is part of the clip the viewer sees, so it counts toward the
    * limit. Measuring only the shots under-reports every branded video. */
-  const endCardSeconds = recipe.brand.endCard ? recipe.brand.endCard.duration : 0;
+  const endCardSeconds = recipe.brand.cta ? recipe.brand.cta.duration : (recipe.brand.endCard ? recipe.brand.endCard.duration : 0);
   const clipSeconds = totalSeconds + endCardSeconds;
 
   if (clipSeconds > MAX_VIDEO_SECONDS) {

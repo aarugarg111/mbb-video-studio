@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { asset } from '../lib/base-path';
+import { ctaImageExists } from '../lib/assets';
 import { THEMES } from '@/lib/schema';
 import { proposeRecipe } from '@/lib/claude';
 import { renderVideo } from '@/lib/render';
@@ -85,7 +86,7 @@ export default function Page() {
 
     let checked: any;
     try {
-      checked = parse(recipe, catalogue());
+      checked = parse(recipe, catalogue(), { ctaImage: await ctaImageExists() });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'The shot list could not be read.');
       return;

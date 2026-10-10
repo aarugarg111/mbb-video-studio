@@ -23,11 +23,6 @@ items:
   - { name: CETIRIZINE 10MG,   rate: 25,  qty: 5, gst: 12, unit: STRIP, purchase: 21, stock: 85 }
   - { name: VICKS VAPORUB 50ML, rate: 145, qty: 1, gst: 12, unit: PCS, purchase: 126, stock: 40 }
 
-brand:
-  endCard:
-    duration: 1.5
-    tagline: India ka No.1 Billing App
-
 shots:
   - screen: items
     duration: 2.4

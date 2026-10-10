@@ -13,7 +13,7 @@ const dest = join(here, '..', 'public', 'kit');
 await rm(dest, { recursive: true, force: true });
 await mkdir(dest, { recursive: true });
 
-for (const entry of ['tokens.css', 'kit.css', 'fonts', 'brand', 'themes']) {
+for (const entry of ['tokens.css', 'kit.css', 'fonts', 'brand', 'themes', 'cta']) {
   await cp(join(repo, 'kit', entry), join(dest, entry), { recursive: true });
 }
 

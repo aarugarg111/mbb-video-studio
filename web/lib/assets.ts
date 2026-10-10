@@ -12,7 +12,11 @@ export type Assets = {
   css: string;
   fontFaces: string;
   logoDataUrl: string;
+  /* null when kit/cta/download-now.png has not been supplied. */
+  ctaDataUrl: string | null;
 };
+
+export const CTA_PATH = '/kit/cta/download-now.png';
 
 export const FONT_SUBSETS = [
   { name: 'latin', file: 'dm-sans-latin.woff2', range: 'U+0000-00FF,U+0131,U+2000-206F,U+20B9,U+2122' },
@@ -44,6 +48,17 @@ async function fetchText(url: string): Promise<string> {
 }
 
 
+/* Whether the CTA artwork is supplied. A static host may answer a missing file
+ * with an HTML page, so check the type as well as the status. */
+export async function ctaImageExists(): Promise<boolean> {
+  try {
+    const res = await fetch(asset(CTA_PATH), { method: 'HEAD' });
+    return res.ok && (res.headers.get('content-type') ?? '').startsWith('image/');
+  } catch {
+    return false;
+  }
+}
+
 let cached: Promise<Assets> | null = null;
 
 /* Memoised: several hundred frames must not refetch the fonts. */
@@ -51,10 +66,11 @@ export function loadAssets(): Promise<Assets> {
   if (cached) return cached;
 
   cached = (async () => {
-    const [tokens, kit, logo, ...fonts] = await Promise.all([
+    const [tokens, kit, logo, cta, ...fonts] = await Promise.all([
       fetchText(asset('/kit/tokens.css')),
       fetchText(asset('/kit/kit.css')),
       fetchBase64(asset('/kit/brand/mybillbook-logo-reverse.png')),
+      fetchBase64(asset(CTA_PATH)).catch(() => null),
       ...FONT_SUBSETS.map(s => fetchBase64(asset(`/kit/fonts/${s.file}`)))
     ]);
 
@@ -64,7 +80,8 @@ export function loadAssets(): Promise<Assets> {
     return {
       css: tokens + kit + STAGE_CSS,
       fontFaces: buildFontFaces(bySubset),
-      logoDataUrl: `data:image/png;base64,${logo}`
+      logoDataUrl: `data:image/png;base64,${logo}`,
+      ctaDataUrl: cta ? `data:image/png;base64,${cta}` : null
     };
   })();
 

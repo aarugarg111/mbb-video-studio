@@ -21,11 +21,6 @@ items:
   - { name: ARHAR DAL GOLD 1KG, rate: 180,  qty: 1, gst: 5, unit: PCS }
   - { name: ANJEER PREMIUM 500GM, rate: 1200, qty: 1, gst: 5, unit: PCS }
 
-brand:
-  endCard:
-    duration: 1.5
-    tagline: India ka No.1 Billing App
-
 shots:
   - screen: create-invoice
     duration: 3.6
