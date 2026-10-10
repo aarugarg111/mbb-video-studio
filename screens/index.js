@@ -5,6 +5,10 @@ import * as invoiceCreated from './invoice-created.js';
 import * as themeStore from './theme-store.js';
 import * as items from './items.js';
 import * as parties from './parties.js';
+import * as scanCamera from './scan-camera.js';
+import * as scanReading from './scan-reading.js';
+import * as scanDone from './scan-done.js';
+import * as createPurchase from './create-purchase.js';
 import * as createItem from './create-item.js';
 import * as shareSheet from './share-sheet.js';
 import * as waAttach from './wa-attach.js';
@@ -18,6 +22,10 @@ export const SCREENS = {
   [themeStore.name]: themeStore,
   [items.name]: items,
   [parties.name]: parties,
+  [scanCamera.name]: scanCamera,
+  [scanReading.name]: scanReading,
+  [scanDone.name]: scanDone,
+  [createPurchase.name]: createPurchase,
   [createItem.name]: createItem,
   [shareSheet.name]: shareSheet,
   [waAttach.name]: waAttach,

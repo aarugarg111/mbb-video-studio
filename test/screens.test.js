@@ -197,11 +197,21 @@ test('invoice-created shows the party and the final total', () => {
   assert.match(html, /₹280/);
 });
 
+/* Two screens are the app working, not the user working: the scan is read
+ * and the result confirmed, and the clip moves on by itself. They are named
+ * here so that a new screen with no targets still fails this test. */
+const PASSIVE = new Set(['scan-reading', 'scan-done']);
+
 test('every registered screen has at least one tap target', () => {
   for (const [key, mod] of Object.entries(SCREENS)) {
+    if (PASSIVE.has(key)) {
+      assert.equal(Object.keys(mod.targets).length, 0, `${key} is listed as passive but declares targets`);
+      continue;
+    }
     assert.ok(Object.keys(mod.targets).length > 0, `${key} has no targets`);
   }
 });
+
 
 test('every registered screen avoids hard-coded hex colours', () => {
   for (const [key, mod] of Object.entries(SCREENS)) {

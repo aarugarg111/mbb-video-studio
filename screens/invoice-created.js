@@ -77,7 +77,39 @@ export function render(data, state) {
     </div>
   </div>
 
-  <div class="bill" style="opacity: ${appear.toFixed(3)}; transform: scale(${(0.97 + 0.03 * appear).toFixed(3)})">
+  ${billMarkup(data, state)}
+
+  <div class="acts">
+    ${actions.map(([label, icon]) => `
+      <div class="a"><span class="ico">${icon(26)}</span><span class="l">${label}</span></div>`).join('')}
+  </div>
+
+  <div style="position: absolute; left: 16px; right: 16px; bottom: 26px">
+    <button class="btn">Done</button>
+  </div>
+</div>`;
+}
+
+
+/* The bill itself, separate from the screen that frames it. The camera films
+ * this while it is being scanned, and the Theme Store draws it behind its
+ * sheet; a second copy of this markup would let them drift apart and the
+ * video would contradict itself. */
+export function billMarkup(data, state) {
+  const items = data?.items ?? [];
+  const sum = summarise(items);
+  const inv = invoiceOf(data);
+  const shop = esc(data?.business?.name);
+  const party = data?.party ?? {};
+  const appear = state?.appear ?? 1;
+  const terms = inv.terms ?? DEFAULT_TERMS;
+  const received = sum.total;
+  const qtyTotal = items.reduce((n, i) => n + (Number(i.qty) || 0), 0);
+  const row = (item, i) => `<tr><td>${i + 1}</td><td class="nm">${esc(item.name)}</td><td>${esc(item.hsn ?? '-')}</td>` +
+    `<td>${esc(item.qty)} ${esc(item.unit ?? 'PCS')}</td><td>${formatINR(item.rate)}</td>` +
+    `<td>${formatINR(item.rate * item.qty)}</td></tr>`;
+
+  return `<div class="bill" style="opacity: ${appear.toFixed(3)}; transform: scale(${(0.97 + 0.03 * appear).toFixed(3)})">
     ${themeLayer(state?.theme ?? inv.theme)}
     <div class="bill-body">
       <div class="bh">
@@ -117,15 +149,5 @@ export function render(data, state) {
 
       <div class="sig"><div class="sigbox"></div><b>Signature</b><div>${shop}</div></div>
     </div>
-  </div>
-
-  <div class="acts">
-    ${actions.map(([label, icon]) => `
-      <div class="a"><span class="ico">${icon(26)}</span><span class="l">${label}</span></div>`).join('')}
-  </div>
-
-  <div style="position: absolute; left: 16px; right: 16px; bottom: 26px">
-    <button class="btn">Done</button>
-  </div>
-</div>`;
+  </div>`;
 }

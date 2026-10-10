@@ -1,0 +1,41 @@
+# Scan & Record: a supplier's bill is photographed, read, and saved as a
+# purchase without being typed. Every name and figure here is invented.
+video: scan-record
+
+invoice:
+  number: 4120
+  date: "10/10/2026"
+  theme: none
+
+business:
+  name: BALAJI TRADING CO
+  gstin: 09ABCDE1234F1Z5
+  address: Hazratganj, Lucknow, Uttar Pradesh, 226001
+
+party:
+  name: Suresh Traders
+  phone: 98765 43210
+  address: Aminabad, Lucknow, Uttar Pradesh, 226018
+
+# Priced so the totals land on the app's own worked example: 24,199.81
+# inclusive at 18% is a taxable 20,508.31, and 0.19 rounds it to 24,200.
+items:
+  - { name: CEMENT OPC 50KG, rate: 410.2, qty: 40, gst: 18, unit: BAG }
+  - { name: TMT BAR 8MM, rate: 7791.81, qty: 1, gst: 18, unit: BUNDLE }
+
+shots:
+  - screen: scan-camera
+    duration: 2.6
+    actions:
+      - { at: 1.7, do: tap, target: shutter }
+
+  - screen: scan-reading
+    duration: 2.4
+
+  - screen: scan-done
+    duration: 1.8
+
+  - screen: create-purchase
+    duration: 3.2
+    actions:
+      - { at: 1.9, do: tap, target: create-purchase }

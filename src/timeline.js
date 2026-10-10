@@ -86,6 +86,11 @@ export function stateAt(recipe, t) {
     typed: '',
     tab: '',
     batching: 0,
+    /* Seconds since this shot began. The scanning screens count up on camera
+     * and the camera drifts as if hand-held, and deriving both from the clock
+     * keeps stateAt a pure function of time - a counter that was stored would
+     * make a render depend on how it was reached. */
+    t: localT,
     appear: easeOut(ramp(localT, 0, 0.45)),
     /* How far a bottom sheet has slid up. Only the Theme Store reads it. */
     sheet: easeOut(ramp(localT, SHEET_DELAY_SECONDS, SHEET_SECONDS))

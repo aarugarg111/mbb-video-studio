@@ -229,3 +229,21 @@
   --mbb-theme-jain-theme:        #F1E1C7;
   --mbb-theme-industrial:        #F8EFE8;
 }
+
+/* ---------- Scan & Record ----------
+ * SAMPLED from reference/frames/scan-t58.png and scan-cam.png. The camera is
+ * the phone's own, not myBillBook's, so its chrome is near-black rather than
+ * any colour in the app's palette. */
+:root {
+  --mbb-scan-strip:     #FDF1E9;  /* SAMPLED - "21 bills scanned" strip   */
+  --mbb-scan-done:      #16A34A;  /* SAMPLED - the Completed pill's text  */
+  --mbb-scan-done-bg:   #F0FDF4;  /* SAMPLED - its fill                   */
+  --mbb-scan-open:      #E05C5C;  /* SAMPLED - the Incomplete pill        */
+  --mbb-cam-chrome:     #000000;  /* the camera's own bars                */
+  --mbb-cam-ground:     #6E6B66;  /* the surface a bill is laid on        */
+  --mbb-cam-pill:       rgba(0, 0, 0, 0.45);
+  --mbb-cam-pill-light: rgba(255, 255, 255, 0.14);  /* the same pill where it sits on black */
+  --mbb-cam-shutter:    #FBFAF5;
+  --mbb-cam-guide:      rgba(255, 255, 255, 0.9);
+  --mbb-scan-tipline:   #F0EFF5;
+}

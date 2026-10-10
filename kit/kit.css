@@ -506,3 +506,85 @@
 .pbtns { gap: 9px; }
 .pbtns .fb.ledger { background: var(--mbb-party-ledger); color: var(--mbb-surface); }
 .pbtns .fb.round { width: 44px; padding: 0; border-radius: 999px; justify-content: center; background: var(--mbb-ink); color: var(--mbb-surface); }
+
+/* ---------- Scan & Record ----------
+ * The camera is the phone's own app (reference/frames/scan-cam.png), so its
+ * chrome is black and borrows nothing from the myBillBook palette. */
+.camscreen { background: var(--mbb-cam-chrome); display: flex; flex-direction: column; }
+.camtop { height: 54px; flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 22px; padding: 0 20px; color: var(--mbb-surface); }
+.camres { font-size: 11px; font-weight: 700; }
+
+.camview { position: relative; flex: 1; overflow: hidden; background: var(--mbb-cam-ground); display: flex; align-items: center; justify-content: center; }
+/* The bill is the invoice-created markup, shrunk to sit on the surface. */
+/* Rendered at full width and scaled down, so the bill keeps its own
+   proportions instead of being squeezed, and lands inside the brackets
+   with the surface visible around it - a camera sees a bill on a table,
+   not a bill pressed against the lens. */
+.campaper { width: 560px; transform-origin: center; box-shadow: 0 14px 34px var(--mbb-transition-shadow); }
+.campaper .bill { margin: 0; width: 100%; }
+
+/* Document-detection brackets, the thing that says "it is looking at a bill". */
+.camguide { position: absolute; inset: 64px 40px; pointer-events: none; z-index: 2; }
+.camguide i { position: absolute; width: 28px; height: 28px; border: 3px solid var(--mbb-cam-guide); }
+.camguide i:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+.camguide i:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+.camguide i:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+.camguide i:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+.camhint { position: absolute; z-index: 2; left: 0; right: 0; bottom: 18px; text-align: center; font-size: 11px; font-weight: 500; color: var(--mbb-cam-guide); }
+
+.cambottom { flex: none; padding: 14px 0 26px; }
+.camzoom { margin: 0 auto 18px; width: 214px; height: 34px; border-radius: 999px; background: var(--mbb-cam-pill-light); display: flex; align-items: center; justify-content: space-around; color: var(--mbb-surface); font-size: 11px; font-weight: 500; }
+.camzoom .on { width: 26px; height: 26px; border-radius: 999px; background: var(--mbb-cam-pill); display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.camrow { display: flex; align-items: center; justify-content: center; gap: 46px; }
+.camshutter { width: 64px; height: 64px; border-radius: 999px; background: var(--mbb-cam-shutter); }
+.camflip { width: 40px; height: 40px; border-radius: 999px; background: var(--mbb-cam-pill-light); color: var(--mbb-surface); display: flex; align-items: center; justify-content: center; }
+
+/* ---------- reading the bill (scan-t70.png) ---------- */
+.readscreen { background: var(--mbb-surface); display: flex; flex-direction: column; align-items: center; }
+.readmid { margin-top: 168px; text-align: center; }
+.readglass { width: 62px; height: 62px; margin: 0 auto; border-radius: 14px; background: var(--mbb-pill-grey); color: var(--mbb-ink); display: flex; align-items: center; justify-content: center; }
+.readlabel { margin-top: 26px; font-size: 13px; color: var(--mbb-ink-muted); }
+.readsecs { margin-top: 5px; font-size: 13px; font-weight: 500; color: var(--mbb-primary-light); }
+
+.readtips { margin: 48px 22px 0; align-self: stretch; border: 1px solid var(--mbb-scan-tipline); border-radius: 10px; padding: 13px 14px 11px; text-align: center; }
+.readtiphead { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 700; color: var(--mbb-brand-orange); }
+.readtiptext { margin-top: 11px; font-size: 11.5px; line-height: 1.5; color: var(--mbb-ink); }
+.readdots { margin-top: 10px; display: flex; justify-content: center; gap: 5px; }
+.readdots i { width: 5px; height: 5px; border-radius: 999px; background: var(--mbb-line); }
+.readdots i.on { background: var(--mbb-primary); }
+
+.readby { margin-top: 18px; font-size: 10.5px; font-weight: 700; color: var(--mbb-brand-orange); }
+.readwarn { position: absolute; left: 16px; right: 16px; bottom: 22px; display: flex; gap: 7px; padding: 10px 12px; border-radius: 8px; background: var(--mbb-warning-tint); font-size: 10px; line-height: 1.45; color: var(--mbb-ink); }
+
+/* ---------- scanned (scan-t78.png) ---------- */
+.donescreen { background: var(--mbb-surface); display: flex; align-items: center; justify-content: center; }
+.donemid { text-align: center; margin-top: -40px; }
+.donetick { width: 76px; height: 76px; margin: 0 auto; border-radius: 999px; background: var(--mbb-scan-done); color: var(--mbb-surface); display: flex; align-items: center; justify-content: center; }
+.donehead { margin-top: 30px; font-size: 20px; font-weight: 700; color: var(--mbb-ink); }
+.donesub { margin-top: 10px; font-size: 11px; font-weight: 700; color: var(--mbb-brand-orange); }
+
+/* ---------- Create Purchase (scan-t86.png) ---------- */
+.cpscreen { background: var(--mbb-tint-100); }
+.cpbody { padding: 10px 14px 0; }
+.cpcard { background: var(--mbb-surface); border-radius: 8px; padding: 13px 14px; margin-bottom: 12px; }
+.cprep { display: flex; align-items: center; gap: 9px; }
+.cpchip { padding: 7px 12px; border: 1px solid var(--mbb-line); border-radius: 999px; font-size: 10px; font-weight: 500; color: var(--mbb-primary); }
+.cpchip.edit { margin-left: auto; }
+.cpchip.del { color: var(--mbb-danger); }
+.cpline { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: var(--mbb-ink); padding: 3px 0; }
+.cpline .v { font-weight: 500; }
+.cpline.strong { font-weight: 700; margin-top: 4px; }
+.cplink { color: var(--mbb-info); font-weight: 700; margin-left: 6px; }
+.cpbreak { margin: 9px 0; padding: 9px 11px; border-radius: 5px; background: var(--mbb-strip-grey); }
+.cpbreak div { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--mbb-ink-muted); padding: 2px 0; }
+.cprow-add { display: flex; align-items: center; justify-content: flex-end; gap: 7px; margin: 0 2px 12px; font-size: 11.5px; font-weight: 500; color: var(--mbb-primary); }
+.cpround { display: flex; align-items: center; gap: 10px; }
+.cpround .mute { color: var(--mbb-ink-muted); }
+.cplbl { font-size: 11.5px; }
+.cpstep { width: 38px; height: 23px; border-radius: 999px; background: var(--mbb-pill-grey); display: flex; align-items: center; justify-content: center; color: var(--mbb-ink-muted); }
+.cpstep.on { background: transparent; border: 1px solid var(--mbb-primary); color: var(--mbb-primary); }
+.cpfield { flex: 1; text-align: right; border-bottom: 1px solid var(--mbb-ink); font-size: 11.5px; padding-bottom: 3px; }
+.cpfield b { margin-left: 8px; font-weight: 500; }
+.cptotal { position: absolute; left: 0; right: 0; bottom: 88px; padding: 13px 16px; background: var(--mbb-surface); border-top: 1px solid var(--mbb-hairline); display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: var(--mbb-ink); }
+.cpfoot { position: absolute; left: 16px; right: 16px; bottom: 16px; }
+.cpby { margin-top: 8px; text-align: center; font-size: 9.5px; font-weight: 700; color: var(--mbb-brand-orange); }

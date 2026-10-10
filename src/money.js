@@ -37,6 +37,26 @@ export function formatINR(n) {
   return (negative ? '-₹' : '₹') + grouped;
 }
 
+/* The same grouping, to the paisa. The bill rounds to whole rupees, but the
+ * purchase screen shows the tax split exactly - the app prints 20,508.31 and
+ * 1,845.75 there, and a rounded 20,508 would not add up on screen. */
+export function formatINR2(n) {
+  const negative = n < 0;
+  const fixed = Math.abs(n).toFixed(2);
+  const [whole, paise] = fixed.split('.');
+
+  let grouped;
+  if (whole.length <= 3) {
+    grouped = whole;
+  } else {
+    const last3 = whole.slice(-3);
+    const rest = whole.slice(0, -3);
+    grouped = rest.replace(/B(?=(d{2})+(?!d))/g, ',') + ',' + last3;
+  }
+
+  return (negative ? '-₹' : '₹') + grouped + '.' + paise;
+}
+
 /* The price the customer pays for this line, tax included. */
 export function lineTotal(item) {
   return item.rate * item.qty;
