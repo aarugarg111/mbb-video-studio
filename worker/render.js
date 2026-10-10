@@ -97,9 +97,14 @@ async function openStage(recipe) {
   return { browser, page, throwIfBroken, close };
 }
 
-export async function renderFrames(recipe, outDir, { fps = 30 } = {}) {
+export async function renderFrames(recipe, outDir, { fps = 30, onProgress } = {}) {
   const frames = Math.round(totalDuration(recipe) * fps);
   const { page, throwIfBroken, close } = await openStage(recipe);
+
+  /* The total is reported before the first frame: a clip is several hundred
+   * frames, and whoever is waiting should see how many from the start rather
+   * than a bar that only becomes a bar once it is half done. */
+  if (onProgress) onProgress(0, frames);
 
   try {
     for (let i = 0; i < frames; i++) {
@@ -109,6 +114,7 @@ export async function renderFrames(recipe, outDir, { fps = 30 } = {}) {
         animations: 'disabled'
       });
       throwIfBroken();
+      if (onProgress) onProgress(i + 1, frames);
     }
     return frames;
   } finally {

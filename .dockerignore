@@ -1,0 +1,30 @@
+# What must never reach a build.
+#
+# reference/ holds the screen recordings this project was built from. They
+# contain the owner's real contacts, phone numbers and a personal chat. The
+# Dockerfile does not copy them, but everything here is still handed to the
+# build daemon and can end up in a cached layer or a pushed image, so they are
+# excluded outright rather than merely not copied.
+reference/
+docs/
+.superpowers/
+
+# Secrets.
+cf/.dev.vars
+.env
+.env.*
+
+# Rebuilt inside the image, or irrelevant to it.
+node_modules/
+*/node_modules/
+out/
+web/
+.next/
+.wrangler/
+.git/
+.github/
+test/
+recipes/
+*.mp4
+*.png
+!kit/**/*.png

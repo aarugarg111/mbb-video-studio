@@ -18,6 +18,11 @@ this costs is the one Claude call that turns a script into a shot list.
   ever one copy of it.
 - The model and the maximum length are pinned in `src/worker.js`. Someone
   with the password cannot point the key at a bigger model.
+- `/api/render/*` is the other proxy, and it is optional. The video is
+  normally made in the browser, which only Chrome and Edge on a computer can
+  do. If a render machine is set up, the Worker forwards to it so the studio
+  also works on a phone and in Safari. See `worker/README.md` for how to set
+  one up — the studio works without it.
 
 ## Setting it up (once)
 
@@ -43,6 +48,23 @@ npx wrangler secret put SESSION_SECRET
 - `TEAM_PASSWORD` — what the team types to get in. Pick something they can
   be told over a call.
 - `SESSION_SECRET` — not typed by anyone; it only signs the login cookie.
+
+**Two more secrets, only if you set up a render machine** so the studio
+works on phones and in Safari. `worker/README.md` covers the machine itself;
+these two tell the Worker where it is:
+
+```
+npx wrangler secret put RENDER_URL
+npx wrangler secret put RENDER_TOKEN
+```
+
+- `RENDER_URL` — the render machine's address, like
+  `https://mbb-video-studio.fly.dev`.
+- `RENDER_TOKEN` — the same string the render machine was given. They have
+  to match or every render comes back refused.
+
+Leave both unset and nothing breaks: Chrome and Edge carry on rendering in
+the browser, and the site tells anyone else that it cannot make their video.
   Any long random text does. For example:
   `node -e "console.log(crypto.randomUUID()+crypto.randomUUID())"`
 

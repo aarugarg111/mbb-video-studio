@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "node --test \"test/**/*.test.js\" && npm run test --prefix web",
-    "render": "node worker/cli.js"
+    "render": "node worker/cli.js",
+    "render:serve": "node worker/server.js"
   },
   "dependencies": {
     "js-yaml": "^4.1.0",

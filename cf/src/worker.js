@@ -8,6 +8,13 @@ import { signSession, verifySession, cookieHeader, clearCookie, readCookie, same
 
 const UPSTREAM = 'https://api.anthropic.com/v1/messages';
 
+/* Chrome and Edge on a computer can make the video themselves, using
+ * WebCodecs. Safari cannot, and no phone browser can usefully, so on those the
+ * studio stops at a shot list. RENDER_URL points at a machine that renders the
+ * same clip the command line does; this Worker is the only thing that knows
+ * its token, exactly as it is the only thing that knows the API key. */
+const RENDER_TIMEOUT_MS = 120000;
+
 /* Pinned here rather than trusted from the browser. Whoever has the team
  * password can reach this endpoint, and without these two lines they could
  * also point it at any model and any length - on Aryan's bill. */
@@ -43,6 +50,44 @@ async function login(request, env) {
     return json({ error: 'That password is not right.' }, 401);
   }
   return json({ ok: true }, 200, { 'Set-Cookie': cookieHeader(await signSession(env.SESSION_SECRET)) });
+}
+
+/* Forwards /api/render/* to the render service, unchanged apart from the
+ * token. Streaming the body straight through means an mp4 of any size costs
+ * this Worker nothing to carry. */
+async function renderProxy(request, env, pathname) {
+  if (!env.RENDER_URL) {
+    return json({ error: 'This studio has no render service, so the video has to be made in the browser. Chrome or Edge on a computer can do it.' }, 501);
+  }
+  if (!await verifySession(readCookie(request), env.SESSION_SECRET)) {
+    return json({ error: 'Your session has expired. Sign in again.' }, 401);
+  }
+
+  const target = String(env.RENDER_URL).trim().replace(/\/$/, '') + pathname.replace('/api/render', '/render');
+  const headers = { 'Content-Type': 'application/json' };
+  if (env.RENDER_TOKEN) headers.Authorization = 'Bearer ' + String(env.RENDER_TOKEN).trim();
+
+  let upstream;
+  try {
+    upstream = await fetch(target, {
+      method: request.method,
+      headers,
+      body: request.method === 'POST' ? await request.text() : undefined,
+      signal: AbortSignal.timeout(RENDER_TIMEOUT_MS)
+    });
+  } catch (err) {
+    /* A render machine that is asleep, restarting or simply gone. Saying so is
+     * better than a browser error that reads like the studio is broken. */
+    return json({ error: 'The render machine did not answer. It may be starting up - try again in a minute.' }, 502);
+  }
+
+  return new Response(upstream.body, {
+    status: upstream.status,
+    headers: {
+      'Content-Type': upstream.headers.get('Content-Type') || 'application/json',
+      ...(upstream.headers.get('Content-Length') ? { 'Content-Length': upstream.headers.get('Content-Length') } : {})
+    }
+  });
 }
 
 async function proxy(request, env) {
@@ -100,9 +145,15 @@ export default {
       if (pathname === '/api/login') return login(request, env);
       if (pathname === '/api/logout') return json({ ok: true }, 200, { 'Set-Cookie': clearCookie() });
       if (pathname === '/api/session') {
-        return json({ signedIn: await verifySession(readCookie(request), env.SESSION_SECRET) });
+        return json({
+          signedIn: await verifySession(readCookie(request), env.SESSION_SECRET),
+          /* So the page knows whether it can offer to render for a browser
+           * that cannot do it itself, rather than finding out by failing. */
+          canRender: Boolean(env.RENDER_URL)
+        });
       }
       if (pathname === '/api/anthropic/v1/messages') return proxy(request, env);
+      if (pathname.startsWith('/api/render')) return renderProxy(request, env, pathname);
       return json({ error: 'No such endpoint.' }, 404);
     }
 

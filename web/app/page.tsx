@@ -8,6 +8,7 @@ import { proposeRecipe } from '@/lib/claude';
 import { TEAM_MODE, signIn, signOut, isSignedIn } from '@/lib/team';
 import { renderVideo } from '@/lib/render';
 import { isSupported } from '@/lib/encode';
+import { renderRemotely, canRenderRemotely } from '@/lib/render-remote';
 import { Stage } from './studio/stage';
 // The renderer's own validator - the same one the CLI uses.
 import { parse } from '../../src/recipe.js';
@@ -44,6 +45,10 @@ export default function Page() {
   const [signedIn, setSignedIn] = useState(false);
   const [checkingSession, setCheckingSession] = useState(TEAM_MODE);
   const [supported, setSupported] = useState(true);
+  /* Whether this studio has a render machine behind it. Asked rather than
+     assumed, so a browser that cannot encode is told what it can do instead of
+     finding out at the end of a render. */
+  const [canRemote, setCanRemote] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const urlRef = useRef('');
 
@@ -54,6 +59,7 @@ export default function Page() {
       try { setApiKey(localStorage.getItem(KEY_NAME) ?? ''); } catch { /* private mode */ }
     }
     setSupported(isSupported());
+    if (TEAM_MODE) canRenderRemotely().then(setCanRemote);
 
     /* A testing hook. renderVideo is a pure function of a recipe and this page
      * holds no secrets, so exposing it costs nothing and makes the render path
@@ -165,9 +171,13 @@ export default function Page() {
     setProgress({ done: 0, total: 0 });
     setStep('rendering');
     try {
-      const blob = await renderVideo(checked.recipe, {
-        onProgress: (done, total) => setProgress({ done, total })
-      });
+      /* In the browser when the browser can, on the render machine when it
+         cannot. Both make the same clip from the same shot list; the only
+         difference is which machine spends the minute. */
+      const onProgress = (done: number, total: number) => setProgress({ done, total });
+      const blob = supported
+        ? await renderVideo(checked.recipe, { onProgress })
+        : await renderRemotely(recipe, { onProgress });
       const url = URL.createObjectURL(blob);
       urlRef.current = url;
       setVideoUrl(url);
@@ -199,7 +209,13 @@ export default function Page() {
       </header>
       <p className="sub">Paste a creator script. Everything else — the shop, the customer, the items, the theme — is read out of it.</p>
 
-      {!supported && (
+      {!supported && canRemote && (
+        <div className="note">
+          This browser cannot make video itself, so the studio will make it for you on the render machine. It takes a minute or two longer.
+        </div>
+      )}
+
+      {!supported && !canRemote && (
         <div className="note error">
           This browser cannot make the video. Use Chrome or Edge on a computer — Safari cannot encode H.264 video, so a render would fail at the end.
         </div>
@@ -292,7 +308,7 @@ export default function Page() {
                     onChange={e => setRecipe(e.target.value)} />
 
           <div className="row">
-            <button onClick={render} disabled={busy || !supported}>Render the video</button>
+            <button onClick={render} disabled={busy || (!supported && !canRemote)}>Render the video</button>
             <button className="secondary" onClick={() => setStep('fill')} disabled={busy}>
               Back
             </button>

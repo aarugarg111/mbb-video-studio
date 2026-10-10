@@ -2,6 +2,10 @@
  * database - a signed cookie is the whole session. The password is checked
  * here so that the API key never has to leave Cloudflare. */
 
+import { sameSecret } from '../../src/secret.js';
+
+export { sameSecret };
+
 const enc = new TextEncoder();
 
 async function hmac(secret, data) {
@@ -12,16 +16,6 @@ async function hmac(secret, data) {
   return btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/=+$/, '');
 }
 
-/* Compares in constant time. A plain === leaks how much of the password was
- * right through how long the comparison took, which is enough to recover a
- * short one guess by guess. */
-export function sameSecret(a, b) {
-  if (typeof a !== 'string' || typeof b !== 'string') return false;
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
 
 export const SESSION_DAYS = 7;
 
