@@ -9,3 +9,8 @@ out/
 reference/*.mp4
 reference/frames/
 .superpowers/
+
+# Kept out of the public repo: the app teardown, the design-system
+# screenshots and the internal specs. They live in ../mbb-private-docs.
+reference/
+docs/
