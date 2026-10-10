@@ -177,3 +177,38 @@
   --wa-avatar-c:     #3A3A55;
   --wa-bar:          #000000;  /* Android navigation bar                      */
 }
+
+/* --- Theme Store (sampled from reference/frames/th-9.0.png and th-15.0.png,
+ * 720x1560 phone frames; solid-fill modes, not eyeballed) ----------------- */
+:root {
+  --mbb-store-sheet-top:    #F4ECF1;  /* SAMPLED - blush at the sheet's top edge, fades to white */
+  --mbb-store-maroon:       #511E38;  /* SAMPLED - Unlock Themes button            */
+  --mbb-store-chip:         #F5EAF0;  /* SAMPLED - the chosen variant chip fill     */
+  --mbb-store-chip-edge:    #DCDBDE;  /* SAMPLED - the outline chip's border        */
+  --mbb-store-select:       #471E2F;  /* SAMPLED - the chosen card's border         */
+  --mbb-store-card-edge:    #D2D0CC;  /* SAMPLED - an unchosen card's border        */
+  --mbb-store-handle:       #D5CFD4;  /* SAMPLED - the drag handle                  */
+  --mbb-store-ink:          #2E1A22;  /* SAMPLED - Theme Store title and icons      */
+  --mbb-store-label:        #6A6C6C;  /* SAMPLED - an unchosen card's name          */
+  --mbb-store-label-on:     #24232C;  /* SAMPLED - the chosen card's name           */
+
+  /* The tint of each festive theme: the mean colour of its thumbnail in the
+   * reference frames. A card with no kit/themes/<slug>.png shows this; so does
+   * the bill. Real art, when dropped in, covers it. */
+  --mbb-theme-navaratri:         #F8E8D9;
+  --mbb-theme-durga-puja:        #FBEDE8;
+  --mbb-theme-dussehra:          #F6EDE4;
+  --mbb-theme-dhanteras:         #F1EBE4;
+  --mbb-theme-diwali:            #E5DCD7;
+  --mbb-theme-chhath-puja:       #F3EAE8;
+  --mbb-theme-gandhi-jayanti:    #F3EBDF;
+  --mbb-theme-ganesh-chaturthi:  #F6EFE7;
+  --mbb-theme-janmashtami:       #F1EEE1;
+  --mbb-theme-rakhi:             #F5EBDD;
+  --mbb-theme-onam:              #F4ECE2;
+  --mbb-theme-eid-e-milad:       #F1EFDE;
+  --mbb-theme-independence:      #ECE1D1;
+  --mbb-theme-shubh-ekadashi:    #D2BD95;
+  --mbb-theme-jain-theme:        #F1E1C7;
+  --mbb-theme-industrial:        #F8EFE8;
+}

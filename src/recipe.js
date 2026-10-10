@@ -5,6 +5,7 @@
  * because that is how a person finds the line in the file.
  */
 
+import { THEME_SLUGS } from './themes.js';
 import yaml from 'js-yaml';
 import { DEFAULT_INVOICE } from './invoice.js';
 
@@ -29,10 +30,10 @@ const MIN_READABLE_SECONDS = 1.0;
 const MAX_DEAD_AIR_SECONDS = 2.0;
 const MIN_ACTION_GAP_SECONDS = 0.6;
 
-/* Themes the recipe may name. 'none' and 'warm' are built in; the CLI adds the
+/* Themes the recipe may name. 'none', 'warm' and the sixteen festive slugs are built in; the CLI adds the
  * PNG names it finds in kit/themes. Kept as a parameter so this file stays
  * free of filesystem access. */
-export const BUILT_IN_THEMES = ['none', 'warm'];
+export const BUILT_IN_THEMES = ['none', 'warm', ...THEME_SLUGS];
 
 export function parse(text, catalogue, options = {}) {
   const themes = options.themes ?? BUILT_IN_THEMES;

@@ -2,6 +2,7 @@ import * as home from './home.js';
 import * as createBill from './create-bill.js';
 import * as createInvoice from './create-invoice.js';
 import * as invoiceCreated from './invoice-created.js';
+import * as themeStore from './theme-store.js';
 import * as items from './items.js';
 import * as createItem from './create-item.js';
 import * as shareSheet from './share-sheet.js';
@@ -13,6 +14,7 @@ export const SCREENS = {
   [createBill.name]: createBill,
   [createInvoice.name]: createInvoice,
   [invoiceCreated.name]: invoiceCreated,
+  [themeStore.name]: themeStore,
   [items.name]: items,
   [createItem.name]: createItem,
   [shareSheet.name]: shareSheet,

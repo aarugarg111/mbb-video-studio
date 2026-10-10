@@ -23,7 +23,10 @@ const THEME_NAME = /^[A-Za-z0-9_-]+$/;
 function themeLayer(theme) {
   if (!theme || theme === 'none' || !THEME_NAME.test(theme)) return '';
   if (theme === 'warm') return '<div class="bill-theme warm"></div>';
-  return '<div class="bill-theme" style="background-image: url(../kit/themes/' + theme + '.png)"></div>';
+  /* The art sits over a tint of the theme's own colour, so a theme whose PNG has
+   * not been supplied yet still visibly changes the bill instead of vanishing. */
+  const tint = 'var(--mbb-theme-' + theme + ', var(--mbb-surface))';
+  return '<div class="bill-theme" style="background-image: url(../kit/themes/' + theme + '.png), linear-gradient(' + tint + ', ' + tint + ')"></div>';
 }
 
 /* One CGST and SGST pair per GST slab on the bill, each with its own share of
@@ -75,7 +78,7 @@ export function render(data, state) {
   </div>
 
   <div class="bill" style="opacity: ${appear.toFixed(3)}; transform: scale(${(0.97 + 0.03 * appear).toFixed(3)})">
-    ${themeLayer(inv.theme)}
+    ${themeLayer(state?.theme ?? inv.theme)}
     <div class="bill-body">
       <div class="bh">
         <div class="shop">${shop}</div>

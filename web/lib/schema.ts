@@ -12,6 +12,7 @@ export const SCREENS = {
   'create-bill': ['party-field', 'add-items', 'scan-record'],
   'create-invoice': ['item-search', 'add-item-0', 'add-item-1', 'generate-bill'],
   'invoice-created': ['share', 'done'],
+  'theme-store': ['theme-0', 'theme-1', 'theme-2', 'theme-3', 'theme-4', 'theme-5', 'variant-1', 'variant-2', 'unlock', 'close'],
   items: ['create-new-item', 'bulk-action', 'item-row-0'],
   'create-item': ['item-name', 'hsn', 'tab-stock', 'batching', 'save'],
   'share-sheet': ['contact-0', 'contact-1', 'send'],
@@ -19,13 +20,13 @@ export const SCREENS = {
   'wa-chat': ['back', 'attachment']
 } as const;
 
-export const SCREEN_NAMES = ['home', 'create-bill', 'create-invoice', 'invoice-created', 'items', 'create-item', 'share-sheet', 'wa-attach', 'wa-chat'] as const;
+export const SCREEN_NAMES = ['home', 'create-bill', 'create-invoice', 'invoice-created', 'theme-store', 'items', 'create-item', 'share-sheet', 'wa-attach', 'wa-chat'] as const;
 
 export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem'] as const;
 
 /* Mirrors the PNGs in kit/themes/, plus the built-in CSS washes. A theme named
  * here but absent from that folder renders plain and warns - never fails. */
-export const THEMES = ['none', 'warm'] as const;
+export const THEMES = ['none', 'warm', 'navaratri', 'durga-puja', 'dussehra', 'dhanteras', 'diwali', 'chhath-puja', 'gandhi-jayanti', 'ganesh-chaturthi', 'janmashtami', 'rakhi', 'onam', 'eid-e-milad', 'independence', 'shubh-ekadashi', 'jain-theme', 'industrial'] as const;
 
 export const RecipeSchema = z.object({
   video: z.string(),

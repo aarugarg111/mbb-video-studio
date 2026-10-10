@@ -8,6 +8,8 @@ const svg = (size, body, extra = '') =>
 export const icons = {
   back: (s = 24) => svg(s, '<path d="M19 12H5M11 6l-6 6 6 6"/>'),
   search: (s = 22) => svg(s, '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>'),
+  store: (s = 24) => svg(s, '<path d="M4 9.5L5.5 4h13L20 9.5M4 9.5h16M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0M5.5 12.5V20h13v-7.5M10 20v-4.5h4V20"/>', 'stroke-width="1.6"'),
+  info: (s = 20) => svg(s, '<circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r="0.6" fill="currentColor"/>', 'stroke-width="1.6"'),
   close: (s = 20) => svg(s, '<path d="M6 6l12 12M18 6L6 18"/>'),
   scan: (s = 26) => svg(s, '<path d="M4 9V5h4M16 5h4v4M20 15v4h-4M8 19H4v-4M3 12h18"/>'),
   mic: (s = 26) => svg(s, '<rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>'),

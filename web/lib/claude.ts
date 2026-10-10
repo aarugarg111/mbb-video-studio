@@ -14,7 +14,7 @@ THE SCRIPT IS THE SOURCE OF TRUTH. Read everything out of it that you can, and o
 - The customer or party the bill is made out to, if the script names one.
 - The items being billed - their names, prices, quantities and units. Take them from the script wherever it mentions goods. Where it does not, invent items that suit the business the script describes: a kirana shop sells SUGAR 5KG and TATA SALT 1KG, a hardware dealer sells cement and fittings, a pharma distributor sells medicines. Never put grocery items on a hardware bill.
 - GST slabs that suit those goods - 5 for staples, 12 or 18 for most manufactured goods.
-- The theme. If the script is tied to a festival or occasion - Diwali, Rakhi, Independence Day, Ganesh Chaturthi - set invoice.theme to the matching theme from the list below. If it mentions no occasion, use "none". Never guess a theme that is not on the list.
+- The theme. If the script is tied to a festival or occasion - Diwali, Rakhi, Independence Day, Ganesh Chaturthi - set invoice.theme to the matching theme from the list below. If it mentions no occasion, use "none". Never guess a theme that is not on the list. Match by festival: Diwali -> diwali, Rakhi or Raksha Bandhan -> rakhi, Ganesh Chaturthi -> ganesh-chaturthi, Independence Day -> independence, Gandhi Jayanti -> gandhi-jayanti, Dussehra -> dussehra, and so on.
 
 Available themes: ${THEMES.join(', ')}.
 - The end card. Set brand.endCard when the script ends on a call to action or a brand line - 1.5 seconds and a short tagline. Set brand.endCard to null when the script just ends on the result.
@@ -26,6 +26,7 @@ The actions available are: ${ACTIONS.join(', ')}.
 - tap needs a target that exists on that shot's screen
 - type needs a target and the text to type
 - When the script mentions sharing or sending the invoice on WhatsApp, run the shots invoice-created (tap share), share-sheet (tap contact-0, then send), wa-attach (optionally type a caption into caption, then tap send) and wa-chat. The contact is the bill's party.
+- When the script shows the festive theme being CHOSEN (browsing or picking a theme for the invoice), run the shot invoice-created, then a theme-store shot in which you tap the theme's card (theme-0 to theme-5 are the first six: navaratri, durga-puja, dussehra, dhanteras, diwali, chhath-puja) and then tap close, then a final invoice-created shot that shows the themed bill. Leave invoice.theme as "none" in that case so the choice is visible. A theme with no card among the first six cannot be tapped, so for those just set invoice.theme and skip the theme-store shot.
 - selectParty makes the chosen party appear on the bill
 - addItem needs the index of an item in the items list, counting from 0
 

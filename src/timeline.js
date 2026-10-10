@@ -23,6 +23,9 @@ const PARTY_SECONDS = 0.3;
 const ITEM_SECONDS = 0.35;
 const RIPPLE_SECONDS = 0.6;
 const TYPE_SECONDS = 1.2;
+const SHEET_DELAY_SECONDS = 0.2;
+const SHEET_SECONDS = 0.5;
+const SHEET_CLOSE_SECONDS = 0.3;
 
 export const END_CARD_FADE_SECONDS = 0.35;
 
@@ -67,7 +70,9 @@ export function stateAt(recipe, t) {
     typed: '',
     tab: '',
     batching: 0,
-    appear: easeOut(ramp(localT, 0, 0.45))
+    appear: easeOut(ramp(localT, 0, 0.45)),
+    /* How far a bottom sheet has slid up. Only the Theme Store reads it. */
+    sheet: easeOut(ramp(localT, SHEET_DELAY_SECONDS, SHEET_SECONDS))
   };
 
   let ripple = null;
@@ -102,7 +107,17 @@ export function stateAt(recipe, t) {
         }
 
         case 'tap': {
-          if (!current) break;
+          /* A choice made on an earlier screen (the theme picked in the Theme
+           * Store) must still be there on the next one; the rest of a tap's
+           * effect, and its ring, belong to the current shot alone. */
+          if (!current) {
+            const keep = SCREENS[s.screen]?.persists;
+            const past = SCREENS[s.screen]?.tapEffects?.[action.target];
+            if (keep && past) {
+              for (const k of keep) if (k in past) screenState[k] = past[k];
+            }
+            break;
+          }
           const targets = SCREENS[s.screen]?.targets;
           if (!targets || !targets[action.target]) {
             const known = targets ? Object.keys(targets).join(', ') : '(unknown screen)';
@@ -115,6 +130,10 @@ export function stateAt(recipe, t) {
            * what its own taps do, and the change lands with the ring. */
           const effect = SCREENS[s.screen].tapEffects?.[action.target];
           if (effect && at >= action.at) Object.assign(screenState, effect);
+          /* A tap on a sheet's close button slides the sheet back down. */
+          if (SCREENS[s.screen].closes?.includes(action.target)) {
+            screenState.sheet *= 1 - easeOut(ramp(at, action.at, SHEET_CLOSE_SECONDS));
+          }
           const progress = (at - action.at) / RIPPLE_SECONDS;
           if (progress >= 0 && progress <= 1) {
             const point = targets[action.target];

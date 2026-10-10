@@ -1,0 +1,48 @@
+# A Diwali script: the bill is made, the festive Theme Store opens, Diwali is
+# picked and the bill closes themed. Shop and items follow the other demos.
+video: diwali-theme
+
+invoice:
+  number: 5947
+  date: "10/10/2026"
+  theme: none
+
+business:
+  name: SAGAR SUPERBAZAAR
+  gstin: 09ABCDE1234F1Z5
+  address: Gupta Stationers, West Bengal, 741253
+
+party:
+  name: ARYAN ENTERPRISES
+  phone: 98765 43210
+  address: Delhi
+
+items:
+  - { name: ARHAR DAL GOLD 1KG, rate: 180,  qty: 1, gst: 5, unit: PCS }
+  - { name: ANJEER PREMIUM 500GM, rate: 1200, qty: 1, gst: 5, unit: PCS }
+
+brand:
+  endCard:
+    duration: 1.5
+    tagline: India ka No.1 Billing App
+
+shots:
+  - screen: create-invoice
+    duration: 3.6
+    actions:
+      - { at: 0.2, do: selectParty }
+      - { at: 0.9, do: addItem, index: 0 }
+      - { at: 1.7, do: addItem, index: 1 }
+      - { at: 2.8, do: tap, target: generate-bill }
+
+  - screen: invoice-created
+    duration: 2.0
+
+  - screen: theme-store
+    duration: 4.2
+    actions:
+      - { at: 1.4, do: tap, target: theme-4 }
+      - { at: 3.2, do: tap, target: close }
+
+  - screen: invoice-created
+    duration: 2.2
