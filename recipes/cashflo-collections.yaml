@@ -1,0 +1,41 @@
+# myCashFlo: the shop owner sees what is overdue, opens the party who owes the
+# most, and lets the app do the chasing instead of ringing round by hand.
+#
+# Every name and figure is invented. The reference recording is of a real shop
+# and its screens carry real names and a real phone number; none of that is
+# reproduced here.
+video: cashflo-collections
+
+business:
+  name: BALAJI TRADING CO
+
+party:
+  name: SURESH TRADERS
+  balance: 310000
+  overdueDays: 103
+  standby: 3
+
+shots:
+  # What is owed, and how much of it is already late.
+  - screen: mcf-dashboard
+    duration: 3.4
+    actions:
+      - { at: 1.8, do: tap, target: call-personally }
+
+  # Everyone who owes, worst first.
+  - screen: mcf-parties
+    duration: 3.0
+    actions:
+      - { at: 1.5, do: tap, target: party-row-0 }
+
+  # The party's own page - and the moment the owner stops chasing by hand.
+  - screen: mcf-party
+    duration: 4.2
+    actions:
+      - { at: 2.2, do: tap, target: pause-calls }
+
+  # The chasing the app does on its own from here.
+  - screen: mcf-automations
+    duration: 3.2
+    actions:
+      - { at: 1.6, do: tap, target: new-automation }

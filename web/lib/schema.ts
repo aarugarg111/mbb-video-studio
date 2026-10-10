@@ -4,8 +4,9 @@ import { z } from 'zod';
  * but the renderer's own parser remains the authority - whatever comes back is
  * validated there before anyone sees it.
  *
- * When a screen is added to screens/index.js, add it here too, or the model
- * will never propose it. */
+ * When a screen is added to screens/index.js, add it to SCREENS below - that
+ * is the only list, and everything else is derived from it. Miss it and the
+ * model can never propose the screen. */
 
 export const SCREENS = {
   home: ['create-invoice-cta', 'received-payment'],
@@ -23,10 +24,19 @@ export const SCREENS = {
   'create-item': ['item-name', 'hsn', 'tab-stock', 'batching', 'save'],
   'share-sheet': ['contact-0', 'contact-1', 'send'],
   'wa-attach': ['caption', 'send'],
-  'wa-chat': ['back', 'attachment']
+  'wa-chat': ['back', 'attachment'],
+  /* myCashFlo - a different product, so its screens are named apart. */
+  'mcf-dashboard': ['call-personally', 'outstanding', 'nav-parties', 'nav-automations'],
+  'mcf-parties': ['setup-automation', 'search', 'filter-overdue', 'party-row-0', 'party-row-1', 'nav-dashboard', 'nav-automations'],
+  'mcf-party': ['call', 'legal', 'share', 'pause-calls', 'add-automation', 'tab-whatsapp'],
+  'mcf-automations': ['new-automation', 'automation-0', 'automation-1', 'nav-dashboard', 'nav-parties']
 } as const;
 
-export const SCREEN_NAMES = ['home', 'create-bill', 'create-invoice', 'invoice-created', 'theme-store', 'items', 'create-item', 'share-sheet', 'wa-attach', 'wa-chat'] as const;
+/* Derived, never typed out again. This was a hand-kept second list, and it
+ * had fallen six screens behind SCREENS above - parties, the whole of Scan &
+ * Record and create-purchase were all built, listed, and still impossible for
+ * the model to propose, because this is what it is actually constrained to. */
+export const SCREEN_NAMES = Object.keys(SCREENS) as [keyof typeof SCREENS, ...(keyof typeof SCREENS)[]];
 
 export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem'] as const;
 

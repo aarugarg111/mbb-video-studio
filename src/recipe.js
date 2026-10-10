@@ -320,6 +320,20 @@ export function parse(text, catalogue, options = {}) {
    * chat is where the clip should rest. Cutting back into the app afterwards
    * reads as a mistake - which is exactly what it looked like the first time
    * a generated video did it. */
+  /* myCashFlo and myBillBook are two different apps with two different looks.
+   * A clip that cuts between them reads as footage of the wrong product
+   * spliced in by mistake - so this is worth saying out loud, even though
+   * both render perfectly well. */
+  const products = new Set(recipe.shots.map(shot =>
+    shot.screen.startsWith('mcf-') ? 'myCashFlo' : 'myBillBook'));
+  if (products.size > 1) {
+    warnings.push(
+      'This clip mixes myBillBook and myCashFlo screens. They are different apps ' +
+      'and look different, so cutting between them reads as the wrong footage. ' +
+      'Split it into two clips, or keep to one product.'
+    );
+  }
+
   /* Tapping Low Stock on a list where nothing is low empties the screen on
    * camera. The clip still renders - the app would do the same - but it is
    * almost never what the script meant. */

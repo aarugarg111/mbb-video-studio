@@ -251,3 +251,33 @@
   --mbb-cam-guide:      rgba(255, 255, 255, 0.9);
   --mbb-scan-tipline:   #F0EFF5;
 }
+
+/* ---------------------------------------------------------------------------
+ * myCashFlo.
+ *
+ * A different product from myBillBook - collections rather than billing - with
+ * its own navy palette, so these are kept in their own block and never mixed
+ * with the --mbb-* tokens above. SAMPLED from reference/frames/mcf-7.png,
+ * mcf-13.png and mcf-19.png as the modal colour of a small box, or for text
+ * the darkest pixel of a stroke.
+ * ------------------------------------------------------------------------ */
+:root {
+  --mcf-navy:        #2240A0;  /* buttons, the FAB, the active tab   */
+  --mcf-page:        #F1F2F5;  /* the ground behind the cards        */
+  --mcf-ink:         #212121;  /* headings and amounts               */
+  --mcf-muted:       #727176;  /* labels, and the tabs not chosen    */
+  --mcf-overdue:     #C92B30;  /* OVERDUE, and "103d overdue"        */
+  --mcf-due-soon:    #DE851C;  /* DUE SOON                           */
+  --mcf-wallet:      #0E9442;  /* the wallet balance in the header   */
+  --mcf-call-bg:     #DBE0EB;
+  --mcf-call-ink:    #232E77;
+  --mcf-legal-bg:    #F2E2E3;
+  --mcf-legal-ink:   #F03E4A;
+  --mcf-share-bg:    #DAEFEB;
+  --mcf-share-ink:   #006950;
+  --mcf-flag-bg:     #FFF1F2;  /* the pill under a party that needs attention */
+  --mcf-tint-blue:   #EDF2FF;  /* the round icon behind a call automation     */
+  --mcf-tint-green:  #EDFFF7;  /* and behind a WhatsApp one                   */
+  --mcf-line:        #E6E7EC;
+  --mcf-chip:        #E4E5EA;  /* the filter pills                   */
+}

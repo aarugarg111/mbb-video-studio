@@ -42,6 +42,21 @@ export const icons = {
    * generic glyph here, and an image would need a licence and a network
    * fetch the rasteriser cannot make. */
   whatsapp: (s = 22) => svg(s, '<path d="M12 3a9 9 0 0 0-7.7 13.6L3 21l4.5-1.2A9 9 0 1 0 12 3z"/><path d="M9 8.5c.4-.1.7 0 .9.4l.6 1.2c.1.3 0 .6-.2.8l-.4.4a5.5 5.5 0 0 0 2.8 2.8l.4-.4c.2-.2.5-.3.8-.2l1.2.6c.4.2.5.5.4.9-.2.8-1 1.3-1.9 1.2A7.6 7.6 0 0 1 7.8 10c-.1-.9.4-1.3 1.2-1.5z"/>', 'stroke-width="1.5"'),
+  /* myCashFlo's own set. It is a different product with a different bottom
+   * bar - collections, not billing - so these do not overlap the nav icons
+   * above and are kept together. */
+  phone: (s = 22) => svg(s, '<path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5L17 13l4 1.5v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4 7.2 2 2 0 0 1 6 5z"/>', 'stroke-width="1.7"'),
+  phoneOff: (s = 22) => svg(s, '<path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5L17 13l4 1.5v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4 7.2 2 2 0 0 1 6 5z"/><path d="M3 3l18 18"/>', 'stroke-width="1.7"'),
+  legal: (s = 22) => svg(s, '<path d="M6 3h8l4 4v14H6z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.7" fill="currentColor"/>', 'stroke-width="1.7"'),
+  wallet: (s = 22) => svg(s, '<path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18v3M3 7.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2M3 7.5h16a2 2 0 0 1 2 2V12h-4.5a2 2 0 0 0 0 4H21"/>', 'stroke-width="1.7"'),
+  clock: (s = 20) => svg(s, '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>', 'stroke-width="1.8"'),
+  warning: (s = 20) => svg(s, '<path d="M12 3.5L21.5 20h-19z"/><path d="M12 10v4.5"/><circle cx="12" cy="17.6" r="0.7" fill="currentColor"/>', 'stroke-width="1.8"'),
+  /* The four across myCashFlo's bottom bar. */
+  mcfDashboard: (s = 24) => svg(s, '<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/>', 'stroke-width="1.8"'),
+  mcfParties: (s = 24) => svg(s, '<circle cx="9.5" cy="8" r="3.5"/><path d="M3 20c0-3.6 2.9-5.5 6.5-5.5S16 16.4 16 20"/><path d="M16.5 5.2a3.5 3.5 0 0 1 0 6.6M18 14.8c2.1.7 3.5 2.4 3.5 5.2"/>', 'stroke-width="1.7"'),
+  mcfAutomations: (s = 24) => svg(s, '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><circle cx="17.5" cy="17.5" r="3.5"/><path d="M7 10.5v5a3 3 0 0 0 3 3h3.5"/>', 'stroke-width="1.7"'),
+  dots: (s = 18) => svg(s, '<circle cx="5" cy="12" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/><circle cx="19" cy="12" r="1.7" fill="currentColor"/>'),
+  pause: (s = 20) => svg(s, '<path d="M9.5 5v14M14.5 5v14"/>', 'stroke-width="2.2"'),
   folderUp: (s = 24) => svg(s, '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 17v-6M9 13.5l3-3 3 3"/>', 'stroke-width="1.7"'),
   navDashboard: (s = 24) => svg(s, '<path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/>', 'stroke-width="1.6"'),
   navParties: (s = 24) => svg(s, '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>', 'stroke-width="1.6"'),

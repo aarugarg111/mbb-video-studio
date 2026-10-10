@@ -633,3 +633,113 @@
 .sbfoot { margin-top: 7px; display: flex; align-items: center; justify-content: space-between; font-size: 9.5px; color: var(--mbb-ink-muted); }
 .sbamt { font-size: 11px; font-weight: 700; color: var(--mbb-ink); }
 .sbbtns { bottom: 22px; }
+
+/* ---------- myCashFlo ----------
+ * A separate product with its own navy palette and its own bottom bar. Every
+ * value resolves to a --mcf-* token; nothing here borrows a myBillBook one, so
+ * changing the billing palette cannot quietly restyle collections. */
+.mcfscreen { background: var(--mcf-page); color: var(--mcf-ink); display: flex; flex-direction: column; }
+
+.mcf-bar { flex: none; height: 56px; box-sizing: border-box; padding: 0 14px; display: flex; align-items: center; gap: 12px; color: var(--mcf-ink); }
+.mcf-bar.plain { padding-left: 20px; }
+.mcf-biz { flex: 1; min-width: 0; font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mcf-title { flex: 1; font-size: 19px; font-weight: 700; }
+
+.mcf-wallet { flex: none; display: flex; align-items: center; gap: 6px; padding: 8px 13px; border-radius: 999px; background: var(--mbb-surface); color: var(--mcf-wallet); }
+.mcf-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--mcf-wallet); }
+.mcf-wallet-amt { font-size: 12.5px; font-weight: 700; }
+
+.mcf-owed { flex: none; text-align: right; }
+.mcf-owed-amt { font-size: 18px; font-weight: 700; }
+.mcf-owed-late { margin-top: 2px; font-size: 10.5px; font-weight: 600; color: var(--mcf-overdue); }
+
+.mcf-body { flex: 1; min-height: 0; padding: 8px 16px 0; display: flex; flex-direction: column; gap: 12px; }
+
+.mcf-card { background: var(--mbb-surface); border-radius: 12px; padding: 15px; }
+.mcf-card.short { padding: 15px 15px 22px; }
+.mcf-card.row { display: flex; align-items: center; gap: 12px; }
+.mcf-label { font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; color: var(--mcf-muted); }
+.mcf-label.grow { flex: 1; }
+.mcf-head { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+.mcf-big { margin-top: 8px; font-size: 27px; font-weight: 700; letter-spacing: -0.01em; }
+.mcf-rule { height: 1px; margin: 14px 0 12px; background: var(--mcf-line); }
+.mcf-rule.wide { margin: 12px -15px; }
+
+.mcf-split { display: flex; }
+.mcf-split > div { flex: 1; }
+.mcf-sub { display: flex; align-items: center; gap: 5px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.05em; }
+.mcf-sub.overdue { color: var(--mcf-overdue); }
+.mcf-sub.soon { color: var(--mcf-due-soon); }
+.mcf-sub-amt { margin-top: 6px; font-size: 15px; font-weight: 700; }
+
+/* The attention strip scrolls sideways in the app, so the next card is cut off
+   by the screen edge - that overhang is what says there are more. */
+.mcf-attn { display: flex; gap: 11px; margin-top: 11px; overflow: hidden; }
+.mcf-attn-card { flex: none; width: 253px; box-sizing: border-box; padding: 13px; border: 1px solid var(--mcf-line); border-radius: 10px; }
+.mcf-flag { margin-bottom: 11px; }
+.mcf-flag-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.mcf-flag-nm { font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mcf-flag-amt { flex: none; font-size: 12.5px; font-weight: 700; }
+.mcf-flag-why { display: inline-block; margin-top: 7px; padding: 4px 10px; border-radius: 999px; background: var(--mcf-flag-bg); color: var(--mcf-overdue); font-size: 9.5px; font-weight: 600; }
+.mcf-more { margin: 14px 0 10px; font-size: 11px; font-weight: 700; color: var(--mcf-navy); }
+
+.mcf-btn { height: 40px; display: flex; align-items: center; justify-content: center; gap: 7px; border-radius: 999px; background: var(--mcf-navy); color: var(--mbb-surface); font-size: 12.5px; font-weight: 700; }
+.mcf-btn.wide { height: 44px; border-radius: 10px; font-size: 13.5px; }
+
+.mcf-search { display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 14px; border-radius: 10px; background: var(--mcf-chip); color: var(--mcf-muted); font-size: 12px; }
+
+.mcf-filters { display: flex; gap: 9px; overflow: hidden; }
+.mcf-filter { flex: none; display: flex; align-items: center; gap: 4px; height: 33px; padding: 0 14px; box-sizing: border-box; border-radius: 999px; background: var(--mcf-chip); color: var(--mcf-ink); font-size: 11.5px; font-weight: 600; }
+
+.mcf-plist { display: flex; flex-direction: column; gap: 9px; }
+.mcf-prow { padding: 13px 15px; border-radius: 10px; background: var(--mbb-surface); }
+.mcf-prow-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.mcf-prow-nm { font-size: 12.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mcf-prow-right { flex: none; text-align: right; }
+.mcf-prow-amt { font-size: 14px; font-weight: 700; }
+.mcf-prow-late { margin-top: 3px; font-size: 10px; font-weight: 600; color: var(--mcf-overdue); }
+.mcf-standby { display: inline-flex; align-items: center; gap: 6px; margin-top: 9px; padding: 4px 11px; border-radius: 999px; background: var(--mcf-page); color: var(--mcf-muted); font-size: 9.5px; font-weight: 600; }
+.mcf-standby-dot { width: 5px; height: 5px; border-radius: 999px; background: var(--mcf-muted); }
+
+.mcf-chips { display: flex; gap: 11px; }
+.mcf-chip { flex: 1; height: 42px; display: flex; align-items: center; justify-content: center; gap: 7px; border-radius: 9px; font-size: 12.5px; font-weight: 600; }
+.mcf-chip.call { background: var(--mcf-call-bg); color: var(--mcf-call-ink); }
+.mcf-chip.legal { background: var(--mcf-legal-bg); color: var(--mcf-legal-ink); }
+.mcf-chip.share { background: var(--mcf-share-bg); color: var(--mcf-share-ink); }
+
+.mcf-grid { display: flex; flex-wrap: wrap; }
+.mcf-field { width: 50%; margin-bottom: 14px; }
+.mcf-field:nth-child(n+3) { margin-bottom: 0; }
+.mcf-value { display: flex; align-items: center; gap: 7px; margin-top: 7px; font-size: 12.5px; }
+.mcf-pencil { color: var(--mcf-muted); }
+
+.mcf-tabs { display: flex; }
+.mcf-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 7px; font-size: 10px; color: var(--mcf-muted); }
+.mcf-tab-box { width: 24px; height: 24px; border-radius: 6px; background: var(--mcf-page); }
+.mcf-quiet { font-size: 11.5px; color: var(--mcf-muted); }
+
+.mcf-round { flex: none; width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; background: var(--mcf-tint-blue); color: var(--mcf-call-ink); }
+.mcf-round.whatsapp { background: var(--mcf-tint-green); color: var(--mcf-share-ink); }
+.mcf-pausetxt { flex: 1; min-width: 0; }
+.mcf-pause-ttl { font-size: 12px; font-weight: 700; }
+.mcf-pause-sub { margin-top: 3px; font-size: 10.5px; color: var(--mcf-muted); }
+.mcf-toggle { flex: none; width: 40px; height: 23px; border-radius: 999px; background: var(--mcf-chip); display: flex; align-items: center; padding: 0 3px; }
+.mcf-toggle span { width: 17px; height: 17px; border-radius: 999px; background: var(--mbb-surface); box-shadow: 0 1px 3px var(--mbb-card-shadow); }
+.mcf-toggle.on { background: var(--mcf-navy); justify-content: flex-end; }
+.mcf-ghost { width: 28px; height: 28px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--mcf-page); color: var(--mcf-muted); }
+.mcf-plus { width: 32px; height: 32px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--mcf-navy); color: var(--mbb-surface); }
+
+.mcf-autolist { margin-top: 6px; }
+.mcf-auto { display: flex; align-items: center; gap: 12px; padding: 11px 0; }
+.mcf-auto-txt { flex: 1; min-width: 0; }
+.mcf-auto-ttl { font-size: 12.5px; font-weight: 700; }
+.mcf-auto-sub { margin-top: 3px; font-size: 10.5px; color: var(--mcf-muted); }
+.mcf-auto-n { flex: none; display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--mcf-muted); }
+.mcf-chev { color: var(--mcf-muted); transform: rotate(-90deg); }
+
+.mcf-support { position: absolute; right: 16px; bottom: 96px; display: flex; align-items: center; gap: 8px; padding: 11px 16px; border-radius: 999px; background: var(--mbb-surface); color: var(--mcf-share-ink); font-size: 12px; font-weight: 700; box-shadow: 0 2px 10px var(--mbb-card-shadow); }
+
+.mcf-nav { position: absolute; left: 0; right: 0; bottom: 0; height: 68px; display: flex; align-items: center; background: var(--mbb-surface); border-top: 1px solid var(--mcf-line); }
+.mcf-nav > div { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 9.5px; color: var(--mcf-muted); }
+.mcf-nav > div.on { color: var(--mcf-navy); font-weight: 700; }
+.mcf-fab { flex: none; width: 52px; height: 52px; margin: 0 6px; border-radius: 999px; background: var(--mcf-navy); color: var(--mbb-surface); display: flex; align-items: center; justify-content: center; transform: translateY(-6px); }

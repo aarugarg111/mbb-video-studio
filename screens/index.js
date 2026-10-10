@@ -14,6 +14,10 @@ import * as createItem from './create-item.js';
 import * as shareSheet from './share-sheet.js';
 import * as waAttach from './wa-attach.js';
 import * as waChat from './wa-chat.js';
+import * as mcfDashboard from './mcf-dashboard.js';
+import * as mcfParties from './mcf-parties.js';
+import * as mcfParty from './mcf-party.js';
+import * as mcfAutomations from './mcf-automations.js';
 
 export const SCREENS = {
   [home.name]: home,
@@ -31,7 +35,11 @@ export const SCREENS = {
   [createItem.name]: createItem,
   [shareSheet.name]: shareSheet,
   [waAttach.name]: waAttach,
-  [waChat.name]: waChat
+  [waChat.name]: waChat,
+  [mcfDashboard.name]: mcfDashboard,
+  [mcfParties.name]: mcfParties,
+  [mcfParty.name]: mcfParty,
+  [mcfAutomations.name]: mcfAutomations
 };
 
 /* The shape src/recipe.js validates against: screen name -> its target names. */
