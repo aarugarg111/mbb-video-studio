@@ -21,6 +21,7 @@ export default function Page() {
   const [party, setParty] = useState('');
   const [theme, setTheme] = useState('');
   const [recipe, setRecipe] = useState('');
+  const [unsupported, setUnsupported] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [warnings, setWarnings] = useState<string[]>([]);
   const [videoUrl, setVideoUrl] = useState('');
@@ -57,7 +58,7 @@ export default function Page() {
     setBusy(true);
     setError('');
     try {
-      const text = await proposeRecipe({
+      const proposed = await proposeRecipe({
         apiKey,
         script,
         /* Only send what was filled in - an empty field must not overwrite
@@ -68,7 +69,8 @@ export default function Page() {
           ...(theme ? { invoice: { theme } } : {})
         }
       });
-      setRecipe(text);
+      setRecipe(proposed.recipe);
+      setUnsupported(proposed.unsupported);
       setStep('check');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong.');
@@ -191,6 +193,12 @@ export default function Page() {
 
       {step === 'check' && (
         <>
+          {unsupported.length > 0 && (
+            <div className="note warn">
+              <strong>Not in this video —</strong> the script asks for these and there are no screens for them yet:
+              {unsupported.map((u, i) => <div key={i}>· {u}</div>)}
+            </div>
+          )}
           <label htmlFor="recipe">The shot list — change anything that looks wrong</label>
           <textarea id="recipe" className="recipe" value={recipe}
                     onChange={e => setRecipe(e.target.value)} />

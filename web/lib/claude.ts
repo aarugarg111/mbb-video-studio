@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import * as yaml from 'js-yaml';
+import type { Recipe } from './schema';
 import { RecipeSchema, SCREENS, ACTIONS, THEMES } from './schema';
 
 /* The prompt is carried over verbatim from the server route. It has been
@@ -39,11 +40,21 @@ Rules you must follow:
 - Item prices are TAX-INCLUSIVE and gst is the slab percentage, usually 5, 12 or 18.
 - "video" must be a short name of letters, digits, hyphens and underscores only.
 - Details supplied alongside the script are OVERRIDES. Where one is given it wins over what the script says; where it is blank, take the value from the script.
-- If the script describes something the renderer has no screen for, cover what you can with the screens above and keep the video short rather than inventing a screen.`;
+- If the script describes something the renderer has no screen for, cover what you can with the screens above and keep the video short rather than inventing a screen.
+- Put in "unsupported" every feature the script asks for that none of the available screens can show. Name the feature as the script describes it, briefly: "sharing the invoice on WhatsApp", "batch-wise stock records", "GST reports". Use an empty array when the screens cover the whole script.
+- Still build the best shot list you can from the screens that do exist. The "unsupported" list is a warning to the author, not a refusal.`;
+
+/* Split the model's output into the recipe YAML and the unsupported list.
+ * src/recipe.js knows nothing about "unsupported", so it must never reach the
+ * YAML. */
+export function splitRecipe(parsed: Recipe): { recipe: string; unsupported: string[] } {
+  const { unsupported, ...rest } = parsed;
+  return { recipe: yaml.dump(rest), unsupported: unsupported ?? [] };
+}
 
 export async function proposeRecipe(
   { apiKey, script, details }: { apiKey: string; script: string; details: unknown }
-): Promise<string> {
+): Promise<{ recipe: string; unsupported: string[] }> {
   /* The key is the user's own, held in their browser and sent only to
    * Anthropic. There is no server here to hold it instead. */
   const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
@@ -69,5 +80,5 @@ export async function proposeRecipe(
     throw new Error('The model did not return a usable shot list. Try again.');
   }
 
-  return yaml.dump(response.parsed_output);
+  return splitRecipe(response.parsed_output);
 }

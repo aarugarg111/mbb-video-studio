@@ -52,6 +52,10 @@ export const RecipeSchema = z.object({
       tagline: z.string()
     }).nullable()
   }),
+  /* Anything the script calls for that no available screen can show. Always
+   * present - an empty array when the screens cover everything - because a
+   * strict output schema is more reliable when every field is. */
+  unsupported: z.array(z.string()),
   shots: z.array(
     z.object({
       screen: z.enum(SCREEN_NAMES),
