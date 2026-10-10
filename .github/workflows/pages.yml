@@ -27,6 +27,12 @@ jobs:
           node-version: '24'
           cache: npm
           cache-dependency-path: web/package-lock.json
+      # The web app imports src/ and screens/ from the repository root, and
+      # src/recipe.js imports js-yaml - a ROOT dependency. Installing only
+      # web/ leaves it unresolvable and the build fails with "Can't resolve
+      # 'js-yaml'". --ignore-scripts skips Playwright's browser download,
+      # which a static build has no use for.
+      - run: npm ci --ignore-scripts
       - run: npm ci --prefix web
       # GitHub Pages serves a project repo at /<repo>/, so the build needs to
       # know the repo name. next.config.mjs (basePath) and web/lib/base-path.ts
