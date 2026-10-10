@@ -27,5 +27,16 @@ export const icons = {
   more: (s = 26) => svg(s, '<circle cx="12" cy="5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/>'),
   print: (s = 26) => svg(s, '<path d="M7 9V4h10v5M7 17H4v-7h16v7h-3M7 14h10v6H7z"/>', 'stroke-width="1.7"'),
   download: (s = 26) => svg(s, '<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>', 'stroke-width="1.8"'),
-  share: (s = 26) => svg(s, '<circle cx="6" cy="12" r="2.4"/><circle cx="17" cy="6" r="2.4"/><circle cx="17" cy="18" r="2.4"/><path d="M8.2 11l6.6-3.8M8.2 13l6.6 3.8"/>', 'stroke-width="1.7"')
+  share: (s = 26) => svg(s, '<circle cx="6" cy="12" r="2.4"/><circle cx="17" cy="6" r="2.4"/><circle cx="17" cy="18" r="2.4"/><path d="M8.2 11l6.6-3.8M8.2 13l6.6 3.8"/>', 'stroke-width="1.7"'),
+  /* Items and Create New Item screens. */
+  settings: (s = 24) => svg(s, '<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5l1.6 2.6 3-.6.6 3 2.6 1.6-1.6 2.6 1.6 2.6-2.6 1.6-.6 3-3-.6L12 21.5l-1.6-2.6-3 .6-.6-3-2.6-1.6 1.6-2.6-1.6-2.6 2.6-1.6.6-3 3 .6z"/>', 'stroke-width="1.7"'),
+  sliders: (s = 22) => svg(s, '<path d="M3 6h18M3 12h18M3 18h18"/><circle cx="15" cy="6" r="2" fill="var(--mbb-surface)"/><circle cx="9" cy="12" r="2" fill="var(--mbb-surface)"/><circle cx="15" cy="18" r="2" fill="var(--mbb-surface)"/>', 'stroke-width="1.8"'),
+  filter: (s = 16) => svg(s, '<path d="M3 7h18M6 12h12M10 17h4"/>', 'stroke-width="2"'),
+  plusCircle: (s = 24) => svg(s, '<circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="M12 7v10M7 12h10" stroke="var(--mbb-primary)"/>'),
+  folderUp: (s = 24) => svg(s, '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 17v-6M9 13.5l3-3 3 3"/>', 'stroke-width="1.7"'),
+  navDashboard: (s = 24) => svg(s, '<path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/>', 'stroke-width="1.6"'),
+  navParties: (s = 24) => svg(s, '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6 7-6s7 2 7 6"/>', 'stroke-width="1.6"'),
+  navItems: (s = 24) => svg(s, '<rect x="4" y="12" width="7" height="7" rx="1" fill="currentColor"/><rect x="13" y="12" width="7" height="7" rx="1" fill="currentColor"/><rect x="8.5" y="4" width="7" height="7" rx="1" fill="currentColor"/>', 'stroke-width="1"'),
+  navForYou: (s = 24) => svg(s, '<circle cx="15" cy="7" r="3"/><path d="M3 20l4-5 5 1 6 2M3 15h5"/>', 'stroke-width="1.6"'),
+  navMore: (s = 24) => svg(s, '<circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/>', 'stroke-width="1.6"')
 };

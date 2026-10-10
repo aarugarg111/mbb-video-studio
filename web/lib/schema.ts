@@ -11,10 +11,12 @@ export const SCREENS = {
   home: ['create-invoice-cta', 'received-payment'],
   'create-bill': ['party-field', 'add-items', 'scan-record'],
   'create-invoice': ['item-search', 'add-item-0', 'add-item-1', 'generate-bill'],
-  'invoice-created': ['share', 'done']
+  'invoice-created': ['share', 'done'],
+  items: ['create-new-item', 'bulk-action', 'item-row-0'],
+  'create-item': ['item-name', 'hsn', 'tab-stock', 'batching', 'save']
 } as const;
 
-export const SCREEN_NAMES = ['home', 'create-bill', 'create-invoice', 'invoice-created'] as const;
+export const SCREEN_NAMES = ['home', 'create-bill', 'create-invoice', 'invoice-created', 'items', 'create-item'] as const;
 
 export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem'] as const;
 

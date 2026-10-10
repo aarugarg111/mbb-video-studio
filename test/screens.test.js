@@ -349,3 +349,62 @@ test('tokens.css no longer carries the unused on-primary tokens', async () => {
   const tokens = await readFile(new URL('../kit/tokens.css', import.meta.url), 'utf8');
   assert.doesNotMatch(tokens, /--mbb-on-primary/);
 });
+
+/* --- items and create-item ------------------------------------------------ */
+const PHARMA = { items: [
+  { name: 'PARACETAMOL 500MG', rate: 30, purchase: 26, qty: 1 },
+  { name: 'CETIRIZINE 10MG', rate: 25, purchase: 21, qty: 1 }
+] };
+
+test('items and create-item render with no data at all', () => {
+  assert.equal(typeof SCREENS.items.render({}, {}), 'string');
+  assert.equal(typeof SCREENS['create-item'].render({}, {}), 'string');
+});
+
+test('items lists every recipe item with its sales and purchase price', () => {
+  const html = SCREENS.items.render(PHARMA, {});
+  for (const s of ['PARACETAMOL 500MG', 'CETIRIZINE 10MG', '₹ 30', '₹ 26', '₹ 25', '₹ 21',
+                   'Sales Price', 'Purchase Price', 'Create New Item', 'Bulk Action', 'Low Stock']) {
+    assert.ok(html.includes(s), `missing "${s}"`);
+  }
+});
+
+test('create-item shows the typed name and escapes it', () => {
+  assert.match(SCREENS['create-item'].render({}, { typed: 'Dolo 650' }), /Dolo 650/);
+  assert.doesNotMatch(SCREENS['create-item'].render({}, { typed: '<b>x</b>' }), /<b>x<\/b>/);
+});
+
+test('create-item selects Batching only when the state says so', () => {
+  const off = SCREENS['create-item'].render({}, {});
+  const on = SCREENS['create-item'].render({}, { batching: 1 });
+  assert.match(off, /class="chip" id="batching"/);
+  assert.match(on, /class="chip on" id="batching"/);
+});
+
+test('create-item follows state.tab and defaults to Pricing', () => {
+  const html = t => SCREENS['create-item'].render({}, t ? { tab: t } : {});
+  assert.match(html(), /class="tab on" id="tab-pricing"/);
+  assert.match(html('Stock'), /class="tab on" id="tab-stock"/);
+  assert.doesNotMatch(html('Stock'), /class="tab on" id="tab-pricing"/);
+});
+
+test('a tap on a tab or the Batching pill reaches the screen state', () => {
+  const recipe = { items: [], shots: [{ screen: 'create-item', duration: 4, actions: [
+    { at: 1, do: 'tap', target: 'tab-stock' }, { at: 2, do: 'tap', target: 'batching' }] }] };
+  assert.equal(stateAt(recipe, 0.5).screenState.tab, '');
+  assert.equal(stateAt(recipe, 1.5).screenState.tab, 'Stock');
+  assert.equal(stateAt(recipe, 1.5).screenState.batching, 0);
+  assert.equal(stateAt(recipe, 2.5).screenState.batching, 1);
+});
+
+test('the new screens emit no raw hex colour', () => {
+  for (const html of [SCREENS.items.render(PHARMA, {}), SCREENS['create-item'].render(PHARMA, { typed: 'a', batching: 1 })]) {
+    assert.doesNotMatch(html, /#[0-9a-fA-F]{6}/);
+  }
+});
+
+test('catalogue includes the new screens and their targets', () => {
+  const c = catalogue();
+  assert.deepEqual(c.items, ['create-new-item', 'bulk-action', 'item-row-0']);
+  assert.deepEqual(c['create-item'], ['item-name', 'hsn', 'tab-stock', 'batching', 'save']);
+});

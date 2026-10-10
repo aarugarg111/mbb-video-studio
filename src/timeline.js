@@ -65,6 +65,8 @@ export function stateAt(recipe, t) {
     total: 0,
     bill: summarise([]),
     typed: '',
+    tab: '',
+    batching: 0,
     appear: easeOut(ramp(localT, 0, 0.45))
   };
 
@@ -109,6 +111,10 @@ export function stateAt(recipe, t) {
               `Valid targets: ${known}`
             );
           }
+          /* Some taps change the screen: a tab, a toggle. Each screen declares
+           * what its own taps do, and the change lands with the ring. */
+          const effect = SCREENS[s.screen].tapEffects?.[action.target];
+          if (effect && at >= action.at) Object.assign(screenState, effect);
           const progress = (at - action.at) / RIPPLE_SECONDS;
           if (progress >= 0 && progress <= 1) {
             const point = targets[action.target];

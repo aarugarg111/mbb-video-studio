@@ -1,0 +1,44 @@
+# Pharmacy: item records, stock and batch-wise details kept alongside billing.
+# Medicines and prices are invented for the demonstration.
+video: pharmacy-stock
+
+invoice:
+  number: 2210
+  date: "08/10/2026"
+  theme: none
+
+business:
+  name: SHREE MEDICAL STORE
+  gstin: 09ABCDE1234F1Z5
+  address: Station Road, Lucknow, Uttar Pradesh, 226001
+
+party:
+  name: RAJESH PHARMA AGENCY
+  phone: 98765 43210
+  address: Aminabad, Lucknow, Uttar Pradesh, 226018
+
+items:
+  - { name: PARACETAMOL 500MG, rate: 30,  qty: 10, gst: 12, unit: STRIP, purchase: 26, stock: 120 }
+  - { name: AZITHROMYCIN 500MG, rate: 118, qty: 2, gst: 12, unit: STRIP, purchase: 101, stock: 64 }
+  - { name: CETIRIZINE 10MG,   rate: 25,  qty: 5, gst: 12, unit: STRIP, purchase: 21, stock: 85 }
+  - { name: VICKS VAPORUB 50ML, rate: 145, qty: 1, gst: 12, unit: PCS, purchase: 126, stock: 40 }
+
+brand:
+  endCard:
+    duration: 1.5
+    tagline: India ka No.1 Billing App
+
+shots:
+  - screen: items
+    duration: 2.4
+    actions:
+      - { at: 1.4, do: tap, target: create-new-item }
+
+  - screen: create-item
+    duration: 5.0
+    actions:
+      - { at: 0.3, do: tap, target: item-name }
+      - { at: 1.0, do: type, target: item-name, text: Dolo 650, duration: 1.0 }
+      - { at: 2.4, do: tap, target: tab-stock }
+      - { at: 3.2, do: tap, target: batching }
+      - { at: 4.4, do: tap, target: save }

@@ -140,3 +140,11 @@
   --mbb-theme-warm-b: #F6DDB8;
   --mbb-theme-warm-c: #FFF8EC;
 }
+
+/* --- items screens (sampled by eye from item-t34.png and item-t42.png) --- */
+:root {
+  --mbb-card-shadow:   rgba(53, 52, 82, 0.14);  /* the white item cards      */
+  --mbb-avatar-grey:   #E3E3E8;                 /* SAMPLED - Items avatar     */
+  --mbb-avatar-letter: #FFFFFF;                 /* the letter on that avatar  */
+  --mbb-list-ground:   #F7F7FB;                 /* SAMPLED - behind the cards */
+}
