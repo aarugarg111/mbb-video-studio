@@ -127,5 +127,5 @@ test('every scan tap target exists in the markup', () => {
 });
 
 test('no scan screen emits a raw hex colour', () => {
-  for (const s of SCAN) assert.doesNotMatch(SCREENS[s].render(DATA, {}), /#[0-9a-fA-F]{6}/, s);
+  for (const s of SCAN) assert.doesNotMatch(SCREENS[s].render(DATA, {}), /(?<!&)#[0-9a-fA-F]{6}/, s);
 });

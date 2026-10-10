@@ -29,7 +29,7 @@ test('home has a create-invoice tap target with coordinates', () => {
 
 test('screens use tokens, never raw hex colours', () => {
   const html = SCREENS.home.render(DATA, {});
-  assert.doesNotMatch(html, /#[0-9a-fA-F]{6}/, 'found a hard-coded hex - use var(--mbb-*)');
+  assert.doesNotMatch(html, /(?<!&)#[0-9a-fA-F]{6}/, 'found a hard-coded hex - use var(--mbb-*)');
 });
 
 test('catalogue maps every screen to its target names', () => {
@@ -216,7 +216,7 @@ test('every registered screen has at least one tap target', () => {
 test('every registered screen avoids hard-coded hex colours', () => {
   for (const [key, mod] of Object.entries(SCREENS)) {
     const html = mod.render(DATA, {});
-    assert.doesNotMatch(html, /#[0-9a-fA-F]{6}/, `${key} has a hard-coded hex`);
+    assert.doesNotMatch(html, /(?<!&)#[0-9a-fA-F]{6}/, `${key} has a hard-coded hex`);
   }
 });
 
@@ -330,7 +330,7 @@ test('no screen emits a raw hex or rgb colour, in any state', () => {
   for (const [key, mod] of Object.entries(SCREENS)) {
     for (const st of [{}, billState([1, 1]), { items: [1, 0], typed: 'S', party: 1 }]) {
       const html = mod.render(TWO, st);
-      assert.doesNotMatch(html, /#[0-9a-fA-F]{6}\b|rgba?\(/, `${key} has a raw colour`);
+      assert.doesNotMatch(html, /(?<!&)#[0-9a-fA-F]{6}\b|rgba?\(/, `${key} has a raw colour`);
     }
   }
 });
@@ -409,7 +409,7 @@ test('a tap on a tab or the Batching pill reaches the screen state', () => {
 
 test('the new screens emit no raw hex colour', () => {
   for (const html of [SCREENS.items.render(PHARMA, {}), SCREENS['create-item'].render(PHARMA, { typed: 'a', batching: 1 })]) {
-    assert.doesNotMatch(html, /#[0-9a-fA-F]{6}/);
+    assert.doesNotMatch(html, /(?<!&)#[0-9a-fA-F]{6}/);
   }
 });
 

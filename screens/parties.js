@@ -94,8 +94,8 @@ export function render(data, state) {
   </div>
 
   <div class="ppromo">
-    <div class="ppromo-txt">Tired of asking Party&rsquo;s Ledger</div>
-    <div class="ppromo-btn">View Shared Ledgers &rsaquo;</div>
+    <div class="ppromo-txt">Tired of asking Party&#8217;s Ledger</div>
+    <div class="ppromo-btn">View Shared Ledgers &#8250;</div>
     <span class="ppromo-x">${icons.close(16)}</span>
   </div>
 

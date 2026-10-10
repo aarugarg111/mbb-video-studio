@@ -60,3 +60,37 @@ test('ordinary css survives escaping unchanged', () => {
   const css = '.a > .b { width: calc(100% - 4px); content: "x" }';
   assert.equal(escapeStyleText(css), css);
 });
+
+test('a non-breaking space cannot take the whole frame down', () => {
+  /* The real failure behind "the source image cannot be decoded": outerHTML
+     re-escapes U+00A0 as &nbsp; whatever the source wrote, and &nbsp; is not
+     one of XML's five entity names. One of them anywhere makes every frame
+     unparseable, and nothing says which character or which screen. */
+  const out = prepareHtml('<div>21 bills&nbsp;scanned</div>', 'data:logo');
+  assert.ok(!out.includes('&nbsp;'));
+  assert.ok(out.includes('&#160;'));
+});
+
+test('the five XML entity names are left exactly as they are', () => {
+  const out = prepareHtml('<div>Tea &amp; Co &lt;b&gt; &quot;x&quot; &apos;y&apos;</div>', 'data:logo');
+  assert.ok(out.includes('&amp;'));
+  assert.ok(out.includes('&lt;'));
+  assert.ok(out.includes('&gt;'));
+  assert.ok(out.includes('&quot;'));
+  assert.ok(out.includes('&apos;'));
+});
+
+test('the typographic entities a screen might write become numeric', () => {
+  const out = prepareHtml('<div>Friendly &middot; Daily &rsaquo; Party&rsquo;s</div>', 'data:logo');
+  assert.ok(out.includes('&#183;'));
+  assert.ok(out.includes('&#8250;'));
+  assert.ok(out.includes('&#8217;'));
+  assert.equal(out.match(/&[a-zA-Z][a-zA-Z0-9]*;/g), null, 'no named entity may survive');
+});
+
+test('an entity nobody anticipated is dropped rather than left to break it', () => {
+  /* A missing character beats a missing video. */
+  const out = prepareHtml('<div>a&thinsp;b</div>', 'data:logo');
+  assert.ok(!out.includes('&thinsp;'));
+  assert.ok(out.includes('<div>ab</div>'));
+});

@@ -40,7 +40,7 @@ export function render(data, state) {
       <span class="mcf-round ${r.via}">${icons[r.via === 'phone' ? 'phone' : 'whatsapp'](16)}</span>
       <div class="mcf-auto-txt">
         <div class="mcf-auto-ttl">${esc(r.window)}</div>
-        <div class="mcf-auto-sub">${esc(r.tone)} &middot; ${esc(r.when)}</div>
+        <div class="mcf-auto-sub">${esc(r.tone)} &#183; ${esc(r.when)}</div>
       </div>
       <div class="mcf-auto-n"><span class="ico">${icons.group(14)}</span>${counts[i]}</div>
       <span class="ico mcf-chev">${icons.chevDown(14)}</span>

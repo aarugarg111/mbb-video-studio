@@ -143,7 +143,7 @@ test('every scan-bills target exists in the markup', () => {
 test('neither screen emits a raw hex colour', () => {
   for (const key of ['items', 'scan-bills']) {
     for (const state of [{}, { lowStock: 1 }]) {
-      assert.doesNotMatch(SCREENS[key].render(DATA, state), /#[0-9a-fA-F]{6}/, key);
+      assert.doesNotMatch(SCREENS[key].render(DATA, state), /(?<!&)#[0-9a-fA-F]{6}/, key);
     }
   }
 });

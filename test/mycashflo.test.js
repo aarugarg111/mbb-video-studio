@@ -29,7 +29,7 @@ test('all four are in the catalogue, so a recipe can name them', () => {
 test('no myCashFlo screen emits a raw colour', () => {
   for (const name of MCF) {
     const html = SCREENS[name].render(recipe, {});
-    assert.equal(html.match(/#[0-9a-fA-F]{3,8}\b/), null, name + ' has a hard-coded colour');
+    assert.equal(html.match(/(?<!&)#[0-9a-fA-F]{3,8}\b/), null, name + ' has a hard-coded colour');
     assert.equal(html.match(/rgba?\(/), null, name + ' has a hard-coded colour');
   }
 });

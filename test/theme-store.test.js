@@ -109,6 +109,8 @@ test('closing slides the sheet back down', () => {
 test('no screen emits a raw hex or rgb colour', () => {
   for (const [key, mod] of Object.entries(SCREENS)) {
     const html = mod.render(DATA, { theme: 'diwali' });
-    assert.doesNotMatch(html, /#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b|rgba?\(/, `${key} has a hard-coded colour`);
+    /* The lookbehind spares numeric character references: &#160; is a
+       non-breaking space, not a three-digit hex colour. */
+    assert.doesNotMatch(html, /(?<!&)#[0-9a-fA-F]{6}\b|(?<!&)#[0-9a-fA-F]{3}\b|rgba?\(/, `${key} has a hard-coded colour`);
   }
 });

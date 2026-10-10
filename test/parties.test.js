@@ -90,5 +90,5 @@ test('no real contact from the reference recording appears', () => {
 });
 
 test('parties uses tokens, never raw hex colours', () => {
-  assert.doesNotMatch(SCREENS.parties.render(DATA, {}), /#[0-9a-fA-F]{6}/);
+  assert.doesNotMatch(SCREENS.parties.render(DATA, {}), /(?<!&)#[0-9a-fA-F]{6}/);
 });

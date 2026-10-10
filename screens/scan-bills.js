@@ -42,7 +42,7 @@ export function render(data, state) {
       </div>
       <div class="sbdoc">Purchase Invoice #${r.doc}</div>
       <div class="sbfoot">
-        <span>19 Apr 2026 &nbsp;&middot;&nbsp; ${r.items} items</span>
+        <span>19 Apr 2026 &#160;&#183;&#160; ${r.items} items</span>
         <span class="sbamt">${formatINR(r.amount)}</span>
       </div>
     </div>`;
@@ -62,7 +62,7 @@ export function render(data, state) {
 
   <div class="sbhead">
     <span>Invoices From Gallery</span>
-    <span class="sblink" id="browse-gallery">Browse Gallery &rsaquo;</span>
+    <span class="sblink" id="browse-gallery">Browse Gallery &#8250;</span>
   </div>
   <div class="sbtiles">${[0, 1, 2, 3].map(tile).join('')}</div>
 
