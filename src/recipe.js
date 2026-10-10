@@ -320,6 +320,21 @@ export function parse(text, catalogue, options = {}) {
    * chat is where the clip should rest. Cutting back into the app afterwards
    * reads as a mistake - which is exactly what it looked like the first time
    * a generated video did it. */
+  /* Tapping Low Stock on a list where nothing is low empties the screen on
+   * camera. The clip still renders - the app would do the same - but it is
+   * almost never what the script meant. */
+  const tapsLowStock = recipe.shots.some(shot =>
+    shot.screen === 'items' && (shot.actions ?? []).some(a => a.do === 'tap' && a.target === 'low-stock'));
+  if (tapsLowStock) {
+    const low = recipe.items.filter(i => Number(i.stock ?? 90) <= Number(i.lowAt ?? 10));
+    if (low.length === 0) {
+      warnings.push(
+        'The clip taps Low Stock but no item is low, so the list empties on camera. ' +
+        'Give an item a smaller stock, or a lowAt above its stock.'
+      );
+    }
+  }
+
   const lastWhatsApp = recipe.shots.map(s => s.screen).lastIndexOf('wa-chat');
   if (lastWhatsApp !== -1) {
     const after = recipe.shots

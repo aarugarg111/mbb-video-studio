@@ -1,0 +1,53 @@
+# A kirana owner checks what is running low, then photographs the supplier's
+# bill instead of typing it in. Every name and figure here is invented.
+video: stock-scan
+
+invoice:
+  number: 4180
+  date: "10/10/2026"
+  theme: none
+
+business:
+  name: BALAJI TRADING CO
+  gstin: 09ABCDE1234F1Z5
+  address: Hazratganj, Lucknow, Uttar Pradesh, 226001
+
+party:
+  name: Suresh Traders
+  phone: 98765 43210
+  address: Aminabad, Lucknow, Uttar Pradesh, 226018
+
+# lowAt is the level each item's own record calls low. Three of these are at or
+# under it, so the Low Stock filter has something to find.
+items:
+  - { name: CEMENT OPC 50KG, rate: 410.2, qty: 40, gst: 18, unit: BAG, purchase: 356, stock: 6, lowAt: 10 }
+  - { name: TMT BAR 8MM, rate: 7791.81, qty: 1, gst: 18, unit: BUNDLE, purchase: 6780, stock: 2, lowAt: 5 }
+  - { name: WHITE CEMENT 5KG, rate: 290, qty: 4, gst: 18, unit: PKT, purchase: 251, stock: 48, lowAt: 10 }
+  - { name: WALL PUTTY 20KG, rate: 640, qty: 2, gst: 18, unit: BAG, purchase: 554, stock: 9, lowAt: 12 }
+
+shots:
+  - screen: items
+    duration: 3.0
+    actions:
+      - { at: 1.5, do: tap, target: low-stock }
+
+  - screen: scan-bills
+    duration: 2.8
+    actions:
+      - { at: 1.6, do: tap, target: open-camera }
+
+  - screen: scan-camera
+    duration: 2.4
+    actions:
+      - { at: 1.5, do: tap, target: shutter }
+
+  - screen: scan-reading
+    duration: 2.2
+
+  - screen: scan-done
+    duration: 1.6
+
+  - screen: create-purchase
+    duration: 3.0
+    actions:
+      - { at: 1.8, do: tap, target: create-purchase }

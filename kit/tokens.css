@@ -235,6 +235,10 @@
  * the phone's own, not myBillBook's, so its chrome is near-black rather than
  * any colour in the app's palette. */
 :root {
+  /* SAMPLED from reference/frames/item-low.png, the Items list with the Low
+   * Stock filter on: the app prints a low quantity in red. Close to
+   * --mbb-danger but not the same colour, so it is its own token. */
+  --mbb-stock-low:      #F2514A;
   --mbb-scan-strip:     #FDF1E9;  /* SAMPLED - "21 bills scanned" strip   */
   --mbb-scan-done:      #16A34A;  /* SAMPLED - the Completed pill's text  */
   --mbb-scan-done-bg:   #F0FDF4;  /* SAMPLED - its fill                   */

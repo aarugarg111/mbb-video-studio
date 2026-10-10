@@ -1,0 +1,10 @@
+const fs = require('fs');
+const p = 'test/screens.test.js';
+let s = fs.readFileSync(p, 'utf8');
+const old = "      'item-row-0'\n";
+const oldCrlf = "      'item-row-0'\r\n";
+if (s.includes(oldCrlf)) s = s.replace(oldCrlf, "      'item-row-0',\r\n      'low-stock'\r\n");
+else if (s.includes(old)) s = s.replace(old, "      'item-row-0',\n      'low-stock'\n");
+else throw new Error('expectation not found');
+fs.writeFileSync(p, s);
+console.log('ok');

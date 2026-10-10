@@ -415,7 +415,7 @@ test('the new screens emit no raw hex colour', () => {
 
 test('catalogue includes the new screens and their targets', () => {
   const c = catalogue();
-  assert.deepEqual(c.items, ['create-new-item', 'bulk-action', 'item-row-0']);
+  assert.deepEqual(c.items, ['create-new-item', 'bulk-action', 'item-row-0', 'low-stock']);
   assert.deepEqual(c['create-item'], ['item-name', 'hsn', 'tab-stock', 'batching', 'save']);
 });
 
