@@ -137,3 +137,26 @@ test('session reports signed out without a cookie, and in with one', async () =>
   }), ENV);
   assert.equal((await inn.json()).signedIn, true);
 });
+
+test('a password stored with stray whitespace still lets the team in', async () => {
+  /* wrangler secret put keeps whatever the terminal gives it, so a pasted
+   * password can carry a newline nobody can see. */
+  const env = { ...ENV, TEAM_PASSWORD: '  let-me-in\n' };
+  const res = await worker.fetch(post('/api/login', { password: 'let-me-in' }), env);
+  assert.equal(res.status, 200);
+});
+
+test('a password typed with stray whitespace still lets the team in', async () => {
+  const res = await worker.fetch(post('/api/login', { password: ' let-me-in ' }), ENV);
+  assert.equal(res.status, 200);
+});
+
+test('trimming does not let a different password through', async () => {
+  const res = await worker.fetch(post('/api/login', { password: 'let-me-in-too' }), ENV);
+  assert.equal(res.status, 401);
+});
+
+test('an empty password is refused even against an unset-looking secret', async () => {
+  const res = await worker.fetch(post('/api/login', { password: '   ' }), { ...ENV, TEAM_PASSWORD: '   ' });
+  assert.equal(res.status, 401, 'an all-whitespace password must never be a way in');
+});

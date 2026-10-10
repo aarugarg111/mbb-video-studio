@@ -28,7 +28,18 @@ async function login(request, env) {
   if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405);
   let body;
   try { body = await request.json(); } catch { return json({ error: 'Expected JSON.' }, 400); }
-  if (!sameSecret(String(body?.password ?? ''), env.TEAM_PASSWORD)) {
+  /* Trimmed on both sides. `wrangler secret put` keeps whatever the terminal
+   * hands it, so a pasted password can carry a trailing newline or a stray
+   * space that nobody can see and that makes every correct attempt fail -
+   * which is exactly how this first went wrong. Nobody means a password to
+   * begin or end with a space. */
+  const given = String(body?.password ?? '').trim();
+  const expected = String(env.TEAM_PASSWORD).trim();
+  /* Without this, trimming turns an all-whitespace secret into an empty one
+   * that an all-whitespace guess matches - the door left open by the fix for
+   * the door being stuck. A test caught it. */
+  if (!given || !expected) return json({ error: 'That password is not right.' }, 401);
+  if (!sameSecret(given, expected)) {
     return json({ error: 'That password is not right.' }, 401);
   }
   return json({ ok: true }, 200, { 'Set-Cookie': cookieHeader(await signSession(env.SESSION_SECRET)) });
