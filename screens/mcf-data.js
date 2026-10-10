@@ -77,10 +77,25 @@ export function ledger(data) {
       }]
     : [];
 
+  /* A script that says a figure out loud - "market mein mera 52 lakh atka hai"
+   * - needs the screen to show that figure, or the video contradicts its own
+   * voiceover. So a recipe may name the whole book, and the fillers are only
+   * there for scripts that do not. */
+  const given = Array.isArray(data?.cashflo?.parties) ? data.cashflo.parties : [];
+  const extra = given.map(p => ({
+    name: String(p?.name ?? 'Party'),
+    balance: Number(p?.balance ?? 0),
+    overdueDays: Number(p?.overdueDays ?? 0),
+    standby: Number(p?.standby ?? 1),
+    phone: p?.phone
+  }));
+
+  const listed = [...own, ...extra];
   /* Whoever the recipe named is already in the book; a filler of the same name
    * would list them twice. */
-  const rest = FILLERS.filter(f => !own.some(o => o.name.toLowerCase() === f.name.toLowerCase()));
-  const parties = [...own, ...rest].slice(0, 7);
+  const rest = FILLERS.filter(f => !listed.some(o => o.name.toLowerCase() === f.name.toLowerCase()));
+  /* Fillers only pad a book the recipe did not fill itself. */
+  const parties = (extra.length ? listed : [...listed, ...rest]).slice(0, 7);
 
   const outstanding = parties.reduce((sum, p) => sum + p.balance, 0);
   const overdue = parties.filter(p => p.overdueDays > 0).reduce((sum, p) => sum + p.balance, 0);

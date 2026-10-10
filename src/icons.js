@@ -56,6 +56,7 @@ export const icons = {
   mcfParties: (s = 24) => svg(s, '<circle cx="9.5" cy="8" r="3.5"/><path d="M3 20c0-3.6 2.9-5.5 6.5-5.5S16 16.4 16 20"/><path d="M16.5 5.2a3.5 3.5 0 0 1 0 6.6M18 14.8c2.1.7 3.5 2.4 3.5 5.2"/>', 'stroke-width="1.7"'),
   mcfAutomations: (s = 24) => svg(s, '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><circle cx="17.5" cy="17.5" r="3.5"/><path d="M7 10.5v5a3 3 0 0 0 3 3h3.5"/>', 'stroke-width="1.7"'),
   dots: (s = 18) => svg(s, '<circle cx="5" cy="12" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/><circle cx="19" cy="12" r="1.7" fill="currentColor"/>'),
+  sync: (s = 18) => svg(s, '<path d="M20 11a8 8 0 0 0-13.7-5.2L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 13.7 5.2L20 16"/><path d="M20 20v-4h-4"/>', 'stroke-width="1.9"'),
   pause: (s = 20) => svg(s, '<path d="M9.5 5v14M14.5 5v14"/>', 'stroke-width="2.2"'),
   folderUp: (s = 24) => svg(s, '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 17v-6M9 13.5l3-3 3 3"/>', 'stroke-width="1.7"'),
   navDashboard: (s = 24) => svg(s, '<path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/>', 'stroke-width="1.6"'),

@@ -1,0 +1,52 @@
+# Script 1 - CONSTRUCTION, "Supplier ka payment aaj hai".
+#
+# The app-interface half of the script. Scenes 1, 2 and 5 are the creator's own
+# footage - the owner at the counter, the godown, the laptop with Tally on it -
+# and nothing here renders those. What the studio makes is scene 4: the
+# outstanding arriving from Tally, the parties it lands on, and the AI call.
+#
+# The book below adds up to the 52 lakh the script says out loud. If the
+# dashboard showed anything else the video would contradict its own voiceover.
+# Every name is invented.
+video: construction-tally-mcf
+
+business:
+  name: SHREE BALAJI BUILDING MATERIALS
+
+# The party the AI rings: the biggest and the oldest.
+party:
+  name: AGRAWAL CONSTRUCTIONS
+  balance: 1400000
+  overdueDays: 68
+  standby: 3
+
+cashflo:
+  parties:
+    - { name: SHANTI INFRA PROJECTS, balance: 1150000, overdueDays: 94, standby: 3 }
+    - { name: M R BUILDCON, balance: 900000, overdueDays: 41, standby: 2 }
+    - { name: Deepak Hardware Stores, balance: 760000, overdueDays: 22, standby: 2 }
+    - { name: NAVEEN CEMENT AGENCY, balance: 620000, overdueDays: 0, standby: 1 }
+    - { name: Sunil Traders, balance: 370000, overdueDays: 9, standby: 1 }
+
+shots:
+  # "myCashflo Tally se outstanding sync karta hai"
+  - screen: mcf-tally
+    duration: 3.4
+    actions:
+      - { at: 1.4, do: tap, target: sync-now }
+
+  # "priority parties dikhata hai" - worst first.
+  - screen: mcf-parties
+    duration: 3.0
+    actions:
+      - { at: 1.5, do: tap, target: party-row-0 }
+
+  # "aur AI follow-up karta hai" - the call, with the commitment at the end.
+  # Long enough for the whole exchange: the last line lands at 5.4s and the
+  # commitment at 7.4s.
+  - screen: mcf-ai-call
+    duration: 9.5
+
+  # Scene 5: back to the dashboard, the money now being chased.
+  - screen: mcf-dashboard
+    duration: 3.2

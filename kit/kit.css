@@ -743,3 +743,48 @@
 .mcf-nav > div { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 9.5px; color: var(--mcf-muted); }
 .mcf-nav > div.on { color: var(--mcf-navy); font-weight: 700; }
 .mcf-fab { flex: none; width: 52px; height: 52px; margin: 0 6px; border-radius: 999px; background: var(--mcf-navy); color: var(--mbb-surface); display: flex; align-items: center; justify-content: center; transform: translateY(-6px); }
+
+/* ---------- myCashFlo: the Tally sync, and the AI call ---------- */
+
+.mcf-trow { display: flex; align-items: center; gap: 12px; }
+.mcf-round.ok { background: var(--mcf-tint-green); color: var(--mcf-share-ink); }
+.mcf-dot.waiting { background: var(--mcf-due-soon); }
+
+/* The bar fills as the sync runs, so the shot shows it happening. */
+.mcf-bar-track { height: 5px; margin: 14px 0 4px; border-radius: 999px; background: var(--mcf-page); overflow: hidden; }
+.mcf-bar-track span { display: block; height: 100%; border-radius: 999px; background: var(--mcf-navy); }
+
+.mcf-tline { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--mcf-line); }
+.mcf-tline:last-child { border-bottom: 0; padding-bottom: 0; }
+.mcf-tlabel { font-size: 11.5px; color: var(--mcf-muted); }
+.mcf-tvalue { font-size: 12.5px; font-weight: 700; }
+.mcf-tvalue.strong { font-size: 15px; }
+
+/* The call is the one myCashFlo screen on a dark ground: it is a phone call,
+   not a page of the app, and the app's own screens are all light. */
+.callscreen { background: var(--mcf-call-ground); color: var(--mbb-surface); }
+
+.mcf-callhead { flex: none; padding: 34px 20px 0; text-align: center; }
+.mcf-calllabel { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 999px; background: var(--mcf-call-chip); font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; }
+.mcf-live { width: 7px; height: 7px; border-radius: 999px; background: var(--mcf-live); }
+.mcf-callname { margin-top: 16px; font-size: 21px; font-weight: 700; }
+.mcf-callowed { margin-top: 6px; font-size: 12px; color: var(--mcf-call-sub); }
+
+.mcf-wave { height: 44px; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.mcf-wave span { width: 5px; border-radius: 999px; background: var(--mcf-call-wave); }
+
+.mcf-calltime { margin-top: 12px; font-size: 12px; color: var(--mcf-call-sub); }
+
+.mcf-transcript { flex: 1; min-height: 0; padding: 22px 20px 0; display: flex; flex-direction: column; gap: 12px; }
+.mcf-said { max-width: 84%; padding: 11px 14px; border-radius: 13px; }
+.mcf-said.ai { align-self: flex-start; background: var(--mcf-said-ai); }
+.mcf-said.them { align-self: flex-end; background: var(--mcf-said-them); }
+.mcf-said-who { font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em; color: var(--mcf-call-sub); }
+.mcf-said-text { margin-top: 5px; font-size: 12.5px; line-height: 1.45; }
+
+.mcf-commit { align-self: flex-start; display: flex; align-items: center; gap: 8px; margin-top: 2px; padding: 10px 14px; border-radius: 999px; background: var(--mcf-commit-bg); color: var(--mcf-commit-ink); font-size: 11.5px; font-weight: 700; }
+
+.mcf-callbar { flex: none; height: 108px; display: flex; align-items: center; justify-content: space-around; }
+.mcf-callbtn { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 10px; color: var(--mcf-call-sub); }
+.mcf-callring { width: 46px; height: 46px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--mcf-call-chip); color: var(--mbb-surface); }
+.mcf-callbtn.end .mcf-callring { background: var(--mcf-legal-ink); }

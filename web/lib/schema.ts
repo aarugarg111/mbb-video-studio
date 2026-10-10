@@ -29,7 +29,9 @@ export const SCREENS = {
   'mcf-dashboard': ['call-personally', 'outstanding', 'nav-parties', 'nav-automations'],
   'mcf-parties': ['setup-automation', 'search', 'filter-overdue', 'party-row-0', 'party-row-1', 'nav-dashboard', 'nav-automations'],
   'mcf-party': ['call', 'legal', 'share', 'pause-calls', 'add-automation', 'tab-whatsapp'],
-  'mcf-automations': ['new-automation', 'automation-0', 'automation-1', 'nav-dashboard', 'nav-parties']
+  'mcf-automations': ['new-automation', 'automation-0', 'automation-1', 'nav-dashboard', 'nav-parties'],
+  'mcf-tally': ['sync-now', 'tally-status', 'nav-dashboard', 'nav-parties'],
+  'mcf-ai-call': ['end-call', 'listen', 'mute']
 } as const;
 
 /* Derived, never typed out again. This was a hand-kept second list, and it

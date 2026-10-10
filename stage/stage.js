@@ -22,7 +22,12 @@ window.setTime = function setTime(t) {
     business: recipe.business,
     party: recipe.party,
     items: recipe.items,
-    invoice: recipe.invoice
+    invoice: recipe.invoice,
+    /* The collections book, for the myCashFlo screens. Both renderers pick
+       the keys they hand over by hand, so a key added to a recipe reaches a
+       screen only once it is listed HERE TOO - in both files, which must stay
+       in step or the browser and CLI renders stop matching. */
+    cashflo: recipe.cashflo
   };
 
   const layers = [];

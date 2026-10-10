@@ -62,6 +62,11 @@ export function parse(text, catalogue, options = {}) {
     business: { name: '', ...(doc.business || {}) },
     party: { name: '', ...(doc.party || {}) },
     items: Array.isArray(doc.items) ? doc.items : [],
+    /* The collections book, for myCashFlo clips. A script that says a figure
+     * out loud - "market mein mera 52 lakh atka hai" - needs the screens to
+     * show that figure, so a recipe may name the parties itself instead of
+     * taking the invented ones. Anything not named here is filled in. */
+    cashflo: { ...(doc.cashflo || {}) },
     brand: { endCard: null, cta: { ...DEFAULT_CTA, image: true, tagline: DEFAULT_END_CARD.tagline } },
     shots: []
   };
@@ -185,6 +190,24 @@ export function parse(text, catalogue, options = {}) {
    * "actions" is: silently emptying it makes every later addItem complain the
    * recipe lists 0 items, which points the author at the wrong line. An absent
    * items key stays valid - a shot can be about a screen with no bill on it. */
+  if (doc.cashflo?.parties != null) {
+    if (!Array.isArray(doc.cashflo.parties)) {
+      errors.push('"cashflo.parties" must be a list of parties.');
+    } else {
+      doc.cashflo.parties.forEach((p, i) => {
+        const at = `cashflo.parties[${i}]`;
+        if (!p || typeof p !== 'object') {
+          errors.push(`${at} must be a mapping with a name and a balance.`);
+          return;
+        }
+        if (!p.name) errors.push(`${at} needs a name.`);
+        if (p.balance != null && !(Number(p.balance) >= 0)) {
+          errors.push(`${at}.balance must be a number, got ${JSON.stringify(p.balance)}.`);
+        }
+      });
+    }
+  }
+
   if (doc.items != null && !Array.isArray(doc.items)) {
     errors.push(`"items" must be a list, got ${typeof doc.items}.`);
   }

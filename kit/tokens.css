@@ -281,3 +281,18 @@
   --mcf-line:        #E6E7EC;
   --mcf-chip:        #E4E5EA;  /* the filter pills                   */
 }
+
+/* myCashFlo, continued: the AI call. The one screen of this app on a dark
+ * ground - it is a phone call, not a page of the app. Derived from the navy
+ * above rather than sampled, since no frame of this screen exists yet. */
+:root {
+  --mcf-call-ground: #141A2E;
+  --mcf-call-chip:   #2A3350;
+  --mcf-call-sub:    #9AA2BC;
+  --mcf-call-wave:   #7E93E8;
+  --mcf-live:        #F03E4A;
+  --mcf-said-ai:     #263159;
+  --mcf-said-them:   #2F2A45;
+  --mcf-commit-bg:   #16351F;
+  --mcf-commit-ink:  #6FE39A;
+}
