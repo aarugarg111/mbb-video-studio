@@ -19,3 +19,6 @@ docs/
 cf/.dev.vars
 cf/.wrangler/
 cf/node_modules/
+
+# Throwaway edit helpers
+*.cjs
