@@ -60,9 +60,13 @@ async function proxy(request, env) {
    * and allowing it here would only add a path nothing exercises. */
   delete body.stream;
 
+  /* The key is trimmed for the reason the password is: `wrangler secret put`
+   * stores whatever the terminal gave it, and a key with a trailing newline
+   * comes back from Anthropic as "invalid x-api-key" - which reads like the
+   * wrong key rather than the right one with a character stuck to it. */
   const headers = {
     'Content-Type': 'application/json',
-    'x-api-key': env.ANTHROPIC_API_KEY,
+    'x-api-key': String(env.ANTHROPIC_API_KEY).trim(),
     'anthropic-version': request.headers.get('anthropic-version') || '2023-06-01'
   };
   /* The structured-output helper the studio uses asks for a beta; forward

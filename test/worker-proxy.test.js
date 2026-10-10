@@ -160,3 +160,16 @@ test('an empty password is refused even against an unset-looking secret', async 
   const res = await worker.fetch(post('/api/login', { password: '   ' }), { ...ENV, TEAM_PASSWORD: '   ' });
   assert.equal(res.status, 401, 'an all-whitespace password must never be a way in');
 });
+
+test('a key stored with a trailing newline is still sent as the key', async () => {
+  /* Anthropic answers "invalid x-api-key" for this, which reads like the wrong
+   * key rather than the right one with a character stuck to it. */
+  const cap = captureUpstream();
+  try {
+    await worker.fetch(
+      post('/api/anthropic/v1/messages', {}, await signedInCookie()),
+      { ...ENV, ANTHROPIC_API_KEY: ENV.ANTHROPIC_API_KEY + '\n' }
+    );
+    assert.equal(cap.seen.headers['x-api-key'], ENV.ANTHROPIC_API_KEY);
+  } finally { cap.restore(); }
+});
