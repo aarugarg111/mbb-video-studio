@@ -7,7 +7,7 @@ import { THEMES } from '@/lib/schema';
 import { proposeRecipe } from '@/lib/claude';
 import { TEAM_MODE, signIn, signOut, isSignedIn } from '@/lib/team';
 import { renderVideo } from '@/lib/render';
-import { isSupported } from '@/lib/encode';
+import { canEncode } from '@/lib/encode';
 import { renderRemotely, canRenderRemotely } from '@/lib/render-remote';
 import { briefingFor } from '@/lib/briefing';
 import { runSelfTest, asReport, type Step as CheckStep } from '@/lib/selftest';
@@ -75,7 +75,11 @@ export default function Page() {
     } else {
       try { setApiKey(localStorage.getItem(KEY_NAME) ?? ''); } catch { /* private mode */ }
     }
-    setSupported(isSupported());
+    /* Asked, not assumed. Safari has VideoEncoder and VideoFrame and fails
+       anyway, so the old check promised a render it could not deliver and the
+       failure landed deep inside the muxer. The stage is 1080x1920 at 30fps,
+       which is exactly what the render will ask for. */
+    canEncode({ width: 1080, height: 1920, fps: 30 }).then(setSupported);
     if (TEAM_MODE) canRenderRemotely().then(setCanRemote);
 
     /* A testing hook. renderVideo is a pure function of a recipe and this page

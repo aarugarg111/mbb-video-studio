@@ -8,10 +8,37 @@ export const keyFrameEvery = (fps: number) => fps;
 export const timestampFor = (frame: number, fps: number) =>
   Math.round((frame / fps) * 1_000_000);
 
+/* Whether the objects exist at all. Necessary and nowhere near sufficient:
+ * Safari 26 has VideoEncoder and VideoFrame, passes this, and then cannot
+ * actually encode H.264 - the failure surfaces deep inside the muxer as
+ * "null is not an object (evaluating 't.info.decoderConfig.colorSpace')",
+ * which names neither Safari nor the codec. Use canEncode below for anything
+ * that decides whether to offer a render. */
 export function isSupported(): boolean {
   return typeof window !== 'undefined' &&
     'VideoEncoder' in window &&
     'VideoFrame' in window;
+}
+
+/* Asks the browser whether it can really encode what we are about to ask for,
+ * rather than whether the words exist. This is the honest check, and it is
+ * asynchronous because the specification made it so. */
+export async function canEncode(
+  { width, height, fps }: { width: number; height: number; fps: number }
+): Promise<boolean> {
+  if (!isSupported()) return false;
+  try {
+    const encoder = VideoEncoder as unknown as {
+      isConfigSupported?: (c: VideoEncoderConfig) => Promise<{ supported?: boolean }>;
+    };
+    /* An older browser with no isConfigSupported is taken at its word - it is
+     * the browsers that answer this question that we need protecting from. */
+    if (typeof encoder.isConfigSupported !== 'function') return true;
+    const { supported } = await encoder.isConfigSupported({ codec: CODEC, width, height, framerate: fps });
+    return supported === true;
+  } catch {
+    return false;
+  }
 }
 
 export type Encoder = {
@@ -22,9 +49,10 @@ export type Encoder = {
 export async function createEncoder(
   { width, height, fps }: { width: number; height: number; fps: number }
 ): Promise<Encoder> {
-  if (!isSupported()) {
+  if (!await canEncode({ width, height, fps })) {
     throw new Error(
-      'This browser cannot encode video. Chrome or Edge is needed — Safari does not support WebCodecs H.264 encoding.'
+      'This browser cannot make H.264 video. Safari says it can and then cannot, which is why ' +
+      'this is checked rather than assumed. Use Chrome or Edge on a computer.'
     );
   }
 
@@ -35,9 +63,30 @@ export async function createEncoder(
   });
 
   let failure: Error | null = null;
+  let seenConfig = false;
 
   const encoder = new VideoEncoder({
-    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+    output: (chunk, meta) => {
+      /* The muxer needs the decoder configuration that comes with the first
+       * chunk. A browser that encodes but never sends one takes the muxer down
+       * from the inside, with a message naming a property rather than a cause.
+       * Caught here, where it can say what actually happened. */
+      if (!seenConfig) {
+        if (!meta?.decoderConfig) {
+          failure = new Error(
+            'This browser produced video it could not describe, so the file cannot be assembled. ' +
+            'That is a limitation of the browser rather than of the clip - use Chrome or Edge on a computer.'
+          );
+          return;
+        }
+        seenConfig = true;
+      }
+      try {
+        muxer.addVideoChunk(chunk, meta);
+      } catch (e) {
+        failure = e instanceof Error ? e : new Error(String(e));
+      }
+    },
     error: e => { failure = e instanceof Error ? e : new Error(String(e)); }
   });
 
@@ -81,7 +130,13 @@ export async function createEncoder(
     },
 
     async finish() {
-      await encoder.flush();
+      /* flush can itself throw on a browser that got this far and still
+       * cannot finish, and that error is no more readable than the muxer's. */
+      try {
+        await encoder.flush();
+      } catch (e) {
+        throw failure ?? (e instanceof Error ? e : new Error(String(e)));
+      }
       if (failure) throw failure;
       encoder.close();
       muxer.finalize();
