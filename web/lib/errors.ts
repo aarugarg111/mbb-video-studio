@@ -27,6 +27,33 @@ function statusOf(error: unknown): number | null {
   return match ? Number(match[1]) : null;
 }
 
+/* Which of the three things in the chain answered, and its own reference.
+ * A 403 can come from this studio's Worker, from Cloudflare in front of it,
+ * or from Claude behind it - identical on screen, fixed in three different
+ * places. Without these the only way to tell them apart is to guess. */
+function traceOf(error: unknown): string {
+  const headers = (error as { headers?: unknown })?.headers;
+  if (!headers) return '';
+
+  const read = (name: string): string => {
+    try {
+      if (typeof (headers as Headers).get === 'function') return (headers as Headers).get(name) ?? '';
+      return String((headers as Record<string, unknown>)[name] ?? '');
+    } catch {
+      return '';
+    }
+  };
+
+  const parts = [
+    read('x-mvs-stage') && `answered by: ${read('x-mvs-stage')}`,
+    read('x-mvs-request-id') && `claude request id: ${read('x-mvs-request-id')}`,
+    read('request-id') && `request id: ${read('request-id')}`,
+    read('cf-ray') && `cloudflare ray: ${read('cf-ray')}`
+  ].filter(Boolean);
+
+  return parts.length ? '\n' + parts.join('\n') : '';
+}
+
 function rawOf(error: unknown): string {
   if (error instanceof Error) return error.message;
   if (typeof error === 'string') return error;
@@ -43,7 +70,7 @@ function rawOf(error: unknown): string {
 /* Whether the studio is the one holding the key changes the advice entirely:
  * "ask Aryan to check the key" is wrong if the key is in your own browser. */
 export function explain(error: unknown, teamMode: boolean): Explained {
-  const detail = rawOf(error);
+  const detail = rawOf(error) + traceOf(error);
   const status = statusOf(error);
   const text = detail.toLowerCase();
 
@@ -68,8 +95,9 @@ export function explain(error: unknown, teamMode: boolean): Explained {
   if (status === 403 || text.includes('forbidden') || text.includes('permission_error')) {
     return {
       message:
-        'Claude refused the request outright. That usually means the key has been turned off, ' +
-        `has run out of credit, or is not allowed to use this model. ${keyHolder}`,
+        'Something refused the request before Claude could answer it. That is usually the key ' +
+        'being turned off, out of credit, or not allowed to use this model - but it can also be ' +
+        `the connection in between. ${keyHolder} Open "What it said exactly" and send that too.`,
       detail
     };
   }

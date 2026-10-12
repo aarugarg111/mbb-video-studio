@@ -131,6 +131,10 @@ async function proxy(request, env) {
     headers: {
       'Content-Type': upstream.headers.get('Content-Type') || 'application/json',
       'x-mvs-stage': 'anthropic',
+      /* Cloudflare's own reference. A refusal from an edge rather than from
+       * Anthropic's API carries a ray and no request id - which is exactly
+       * the difference worth knowing. */
+      ...(upstream.headers.get('cf-ray') ? { 'x-mvs-cf-ray': upstream.headers.get('cf-ray') } : {}),
       ...(upstream.headers.get('request-id') ? { 'x-mvs-request-id': upstream.headers.get('request-id') } : {})
     }
   });

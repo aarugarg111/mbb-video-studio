@@ -74,3 +74,41 @@ test('it never throws, whatever it is handed', () => {
     assert.equal(typeof explain(odd, true).message, 'string');
   }
 });
+
+test('the error carries who answered it, which is the whole diagnosis', () => {
+  /* A 403 from the Worker, from Cloudflare, and from Claude look identical on
+     screen and are fixed in three different places. Claude's API always
+     returns a request id; an edge refusal in front of it returns a ray and no
+     request id. That difference is the answer, so it has to reach the person
+     reporting the fault. */
+  const fromClaude = Object.assign(new Error('403 forbidden'), {
+    status: 403,
+    headers: new Headers({ 'x-mvs-stage': 'anthropic', 'x-mvs-request-id': 'req_abc123' })
+  });
+  assert.match(explain(fromClaude, true).detail, /answered by: anthropic/);
+  assert.match(explain(fromClaude, true).detail, /claude request id: req_abc123/);
+
+  const fromAnEdge = Object.assign(new Error('403 forbidden'), {
+    status: 403,
+    headers: new Headers({ 'x-mvs-stage': 'anthropic', 'x-mvs-cf-ray': '8f2a1b' })
+  });
+  const detail = explain(fromAnEdge, true).detail;
+  assert.ok(!detail.includes('request id'), 'no request id means Claude never saw it');
+
+  const fromTheWorker = Object.assign(new Error('403'), {
+    status: 403,
+    headers: new Headers({ 'x-mvs-stage': 'worker' })
+  });
+  assert.match(explain(fromTheWorker, true).detail, /answered by: worker/);
+});
+
+test('an error with no headers at all still explains itself', () => {
+  assert.doesNotThrow(() => explain(new Error('403 forbidden'), true));
+  assert.equal(explain(new Error('plain'), true).detail, 'plain');
+});
+
+test('headers given as a plain object are read too', () => {
+  /* Not every SDK hands back a Headers instance. */
+  const err = Object.assign(new Error('403'), { status: 403, headers: { 'x-mvs-stage': 'worker' } });
+  assert.match(explain(err, true).detail, /answered by: worker/);
+});
