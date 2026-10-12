@@ -10,6 +10,7 @@ import { renderVideo } from '@/lib/render';
 import { isSupported } from '@/lib/encode';
 import { renderRemotely, canRenderRemotely } from '@/lib/render-remote';
 import { briefingFor } from '@/lib/briefing';
+import { runSelfTest, asReport, type Step as CheckStep } from '@/lib/selftest';
 import { Stage } from './studio/stage';
 // The renderer's own validator - the same one the CLI uses.
 import { parse } from '../../src/recipe.js';
@@ -39,6 +40,9 @@ export default function Page() {
      it is rarely the person who can fix it, so it has to be copyable. */
   const [errorDetail, setErrorDetail] = useState('');
   const [copiedError, setCopiedError] = useState(false);
+  /* The connection check, for the machines where the studio does not work. */
+  const [checks, setChecks] = useState<CheckStep[] | null>(null);
+  const [checking, setChecking] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [videoUrl, setVideoUrl] = useState('');
   const [busy, setBusy] = useState(false);
@@ -140,6 +144,29 @@ export default function Page() {
   /* An error here is nearly always on its way to somebody else, so it leaves
      with everything needed to act on it - what was shown, what was said, and
      when - rather than as a photograph of half of it. */
+  /* Walks the chain one hop at a time and says which hop broke. The studio
+     works for most people and fails for a few, which means the fault is on one
+     person's own path to it - and from the outside every one of those looks
+     the same. */
+  async function check() {
+    setChecking(true);
+    setChecks(null);
+    try {
+      setChecks(await runSelfTest());
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  async function copyChecks() {
+    if (!checks) return;
+    try {
+      await navigator.clipboard.writeText(asReport(checks));
+      setCopiedError(true);
+      setTimeout(() => setCopiedError(false), 2500);
+    } catch { /* it is on screen either way */ }
+  }
+
   async function copyError() {
     const text = [
       'myBillBook Video Studio - error report',
@@ -457,6 +484,36 @@ export default function Page() {
         <div className="note warn">
           {warnings.map((w, i) => <div key={i}>{w}</div>)}
         </div>
+      )}
+
+      {TEAM_MODE && (
+        <details className="freepath checkbox">
+          <summary>Not working on this machine? Run a check</summary>
+          <p className="hint">
+            This walks from this browser to the studio to Claude and says which step fails.
+            It sends one tiny request, so it costs almost nothing.
+          </p>
+          <div className="row">
+            <button className="secondary" onClick={check} disabled={checking}>
+              {checking ? 'Checking…' : 'Run the check'}
+            </button>
+            {checks && (
+              <button className="secondary" onClick={copyChecks}>
+                {copiedError ? 'Copied' : 'Copy the result'}
+              </button>
+            )}
+          </div>
+          {checks && (
+            <ul className="checks">
+              {checks.map(step => (
+                <li key={step.name} className={step.outcome}>
+                  <strong>{step.name}</strong>
+                  <div>{step.detail}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </details>
       )}
 
       {error && (
