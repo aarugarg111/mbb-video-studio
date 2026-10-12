@@ -788,3 +788,44 @@
 .mcf-callbtn { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 10px; color: var(--mcf-call-sub); }
 .mcf-callring { width: 46px; height: 46px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--mcf-call-chip); color: var(--mbb-surface); }
 .mcf-callbtn.end .mcf-callring { background: var(--mcf-legal-ink); }
+
+/* ---------- Tally ----------
+ * Approximated from TallyPrime's public documentation, not sampled from a
+ * recording - the only screen here built that way, and deliberately so. */
+.tyscreen { background: var(--tally-body); color: var(--tally-ink); display: flex; flex-direction: column; font-family: var(--mbb-font); }
+
+.ty-top { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 0 13px; padding: 7px 10px; background: var(--tally-bar); color: var(--mbb-surface); font-size: 9px; }
+.ty-key b { font-weight: 700; }
+
+.ty-sub { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; background: var(--tally-sub); color: var(--mbb-surface); }
+.ty-co { font-size: 11px; font-weight: 700; }
+.ty-rep { font-size: 11px; }
+
+.ty-main { flex: 1; min-height: 0; display: flex; }
+.ty-sheet { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* Six columns, sized the way the report weights them: the party's name gets
+   the room and the numbers sit right-aligned against it. */
+.ty-head, .ty-row { display: flex; align-items: stretch; border-bottom: 1px solid var(--tally-rule); }
+.ty-head { background: var(--tally-head); font-weight: 700; }
+/* The fixed columns have to add up to LESS than the sheet beside the button
+   panel, or they overflow under it - which hid the overdue count, the one
+   number this screen exists to show. 44+64+44+28 = 180 of 316. */
+.ty-c { padding: 7px 5px; font-size: 8.5px; line-height: 1.3; }
+.ty-c.date { width: 42px; flex: none; }
+.ty-c.party { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ty-c.amt { width: 62px; flex: none; text-align: right; }
+.ty-c.due { width: 42px; flex: none; }
+/* Wide enough for the word "Overdue" in the header, which clipped at 28. */
+.ty-c.late { width: 38px; flex: none; text-align: right; }
+
+.ty-rows { flex: 1; }
+.ty-row .late { color: var(--tally-late); font-weight: 700; }
+.ty-row.total { background: var(--tally-total); font-weight: 700; border-top: 1px solid var(--tally-rule); }
+.ty-row.total .party { text-align: right; }
+
+.ty-side { flex: none; width: 74px; padding: 8px 6px; background: var(--tally-panel); border-left: 1px solid var(--tally-rule); }
+.ty-sidekey { padding: 7px 4px; font-size: 8.5px; color: var(--tally-ink); }
+.ty-sidekey b { color: var(--tally-panel-k); font-weight: 700; }
+
+.ty-status { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; background: var(--tally-status); color: var(--mbb-surface); font-size: 8.5px; }

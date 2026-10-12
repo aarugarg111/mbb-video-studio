@@ -1,9 +1,9 @@
 # Script 1 - CONSTRUCTION, "Supplier ka payment aaj hai".
 #
 # The app-interface half of the script. Scenes 1, 2 and 5 are the creator's own
-# footage - the owner at the counter, the godown, the laptop with Tally on it -
-# and nothing here renders those. What the studio makes is scene 4: the
-# outstanding arriving from Tally, the parties it lands on, and the AI call.
+# footage - the owner at the counter and the godown. What the studio makes is
+# scene 3, the pending money in Tally, and scene 4: the same outstanding
+# arriving in myCashFlo, the parties it lands on, and the AI call.
 #
 # The book below adds up to the 52 lakh the script says out loud. If the
 # dashboard showed anything else the video would contradict its own voiceover.
@@ -29,6 +29,13 @@ cashflo:
     - { name: Sunil Traders, balance: 370000, overdueDays: 9, standby: 1 }
 
 shots:
+  # Scene 3: "Tally mujhe bata deta hai paisa kahan pending hai." The same
+  # bills myCashFlo is about to pull across, so the two screens agree.
+  - screen: tally-receivables
+    duration: 3.2
+    actions:
+      - { at: 1.6, do: tap, target: f6-age-wise }
+
   # "myCashflo Tally se outstanding sync karta hai"
   - screen: mcf-tally
     duration: 3.4

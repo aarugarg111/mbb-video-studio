@@ -20,6 +20,7 @@ import * as mcfParty from './mcf-party.js';
 import * as mcfAutomations from './mcf-automations.js';
 import * as mcfTally from './mcf-tally.js';
 import * as mcfAiCall from './mcf-ai-call.js';
+import * as tallyReceivables from './tally-receivables.js';
 
 export const SCREENS = {
   [home.name]: home,
@@ -43,7 +44,8 @@ export const SCREENS = {
   [mcfParty.name]: mcfParty,
   [mcfAutomations.name]: mcfAutomations,
   [mcfTally.name]: mcfTally,
-  [mcfAiCall.name]: mcfAiCall
+  [mcfAiCall.name]: mcfAiCall,
+  [tallyReceivables.name]: tallyReceivables
 };
 
 /* The shape src/recipe.js validates against: screen name -> its target names. */

@@ -296,3 +296,27 @@
   --mcf-commit-bg:   #16351F;
   --mcf-commit-ink:  #6FE39A;
 }
+
+/* ---------------------------------------------------------------------------
+ * Tally.
+ *
+ * Somebody else's software, and no frame of it exists in our recordings - so
+ * unlike every other palette here these are NOT sampled. They are approximated
+ * from TallyPrime's public documentation and screenshots, which is what Aryan
+ * asked for: recognisable, not exact. If a real recording ever arrives, sample
+ * it and replace these.
+ * ------------------------------------------------------------------------ */
+:root {
+  --tally-bar:     #1C3F73;  /* the top key bar                   */
+  --tally-sub:     #2E5B9A;  /* the company/report strip under it */
+  --tally-panel:   #D7E3F4;  /* the right-hand button bar         */
+  --tally-panel-k: #B23A14;  /* its key letters, in rust          */
+  --tally-body:    #FFFFFF;
+  --tally-head:    #E8EEF8;  /* the column header row             */
+  --tally-ink:     #15223A;
+  --tally-muted:   #5E6B82;
+  --tally-rule:    #C9D4E6;
+  --tally-total:   #F2F6FD;  /* the grand total row               */
+  --tally-late:    #B3261E;  /* an overdue count                  */
+  --tally-status:  #10243F;  /* the strip along the bottom        */
+}

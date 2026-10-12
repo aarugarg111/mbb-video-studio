@@ -347,8 +347,13 @@ export function parse(text, catalogue, options = {}) {
    * A clip that cuts between them reads as footage of the wrong product
    * spliced in by mistake - so this is worth saying out loud, even though
    * both render perfectly well. */
+  /* Tally sits on the myCashFlo side: these scripts are about Tally handing
+   * over to it, so the two belong in one clip. In a myBillBook clip it is as
+   * wrong as myCashFlo would be. */
   const products = new Set(recipe.shots.map(shot =>
-    shot.screen.startsWith('mcf-') ? 'myCashFlo' : 'myBillBook'));
+    shot.screen.startsWith('mcf-') || shot.screen.startsWith('tally-')
+      ? 'myCashFlo'
+      : 'myBillBook'));
   if (products.size > 1) {
     warnings.push(
       'This clip mixes myBillBook and myCashFlo screens. They are different apps ' +
