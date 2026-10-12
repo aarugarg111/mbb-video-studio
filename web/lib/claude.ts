@@ -4,6 +4,7 @@ import * as yaml from 'js-yaml';
 import type { Recipe } from './schema';
 import { TEAM_MODE, proxyBaseUrl } from './team';
 import { RecipeSchema, SCREENS, ACTIONS, THEMES } from './schema';
+import { explain } from './errors';
 
 /* The prompt is carried over verbatim from the server route. It has been
  * corrected several times against real scripts; rewriting it loses that. */
@@ -77,22 +78,33 @@ export async function proposeRecipe(
     ? new Anthropic({ apiKey: 'held-by-the-worker', baseURL: proxyBaseUrl(), dangerouslyAllowBrowser: true })
     : new Anthropic({ apiKey: apiKey ?? '', dangerouslyAllowBrowser: true });
 
-  const response = await client.messages.parse({
-    model: 'claude-opus-5-5',
-    max_tokens: 16000,
-    system: SYSTEM,
-    messages: [{
-      role: 'user',
-      content: `Overrides (may be empty - anything absent comes from the script):\n` +
-        `${JSON.stringify(details, null, 2)}\n\nScript:\n${script}`
-    }],
-    output_config: {
-      /* Low effort: structured extraction against a fixed schema, not hard
-       * reasoning. Raise it if the shot lists come back sloppy. */
-      effort: 'low',
-      format: zodOutputFormat(RecipeSchema)
-    }
-  });
+  /* Whatever comes back from here reaches a teammate's screen, so it is
+   * translated on the way out. The raw text is kept on the error so whoever
+   * has to fix it still has it. */
+  let response;
+  try {
+    response = await client.messages.parse({
+      model: 'claude-opus-5-5',
+      max_tokens: 16000,
+      system: SYSTEM,
+      messages: [{
+        role: 'user',
+        content: `Overrides (may be empty - anything absent comes from the script):\n` +
+          `${JSON.stringify(details, null, 2)}\n\nScript:\n${script}`
+      }],
+      output_config: {
+        /* Low effort: structured extraction against a fixed schema, not hard
+         * reasoning. Raise it if the shot lists come back sloppy. */
+        effort: 'low',
+        format: zodOutputFormat(RecipeSchema)
+      }
+    });
+  } catch (err) {
+    const { message, detail } = explain(err, TEAM_MODE);
+    const friendly = new Error(message);
+    (friendly as Error & { detail?: string }).detail = detail;
+    throw friendly;
+  }
 
   if (!response.parsed_output) {
     throw new Error('The model did not return a usable shot list. Try again.');

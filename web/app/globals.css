@@ -195,3 +195,10 @@ video { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 20px; di
 .freepath[open] summary { margin-bottom: 8px; }
 .freepath .row { margin-top: 10px; }
 .freepath textarea { margin-top: 10px; }
+
+/* The raw text behind a translated error. Folded away, because the person who
+   sees it is rarely the person who can fix it - but they have to be able to
+   copy it to whoever can. */
+.note.error .detail { margin-top: 10px; }
+.note.error .detail summary { cursor: pointer; font-size: 12px; opacity: 0.85; }
+.note.error .detail code { display: block; margin-top: 7px; padding: 9px 11px; border-radius: 7px; background: rgba(0, 0, 0, 0.06); font-size: 11.5px; line-height: 1.45; word-break: break-word; }

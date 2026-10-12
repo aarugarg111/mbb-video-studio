@@ -35,6 +35,9 @@ export default function Page() {
   const [recipe, setRecipe] = useState('');
   const [unsupported, setUnsupported] = useState<string[]>([]);
   const [error, setError] = useState('');
+  /* The raw text behind a translated error, folded away. The person who sees
+     it is rarely the person who can fix it, so it has to be copyable. */
+  const [errorDetail, setErrorDetail] = useState('');
   const [warnings, setWarnings] = useState<string[]>([]);
   const [videoUrl, setVideoUrl] = useState('');
   const [busy, setBusy] = useState(false);
@@ -89,6 +92,7 @@ export default function Page() {
   async function submitPassword() {
     setBusy(true);
     setError('');
+    setErrorDetail('');
     try {
       await signIn(password);
       setPassword('');
@@ -122,6 +126,7 @@ export default function Page() {
     setUnsupported([]);
     setWarnings([]);
     setError('');
+    setErrorDetail('');
     setByHand(false);
     setProgress({ done: 0, total: 0 });
     setStep('fill');
@@ -150,12 +155,14 @@ export default function Page() {
     setUnsupported([]);
     setWarnings([]);
     setError('');
+    setErrorDetail('');
     setStep('check');
   }
 
   async function propose() {
     setBusy(true);
     setError('');
+    setErrorDetail('');
     try {
       const proposed = await proposeRecipe({
         ...(TEAM_MODE ? {} : { apiKey }),
@@ -173,6 +180,7 @@ export default function Page() {
       setStep('check');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong.');
+      setErrorDetail((e as { detail?: string })?.detail ?? '');
     } finally {
       setBusy(false);
     }
@@ -180,6 +188,7 @@ export default function Page() {
 
   async function render() {
     setError('');
+    setErrorDetail('');
     setWarnings([]);
 
     let checked: any;
@@ -427,7 +436,17 @@ export default function Page() {
         </div>
       )}
 
-      {error && <div className="note error">{error}</div>}
+      {error && (
+        <div className="note error">
+          {error}
+          {errorDetail && errorDetail !== error && (
+            <details className="detail">
+              <summary>What it said exactly</summary>
+              <code>{errorDetail}</code>
+            </details>
+          )}
+        </div>
+      )}
     </main>
   );
 }

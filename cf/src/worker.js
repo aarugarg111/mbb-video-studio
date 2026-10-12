@@ -24,7 +24,7 @@ const MAX_TOKENS = 16000;
 const json = (body, status = 200, headers = {}) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json', ...headers }
+    headers: { 'Content-Type': 'application/json', 'x-mvs-stage': 'worker', ...headers }
   });
 
 function missing(env) {
@@ -122,10 +122,17 @@ async function proxy(request, env) {
   const upstream = await fetch(UPSTREAM, { method: 'POST', headers, body: JSON.stringify(body) });
 
   /* Passed through as-is: the SDK reads Anthropic's own error shapes and says
-   * something useful about them, which a reworded message would lose. */
+   * something useful about them, which a reworded message would lose. The
+   * header is added so that a refusal can be traced to whoever issued it -
+   * this Worker, Cloudflare in front of it, or Anthropic behind it. They look
+   * identical on the screen and are fixed in three different places. */
   return new Response(upstream.body, {
     status: upstream.status,
-    headers: { 'Content-Type': upstream.headers.get('Content-Type') || 'application/json' }
+    headers: {
+      'Content-Type': upstream.headers.get('Content-Type') || 'application/json',
+      'x-mvs-stage': 'anthropic',
+      ...(upstream.headers.get('request-id') ? { 'x-mvs-request-id': upstream.headers.get('request-id') } : {})
+    }
   });
 }
 
