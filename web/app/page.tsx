@@ -38,6 +38,7 @@ export default function Page() {
   /* The raw text behind a translated error, folded away. The person who sees
      it is rarely the person who can fix it, so it has to be copyable. */
   const [errorDetail, setErrorDetail] = useState('');
+  const [copiedError, setCopiedError] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [videoUrl, setVideoUrl] = useState('');
   const [busy, setBusy] = useState(false);
@@ -136,6 +137,28 @@ export default function Page() {
      this costs nothing and needs no key, at the price of three copy-pastes.
      The shot list that comes back is checked by exactly the same validator,
      so a weaker model means a clearer error, not a worse video. */
+  /* An error here is nearly always on its way to somebody else, so it leaves
+     with everything needed to act on it - what was shown, what was said, and
+     when - rather than as a photograph of half of it. */
+  async function copyError() {
+    const text = [
+      'myBillBook Video Studio - error report',
+      new Date().toISOString(),
+      '',
+      error,
+      '',
+      errorDetail
+    ].join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedError(true);
+      setTimeout(() => setCopiedError(false), 2500);
+    } catch {
+      /* Refused clipboard access: the text is on screen anyway, which is the
+         whole reason it is no longer hidden behind a disclosure triangle. */
+    }
+  }
+
   async function copyBriefing() {
     const briefing = briefingFor(script, { business, party, theme });
     try {
@@ -439,11 +462,21 @@ export default function Page() {
       {error && (
         <div className="note error">
           {error}
+          {/* Shown, not folded away. Twice now a fault has been reported with
+              this collapsed, so the one line that identifies it was missing
+              from the screenshot - which is the page's fault, not the
+              reporter's. The button is here because an error on this screen is
+              nearly always going to be pasted to somebody else. */}
           {errorDetail && errorDetail !== error && (
-            <details className="detail">
-              <summary>What it said exactly</summary>
+            <div className="detail">
+              <div className="detail-head">
+                <span>What it said exactly</span>
+                <button className="linkbtn" onClick={copyError}>
+                  {copiedError ? 'Copied' : 'Copy this'}
+                </button>
+              </div>
               <code>{errorDetail}</code>
-            </details>
+            </div>
           )}
         </div>
       )}
