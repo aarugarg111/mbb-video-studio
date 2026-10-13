@@ -33,6 +33,10 @@ export default function Page() {
   const [business, setBusiness] = useState('');
   const [party, setParty] = useState('');
   const [theme, setTheme] = useState('');
+  /* Which shape the clip is filmed in. Empty means the script decides, which
+     is right for most of them - a counter scene is a phone, a desk scene is a
+     laptop, and the script usually says which. */
+  const [shape, setShape] = useState('');
   const [recipe, setRecipe] = useState('');
   const [unsupported, setUnsupported] = useState<string[]>([]);
   const [error, setError] = useState('');
@@ -131,6 +135,7 @@ export default function Page() {
     setBusiness('');
     setParty('');
     setTheme('');
+    setShape('');
     setRecipe('');
     setUnsupported([]);
     setWarnings([]);
@@ -191,7 +196,7 @@ export default function Page() {
   }
 
   async function copyBriefing() {
-    const briefing = briefingFor(script, { business, party, theme });
+    const briefing = briefingFor(script, { business, party, theme, shape });
     try {
       await navigator.clipboard.writeText(briefing);
       setCopied(true);
@@ -226,7 +231,8 @@ export default function Page() {
         details: {
           ...(business ? { business: { name: business } } : {}),
           ...(party ? { party: { name: party } } : {}),
-          ...(theme ? { invoice: { theme } } : {})
+          ...(theme ? { invoice: { theme } } : {}),
+          ...(shape ? { shape } : {})
         }
       });
       setRecipe(proposed.recipe);
@@ -367,6 +373,18 @@ export default function Page() {
           <textarea id="script" value={script} onChange={e => setScript(e.target.value)}
                     placeholder="Paste the finalized script, including its [Internal team adds: UI — ...] markers." />
           <p className="hint">The shop, the customer, the items and the theme are all read out of the script. Only fill in an override below if the script gets one of them wrong.</p>
+
+          <div className="shape">
+            <span className="shape-k">Filmed on</span>
+            {[['', 'Let the script decide'], ['phone', 'A phone'], ['laptop', 'A laptop']].map(([value, label]) => (
+              <button
+                key={value || 'auto'}
+                type="button"
+                className={'shape-pick' + (shape === value ? ' on' : '')}
+                onClick={() => setShape(value)}
+              >{label}</button>
+            ))}
+          </div>
 
           <details className="overrides">
             <summary>Overrides — only if the script gets something wrong</summary>

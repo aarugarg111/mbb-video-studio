@@ -78,3 +78,19 @@ test('the briefing does not ask for a field the renderer throws away', () => {
   assert.ok(briefing.includes('# Not shown:'), 'the briefing must redirect it to a comment');
   assert.ok(briefing.includes('YAML has no place for'), 'and say why');
 });
+
+test('the shape choice reaches the other AI', () => {
+  /* Phone or laptop is a decision the person makes before the shot list
+     exists, so the free path has to carry it too - otherwise the toggle works
+     for Claude and silently does nothing for ChatGPT. */
+  const INSTRUCTION = 'Use the LAPTOP screens (mbb-desktop-*, mcf-desktop)';
+  const PHONE_ONLY = 'Use the PHONE screens throughout.';
+
+  assert.ok(briefingFor(SCRIPT, { shape: 'laptop' }).includes(INSTRUCTION));
+  assert.ok(briefingFor(SCRIPT, { shape: 'phone' }).includes(PHONE_ONLY));
+
+  /* Left to the script, neither instruction is given. */
+  const neither = briefingFor(SCRIPT, {});
+  assert.ok(!neither.includes(INSTRUCTION));
+  assert.ok(!neither.includes(PHONE_ONLY));
+});

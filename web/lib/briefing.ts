@@ -22,6 +22,8 @@ export interface Details {
   business?: string;
   party?: string;
   theme?: string;
+  /* '' | 'phone' | 'laptop' - which shape the clip is filmed in. */
+  shape?: string;
 }
 
 /* A chat window has no structured-output mode, so the briefing asks for YAML
@@ -55,7 +57,12 @@ export function briefingFor(script: string, details: Details = {}): string {
   const overrides = [
     details.business ? `business.name: ${details.business}` : null,
     details.party ? `party.name: ${details.party}` : null,
-    details.theme ? `invoice.theme: ${details.theme}` : null
+    details.theme ? `invoice.theme: ${details.theme}` : null,
+    details.shape === 'laptop'
+      ? 'Use the LAPTOP screens (mbb-desktop-*, mcf-desktop) wherever one exists for the screen you want.'
+      : details.shape === 'phone'
+        ? 'Use the PHONE screens throughout. Do not use any mbb-desktop-* or mcf-desktop screen.'
+        : null
   ].filter(Boolean);
 
   return `${SYSTEM}
