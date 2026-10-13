@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { rawColoursIn } from '../src/colour-guard.js';
 import { readFile } from 'node:fs/promises';
 import { SCREENS, catalogue } from '../screens/index.js';
 import { deviceOf, viewportFor, urlFor, DEVICES } from '../src/device.js';
@@ -25,7 +26,10 @@ test('every screen built before this one is unchanged', () => {
   const desktop = Object.keys(catalogue()).filter(n => deviceOf(SCREENS[n]) === 'desktop');
   assert.deepEqual(
     desktop.sort(),
-    ['mbb-desktop-create-invoice', 'mbb-desktop-items', 'mbb-desktop-parties', 'mcf-desktop'],
+    [
+      'mbb-desktop-create-invoice', 'mbb-desktop-invoice', 'mbb-desktop-items',
+      'mbb-desktop-parties', 'mbb-desktop-purchase', 'mcf-desktop'
+    ],
     'only the screens that asked for it are desktop screens'
   );
 });
@@ -89,7 +93,7 @@ test('the AI bar carries an instruction in the owner own words', () => {
 test('the desktop screen emits no raw colour and no awkward entity', () => {
   for (const state of [{}, { sheet: 1, asking: 1 }]) {
     const html = SCREENS['mcf-desktop'].render({ party: { name: 'X', balance: 1 } }, state);
-    assert.equal(html.match(/(?<!&)#[0-9a-fA-F]{3,8}\b/), null);
+    assert.deepEqual(rawColoursIn(html), []);
     for (const [, e] of html.matchAll(/&([a-zA-Z][a-zA-Z0-9]*);/g)) {
       assert.ok(['amp', 'lt', 'gt', 'quot', 'apos'].includes(e), `&${e};`);
     }

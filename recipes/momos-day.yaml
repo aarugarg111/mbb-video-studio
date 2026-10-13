@@ -1,0 +1,29 @@
+# "One Day as a Momos Seller" - scene 6, the reveal.
+#
+# Scenes 1 to 5 are the creator's own footage. The app moment is the last one:
+# she opens myBillBook and the day adds up on camera.
+#
+# The item is what the stall sells; every sale, the total and the profit are
+# arithmetic on it rather than figures written on the screen.
+video: momos-day
+
+business:
+  name: JHANVI MOMOS CORNER
+
+party:
+  name: Cash Sale
+
+invoice:
+  number: 108
+  date: "13/10/2026"
+  theme: none
+
+items:
+  - { name: VEG MOMOS PLATE, rate: 60, qty: 2, gst: 5, unit: PLATE, purchase: 26 }
+
+shots:
+  # The reveal: the figure counts up as she reads the question out.
+  - screen: day-sales
+    duration: 4.5
+    actions:
+      - { at: 2.6, do: tap, target: profit }

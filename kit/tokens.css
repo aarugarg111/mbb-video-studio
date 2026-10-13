@@ -378,3 +378,9 @@
   --dsk-dash: #3A3A46;  /* an outline waiting to fill  */
   --dsk-link: #7AA2F7;
 }
+
+/* Paid and unpaid, on the desktop invoice. */
+:root {
+  --dsk-unpaid-bg: #3A1D1D;
+  --dsk-paid-bg:   #14301F;
+}

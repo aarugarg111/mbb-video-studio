@@ -40,7 +40,10 @@ export const SCREENS = {
   'mcf-desktop': ['ask-ai', 'setup-automation', 'party-row-0', 'continue'],
   'mbb-desktop-parties': ['create-party', 'to-collect', 'party-row-0', 'reports'],
   'mbb-desktop-items': ['create-item', 'low-stock', 'item-row-0', 'bulk-actions'],
-  'mbb-desktop-create-invoice': ['upload', 'proceed', 'save', 'add-item']
+  'mbb-desktop-create-invoice': ['upload', 'proceed', 'save', 'add-item'],
+  'mbb-desktop-invoice': ['record-payment', 'share', 'download-pdf', 'theme-store'],
+  'mbb-desktop-purchase': ['upload', 'proceed', 'save', 'add-party'],
+  'day-sales': ['today', 'sale-row-0', 'profit', 'download']
 } as const;
 
 /* Derived, never typed out again. This was a hand-kept second list, and it

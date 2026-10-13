@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { rawColoursIn } from '../src/colour-guard.js';
 import { SCREENS, catalogue } from '../screens/index.js';
 import { deviceOf } from '../src/device.js';
 import { itemsFor } from '../screens/mbb-desktop-items.js';
@@ -49,8 +50,7 @@ test('none emits a raw colour or an entity XML cannot read', () => {
   for (const name of DESKTOP) {
     for (const state of [{}, { filled: 1, lowStock: 1 }]) {
       const html = SCREENS[name].render(DATA, state);
-      assert.equal(html.match(/(?<!&)#[0-9a-fA-F]{3,8}\b/), null, name);
-      assert.equal(html.match(/rgba?\(/), null, name);
+      assert.deepEqual(rawColoursIn(html), [], name);
       for (const [, e] of html.matchAll(/&([a-zA-Z][a-zA-Z0-9]*);/g)) {
         assert.ok(['amp', 'lt', 'gt', 'quot', 'apos'].includes(e), `${name}: &${e};`);
       }

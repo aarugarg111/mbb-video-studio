@@ -1,6 +1,7 @@
 import { esc } from '../src/esc.js';
 import { icons } from '../src/icons.js';
 import { formatINR, summarise } from '../src/money.js';
+import { miraPanel, SCANNED } from './mbb-desktop-chrome.js';
 
 export const name = 'mbb-desktop-create-invoice';
 
@@ -33,11 +34,8 @@ export const tapEffects = {
   'proceed': { filled: 1 }
 };
 
-/* The counter the panel carries. Fixed rather than derived: it is the shop's
- * running total, not anything this bill changes, and a number that moved
- * between renders would make two renders of one recipe different files. */
-export const SCANNED = 22;
-export const HOURS_SAVED = '1.8';
+/* Re-exported so the tests and anything else can still reach it from here. */
+export { SCANNED };
 
 export function render(data, state) {
   const filled = Number(state?.filled ?? 0) > 0;
@@ -60,35 +58,7 @@ export function render(data, state) {
 
   return `
 <div class="screen mbscreen">
-  <div class="mb-ai-panel">
-    <div class="mb-ai-head">
-      <span class="mb-ai-mark">${icons.scan(14)}</span>
-      <div>
-        <div class="mb-ai-ttl">Autofill this bill</div>
-        <div class="mb-ai-sub">Powered by Mira AI</div>
-      </div>
-    </div>
-
-    <div class="mb-ai-stats">
-      <span><b>${SCANNED}</b> bills scanned</span>
-      <span>~<b>${HOURS_SAVED} hrs</b> saved</span>
-    </div>
-
-    <div class="mb-drop ${filled ? 'done' : ''}" id="upload">
-      <span class="ico">${filled ? icons.check(18) : icons.folderUp(18)}</span>
-      ${filled ? 'Bill read' : 'Drag &amp; Drop or Upload file'}
-      <div class="mb-drop-s">${filled ? 'Fields filled from the bill' : 'PDF, JPG, PNG &#183; max 5MB'}</div>
-    </div>
-
-    <div class="mb-proceed" id="proceed">Proceed</div>
-
-    <div class="mb-how">
-      <div class="mb-how-k">How it works</div>
-      <div class="mb-how-i"><span class="ico">${icons.folderUp(10)}</span>Upload invoice document</div>
-      <div class="mb-how-i"><span class="ico">${icons.scan(10)}</span>AI scans &amp; extracts data</div>
-      <div class="mb-how-i"><span class="ico">${icons.check(10)}</span>Fields auto-filled instantly</div>
-    </div>
-  </div>
+  ${miraPanel(filled)}
 
   <div class="mb-form">
     <div class="mb-form-top">

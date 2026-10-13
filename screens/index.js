@@ -27,6 +27,9 @@ import * as mcfDesktop from './mcf-desktop.js';
 import * as mbbDesktopParties from './mbb-desktop-parties.js';
 import * as mbbDesktopItems from './mbb-desktop-items.js';
 import * as mbbDesktopCreateInvoice from './mbb-desktop-create-invoice.js';
+import * as mbbDesktopInvoice from './mbb-desktop-invoice.js';
+import * as mbbDesktopPurchase from './mbb-desktop-purchase.js';
+import * as daySales from './day-sales.js';
 
 export const SCREENS = {
   [home.name]: home,
@@ -57,7 +60,10 @@ export const SCREENS = {
   [mcfDesktop.name]: mcfDesktop,
   [mbbDesktopParties.name]: mbbDesktopParties,
   [mbbDesktopItems.name]: mbbDesktopItems,
-  [mbbDesktopCreateInvoice.name]: mbbDesktopCreateInvoice
+  [mbbDesktopCreateInvoice.name]: mbbDesktopCreateInvoice,
+  [mbbDesktopInvoice.name]: mbbDesktopInvoice,
+  [mbbDesktopPurchase.name]: mbbDesktopPurchase,
+  [daySales.name]: daySales
 };
 
 /* The shape src/recipe.js validates against: screen name -> its target names. */
