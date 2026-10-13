@@ -320,3 +320,11 @@
   --tally-late:    #B3261E;  /* an overdue count                  */
   --tally-status:  #10243F;  /* the strip along the bottom        */
 }
+
+/* myCashFlo: the call as the party receives it. Derived from the call screen
+ * above; no frame of this exists either. */
+:root {
+  --mcf-ring-ground: #0E1322;
+  --mcf-ring-accept: #16A34A;
+  --mcf-ring-badge:  #1E2A4A;
+}

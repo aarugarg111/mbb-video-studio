@@ -33,7 +33,9 @@ export const SCREENS = {
   'mcf-tally': ['sync-now', 'tally-status', 'nav-dashboard', 'nav-parties'],
   'mcf-ai-call': ['end-call', 'listen', 'mute'],
   /* Tally, approximated - a cutaway, not a myBillBook screen. */
-  'tally-receivables': ['f6-age-wise', 'f12-configure', 'bill-row-0']
+  'tally-receivables': ['f6-age-wise', 'f12-configure', 'bill-row-0'],
+  'mcf-new-automation': ['channel-ai', 'channel-whatsapp', 'channel-sms', 'tone-firm', 'turn-on'],
+  'mcf-ai-ringing': ['accept', 'decline']
 } as const;
 
 /* Derived, never typed out again. This was a hand-kept second list, and it

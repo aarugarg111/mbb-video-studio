@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /* recipe in, mp4 (or a single still) out. */
 
-import { readFile, mkdir, rm } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { compile } from './compile.js';
+import { voiceLines, toSrt, toScript } from '../src/voiceover.js';
 import { renderFrames, renderStill } from './render.js';
 import { encode } from './encode.js';
 
@@ -55,6 +56,22 @@ async function main() {
 
   /* Frames are only worth keeping when something went wrong. */
   await rm(framesDir, { recursive: true, force: true });
+
+  /* The clip is silent by design - the creator records over it. The one thing
+   * in it that IS spoken is the AI's half of a follow-up call, so the lines go
+   * out beside the video with the second each lands on, rather than a voice
+   * being burned into footage that has to mix with somebody else's. */
+  const lines = voiceLines(recipe);
+  if (lines.length) {
+    const srt = join(outDir, recipe.video + '.srt');
+    const script = join(outDir, recipe.video + '-voiceover.txt');
+    await writeFile(srt, toSrt(lines), 'utf8');
+    await writeFile(script, toScript(lines), 'utf8');
+    const spoken = lines.filter(l => l.voiced).length;
+    console.log(`
+${spoken} line${spoken === 1 ? '' : 's'} to voice: ${script}`);
+    console.log('Captions: ' + srt);
+  }
 
   console.log('\nDone: ' + mp4);
 }

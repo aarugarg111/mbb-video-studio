@@ -829,3 +829,49 @@
 .ty-sidekey b { color: var(--tally-panel-k); font-weight: 700; }
 
 .ty-status { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; background: var(--tally-status); color: var(--mbb-surface); font-size: 8.5px; }
+
+/* ---------- myCashFlo: choosing who does the chasing ---------- */
+
+.mcf-opts { margin-top: 4px; }
+.mcf-opt { display: flex; align-items: flex-start; gap: 12px; padding: 12px; margin-top: 9px; border: 1px solid var(--mcf-line); border-radius: 10px; }
+/* The chosen one is outlined in the brand navy rather than merely tinted, so
+   which one is picked survives a phone-sized frame in a vertical video. */
+.mcf-opt.on { border-color: var(--mcf-navy); box-shadow: inset 0 0 0 1px var(--mcf-navy); }
+.mcf-opt-txt { flex: 1; min-width: 0; }
+.mcf-opt-ttl { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; }
+.mcf-opt-sub { margin-top: 4px; font-size: 10.5px; line-height: 1.45; color: var(--mcf-muted); }
+.mcf-rec { padding: 3px 8px; border-radius: 999px; background: var(--mcf-tint-blue); color: var(--mcf-call-ink); font-size: 8.5px; font-weight: 700; letter-spacing: 0.03em; }
+.mcf-tick { flex: none; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; color: var(--mcf-navy); }
+
+.mcf-label.spaced { margin-top: 16px; }
+.mcf-chiprow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 9px; }
+.mcf-pick { padding: 7px 13px; border-radius: 999px; background: var(--mcf-page); color: var(--mcf-muted); font-size: 11px; font-weight: 600; }
+.mcf-pick.on { background: var(--mcf-navy); color: var(--mbb-surface); }
+
+.mcf-live-note { display: flex; align-items: center; gap: 8px; padding: 11px 14px; border-radius: 10px; background: var(--mcf-tint-green); color: var(--mcf-share-ink); font-size: 11.5px; font-weight: 700; }
+
+/* The button sits on the floor of the screen rather than after the content,
+   which on a short list would leave it halfway up. */
+.mcf-foot { flex: none; padding: 12px 16px 20px; }
+
+/* ---------- myCashFlo: the call as the party receives it ---------- */
+.ringscreen { background: var(--mcf-ring-ground); color: var(--mbb-surface); justify-content: space-between; }
+
+.mcf-ring-top { flex: none; padding: 64px 24px 0; text-align: center; }
+.mcf-ring-label { font-size: 11.5px; letter-spacing: 0.06em; color: var(--mcf-call-sub); }
+
+.mcf-ring-avatar { position: relative; width: 92px; height: 92px; margin: 26px auto 0; display: flex; align-items: center; justify-content: center; }
+.mcf-halo { position: absolute; inset: 0; border-radius: 999px; background: var(--mcf-call-wave); }
+.mcf-ring-mark { position: relative; width: 72px; height: 72px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: var(--mcf-navy); color: var(--mbb-surface); }
+
+.mcf-ring-who { margin-top: 22px; font-size: 22px; font-weight: 700; }
+.mcf-ring-for { margin-top: 7px; font-size: 12px; color: var(--mcf-call-sub); }
+.mcf-ring-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; padding: 6px 12px; border-radius: 999px; background: var(--mcf-ring-badge); color: var(--mcf-call-wave); font-size: 10px; font-weight: 700; }
+
+.mcf-ring-to { text-align: center; font-size: 11.5px; color: var(--mcf-call-sub); }
+
+.mcf-ring-actions { flex: none; display: flex; justify-content: space-around; padding: 0 28px 54px; }
+.mcf-ringbtn { display: flex; flex-direction: column; align-items: center; gap: 10px; font-size: 11px; color: var(--mcf-call-sub); }
+.mcf-ringring { width: 62px; height: 62px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--mbb-surface); }
+.mcf-ringring.end { background: var(--mcf-legal-ink); }
+.mcf-ringring.go { background: var(--mcf-ring-accept); }

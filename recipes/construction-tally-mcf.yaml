@@ -48,6 +48,16 @@ shots:
     actions:
       - { at: 1.5, do: tap, target: party-row-0 }
 
+  # The owner chooses the AI to do the chasing instead of doing it himself.
+  - screen: mcf-new-automation
+    duration: 3.6
+    actions:
+      - { at: 1.8, do: tap, target: turn-on }
+
+  # The call as the party receives it - a phone ringing in somebody else's hand.
+  - screen: mcf-ai-ringing
+    duration: 2.6
+
   # "aur AI follow-up karta hai" - the call, with the commitment at the end.
   # Long enough for the whole exchange: the last line lands at 5.4s and the
   # commitment at 7.4s.
