@@ -933,3 +933,107 @@
 .dk-field-v { font-size: 11px; font-weight: 600; }
 .dk-field-s { margin-top: 2px; font-size: 9px; color: var(--dsk-muted); }
 .dk-go { margin-top: 4px; padding: 10px; border-radius: 8px; background: var(--dsk-blue); text-align: center; font-size: 11px; font-weight: 700; }
+
+/* ---------- myBillBook on a laptop ----------
+ * SAMPLED from reference/frames/dsk-mbb-4.png and dsk-mbb-28.png. Shares the
+ * dark --dsk-* ground with myCashFlo's desktop; what differs is the primary,
+ * which is myBillBook's purple rather than myCashFlo's blue. */
+.mbscreen { background: var(--dsk-page); color: var(--dsk-ink); display: flex; font-size: 11px; }
+
+.mb-side { flex: none; width: 142px; padding: 11px 9px; box-sizing: border-box; background: var(--dsk-sidebar); display: flex; flex-direction: column; gap: 2px; }
+.mb-biz { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+.mb-avatar { flex: none; width: 19px; height: 19px; border-radius: 999px; background: var(--mbb-primary); color: var(--mbb-surface); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
+.mb-biz-nm { font-size: 9.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mb-create { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 7px 4px; margin-bottom: 10px; border-radius: 7px; background: var(--dsk-panel); font-size: 8.5px; font-weight: 600; white-space: nowrap; }
+.mb-head { margin: 9px 0 4px; padding-left: 7px; font-size: 7.5px; letter-spacing: 0.07em; color: var(--dsk-muted); }
+.mb-nav { display: flex; align-items: center; gap: 8px; padding: 6px 7px; border-radius: 6px; color: var(--dsk-muted); font-size: 9.5px; white-space: nowrap; }
+.mb-nav.on { background: var(--dsk-active); color: var(--dsk-ink); font-weight: 600; }
+.mb-new { margin-left: auto; padding: 1px 5px; border-radius: 999px; background: var(--dsk-new); color: var(--mbb-surface); font-size: 6.5px; font-weight: 700; }
+.mb-side-foot { margin-top: auto; display: flex; align-items: center; gap: 8px; padding: 6px 7px; color: var(--dsk-muted); font-size: 9.5px; }
+
+.mb-main { flex: 1; min-width: 0; padding: 13px 15px; display: flex; flex-direction: column; gap: 11px; }
+.mb-top { display: flex; align-items: center; gap: 10px; }
+.mb-title { font-size: 16px; font-weight: 700; }
+.mb-actions { margin-left: auto; display: flex; gap: 8px; }
+.mb-abtn { display: flex; align-items: center; gap: 5px; padding: 6px 11px; border-radius: 7px; font-size: 9.5px; font-weight: 600; }
+.mb-abtn.ghost { border: 1px solid var(--dsk-rule); color: var(--dsk-ink); }
+.mb-abtn.primary { background: var(--dsk-purple); color: var(--mbb-surface); }
+
+/* The three figures across the top: the reason to film a laptop at all. */
+.mb-stats { display: flex; gap: 10px; }
+.mb-stat { flex: 1; padding: 10px 12px; border-radius: 9px; background: var(--dsk-card); border: 1px solid var(--dsk-rule); }
+.mb-stat.collect { border-color: var(--dsk-in); }
+.mb-stat.pay { border-color: var(--dsk-out); }
+.mb-stat.low.on { border-color: var(--dsk-purple); }
+.mb-stat-k { display: flex; align-items: center; gap: 5px; font-size: 9px; color: var(--dsk-muted); }
+.mb-stat.collect .mb-stat-k { color: var(--dsk-in); }
+.mb-stat.pay .mb-stat-k { color: var(--dsk-out); }
+.mb-stat-v { margin-top: 5px; font-size: 15px; font-weight: 700; }
+
+.mb-bar { display: flex; align-items: center; gap: 8px; }
+.mb-search { flex: 1; display: flex; align-items: center; gap: 7px; padding: 6px 11px; border-radius: 7px; background: var(--dsk-panel); color: var(--dsk-muted); font-size: 9.5px; }
+
+.mb-head-row, .mb-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
+.mb-head-row { background: var(--dsk-panel); border-radius: 7px 7px 0 0; color: var(--dsk-ink); font-size: 8.5px; font-weight: 600; }
+.mb-row { border-bottom: 1px solid var(--dsk-rule); font-size: 10px; }
+.mb-c.nm { flex: 1.5; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mb-c.cat { width: 84px; flex: none; color: var(--dsk-muted); }
+.mb-c.kind { width: 84px; flex: none; }
+.mb-c.bal { width: 86px; flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-weight: 700; }
+.mb-c.bal.in { color: var(--dsk-in); }
+.mb-c.bal.out { color: var(--dsk-out); }
+.mb-c.bal.low { color: var(--dsk-late); }
+.mb-empty { padding: 22px 10px; text-align: center; color: var(--dsk-muted); font-size: 10px; }
+
+/* ---------- myBillBook desktop: Create Sales Invoice ----------
+ * The panel down the left is Mira AI reading a bill into the form. SAMPLED
+ * from reference/frames/dsk-mbb-28.png and dsk-mbb-76.png. */
+.mb-ai-panel { flex: none; width: 170px; padding: 12px; box-sizing: border-box; background: var(--dsk-sidebar); display: flex; flex-direction: column; gap: 10px; }
+.mb-ai-head { display: flex; align-items: center; gap: 9px; }
+.mb-ai-mark { flex: none; width: 26px; height: 26px; border-radius: 7px; background: var(--dsk-mira); color: var(--mbb-surface); display: flex; align-items: center; justify-content: center; }
+.mb-ai-ttl { font-size: 11px; font-weight: 700; }
+.mb-ai-sub { margin-top: 2px; font-size: 8.5px; color: var(--dsk-mira); }
+.mb-ai-stats { display: flex; justify-content: space-between; font-size: 8px; color: var(--dsk-muted); }
+.mb-ai-stats b { color: var(--dsk-ink); }
+
+.mb-drop { padding: 18px 10px; border-radius: 9px; border: 1px dashed var(--dsk-mira); background: var(--dsk-drop); color: var(--dsk-mira); text-align: center; font-size: 9.5px; font-weight: 600; }
+.mb-drop .ico { display: flex; justify-content: center; margin-bottom: 7px; }
+.mb-drop-s { margin-top: 5px; font-size: 8px; font-weight: 400; color: var(--dsk-muted); }
+.mb-drop.done { border-style: solid; border-color: var(--dsk-in); color: var(--dsk-in); }
+
+.mb-proceed { padding: 8px; border-radius: 7px; background: var(--dsk-panel); text-align: center; font-size: 9.5px; font-weight: 600; }
+
+.mb-how { margin-top: auto; padding: 10px; border-radius: 8px; background: var(--dsk-panel); }
+.mb-how-k { font-size: 8.5px; font-weight: 700; margin-bottom: 7px; }
+.mb-how-i { display: flex; align-items: center; gap: 7px; padding: 3px 0; font-size: 8px; color: var(--dsk-muted); }
+
+.mb-form { flex: 1; min-width: 0; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.mb-form-top { display: flex; align-items: center; gap: 9px; }
+.mb-title.sm { font-size: 13px; }
+.mb-form-top .mb-abtn { margin-left: 0; }
+.mb-form-top .mb-abtn:nth-of-type(1) { margin-left: auto; }
+
+.mb-form-grid { display: flex; gap: 9px; }
+.mb-field { flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px dashed var(--dsk-dash); }
+.mb-field.set { border-style: solid; border-color: var(--dsk-rule); }
+.mb-field-k { font-size: 8px; color: var(--dsk-muted); }
+.mb-field-v { margin-top: 4px; font-size: 10.5px; font-weight: 600; min-height: 13px; }
+/* An empty field is an outline waiting to be filled, which is what makes the
+   moment the AI fills it legible. */
+.mb-blank { display: block; width: 62px; height: 7px; border-radius: 999px; background: var(--dsk-panel); }
+
+.mb-ihead, .mb-irow { display: flex; align-items: center; gap: 8px; padding: 7px 9px; }
+.mb-ihead { background: var(--dsk-panel); border-radius: 7px; font-size: 8px; color: var(--dsk-muted); letter-spacing: 0.04em; }
+.mb-irow { border-bottom: 1px solid var(--dsk-rule); font-size: 10px; }
+.mb-ic.no { width: 18px; flex: none; color: var(--dsk-muted); }
+.mb-ic.nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mb-ic.qty { width: 62px; flex: none; }
+.mb-ic.rate { width: 70px; flex: none; text-align: right; }
+.mb-ic.amt { width: 76px; flex: none; text-align: right; font-weight: 700; }
+
+.mb-ilist { min-height: 86px; }
+.mb-additem { margin-top: 8px; padding: 20px; border-radius: 8px; border: 1px dashed var(--dsk-dash); text-align: center; color: var(--dsk-link); font-size: 10px; }
+
+.mb-totals { margin-top: auto; padding-top: 9px; border-top: 1px solid var(--dsk-rule); }
+.mb-trow { display: flex; justify-content: space-between; padding: 4px 0; font-size: 10px; color: var(--dsk-muted); }
+.mb-trow.big { margin-top: 4px; font-size: 13px; font-weight: 700; color: var(--dsk-ink); }

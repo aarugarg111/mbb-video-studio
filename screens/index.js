@@ -24,6 +24,9 @@ import * as tallyReceivables from './tally-receivables.js';
 import * as mcfNewAutomation from './mcf-new-automation.js';
 import * as mcfAiRinging from './mcf-ai-ringing.js';
 import * as mcfDesktop from './mcf-desktop.js';
+import * as mbbDesktopParties from './mbb-desktop-parties.js';
+import * as mbbDesktopItems from './mbb-desktop-items.js';
+import * as mbbDesktopCreateInvoice from './mbb-desktop-create-invoice.js';
 
 export const SCREENS = {
   [home.name]: home,
@@ -51,7 +54,10 @@ export const SCREENS = {
   [tallyReceivables.name]: tallyReceivables,
   [mcfNewAutomation.name]: mcfNewAutomation,
   [mcfAiRinging.name]: mcfAiRinging,
-  [mcfDesktop.name]: mcfDesktop
+  [mcfDesktop.name]: mcfDesktop,
+  [mbbDesktopParties.name]: mbbDesktopParties,
+  [mbbDesktopItems.name]: mbbDesktopItems,
+  [mbbDesktopCreateInvoice.name]: mbbDesktopCreateInvoice
 };
 
 /* The shape src/recipe.js validates against: screen name -> its target names. */

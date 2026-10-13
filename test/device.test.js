@@ -23,7 +23,11 @@ test('a shape nobody has heard of falls back to the phone', () => {
 
 test('every screen built before this one is unchanged', () => {
   const desktop = Object.keys(catalogue()).filter(n => deviceOf(SCREENS[n]) === 'desktop');
-  assert.deepEqual(desktop, ['mcf-desktop'], 'only the screen that asked for it is a desktop screen');
+  assert.deepEqual(
+    desktop.sort(),
+    ['mbb-desktop-create-invoice', 'mbb-desktop-items', 'mbb-desktop-parties', 'mcf-desktop'],
+    'only the screens that asked for it are desktop screens'
+  );
 });
 
 test('a desktop screen carries the address its browser shows', () => {

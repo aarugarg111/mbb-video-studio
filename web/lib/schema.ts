@@ -37,7 +37,10 @@ export const SCREENS = {
   'mcf-new-automation': ['channel-ai', 'channel-whatsapp', 'channel-sms', 'tone-firm', 'turn-on'],
   'mcf-ai-ringing': ['accept', 'decline'],
   /* The first screen drawn as a laptop rather than a phone. */
-  'mcf-desktop': ['ask-ai', 'setup-automation', 'party-row-0', 'continue']
+  'mcf-desktop': ['ask-ai', 'setup-automation', 'party-row-0', 'continue'],
+  'mbb-desktop-parties': ['create-party', 'to-collect', 'party-row-0', 'reports'],
+  'mbb-desktop-items': ['create-item', 'low-stock', 'item-row-0', 'bulk-actions'],
+  'mbb-desktop-create-invoice': ['upload', 'proceed', 'save', 'add-item']
 } as const;
 
 /* Derived, never typed out again. This was a hand-kept second list, and it

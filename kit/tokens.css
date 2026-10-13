@@ -359,3 +359,22 @@
   --dsk-ai-live: #8B7CF6;
   --dsk-scrim:   rgba(0, 0, 0, 0.62);
 }
+
+/* myBillBook on a laptop. Shares the dark ground above; the primary is
+ * myBillBook's purple rather than myCashFlo's blue. SAMPLED from
+ * reference/frames/dsk-mbb-4.png. */
+:root {
+  --dsk-purple: #4A2FC6;  /* SAMPLED - Create Party, Create Item */
+  --dsk-card:   #23232B;  /* SAMPLED - the figures across the top */
+  --dsk-in:     #4ADE80;  /* money coming in                     */
+  --dsk-out:    #F87171;  /* money going out                     */
+  --dsk-new:    #DC2626;  /* the "New" tag beside AI Collections */
+}
+
+/* The Mira AI autofill panel and the empty form it fills. */
+:root {
+  --dsk-mira: #E1540C;  /* SAMPLED - Mira AI's orange  */
+  --dsk-drop: #38291E;  /* SAMPLED - the drop zone fill */
+  --dsk-dash: #3A3A46;  /* an outline waiting to fill  */
+  --dsk-link: #7AA2F7;
+}

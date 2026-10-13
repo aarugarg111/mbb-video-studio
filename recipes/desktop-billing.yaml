@@ -1,0 +1,35 @@
+# myBillBook on a laptop: the whole book and the whole catalogue on one screen.
+# Every name and figure is invented.
+video: desktop-billing
+
+business:
+  name: SAGAR SUPERBAZAAR
+
+party:
+  name: ASHOK TRADING CO
+  balance: 21846
+
+invoice:
+  number: 5945
+  date: "08/10/2026"
+
+items:
+  - { name: SUGAR 5KG, rate: 310, qty: 2, gst: 5, unit: PKT, purchase: 272, stock: 4 }
+  - { name: TATA SALT 1KG, rate: 28, qty: 6, gst: 5, unit: PKT, purchase: 24, stock: 8 }
+
+shots:
+  - screen: mbb-desktop-parties
+    duration: 3.4
+    actions:
+      - { at: 1.6, do: tap, target: party-row-0 }
+
+  - screen: mbb-desktop-items
+    duration: 3.6
+    actions:
+      - { at: 1.8, do: tap, target: low-stock }
+
+  # The bill dropped in, and Mira AI filling the form from it.
+  - screen: mbb-desktop-create-invoice
+    duration: 4.2
+    actions:
+      - { at: 1.8, do: tap, target: upload }

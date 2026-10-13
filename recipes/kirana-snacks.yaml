@@ -1,0 +1,59 @@
+# "When I Will Get Rich, There Will Be Signs" - scene 4 only.
+#
+# Scenes 1 to 3 are the creator's own footage; the app moment is the kirana
+# shopkeeper billing a bag of snacks and sending it to her number.
+#
+# Deliberately a LONG bill - a day's worth of snacks - because that is the
+# joke, and because a bill this long is what would show any trouble with the
+# item list. Every name is invented.
+video: kirana-snacks
+
+business:
+  name: GUPTA KIRANA STORE
+
+party:
+  name: Jhanvi
+  phone: 98765 43210
+
+invoice:
+  number: 212
+  date: "13/10/2026"
+  theme: none
+
+items:
+  - { name: LAYS MAGIC MASALA 52G, rate: 20, qty: 4, gst: 12, unit: PKT }
+  - { name: KURKURE MASALA MUNCH 90G, rate: 20, qty: 3, gst: 12, unit: PKT }
+  - { name: BINGO MAD ANGLES 66G, rate: 20, qty: 2, gst: 12, unit: PKT }
+  - { name: HALDIRAM ALOO BHUJIA 200G, rate: 55, qty: 1, gst: 12, unit: PKT }
+  - { name: PARLE-G BISCUIT 250G, rate: 25, qty: 2, gst: 18, unit: PKT }
+  - { name: DAIRY MILK 50G, rate: 40, qty: 3, gst: 18, unit: PCS }
+  - { name: THUMS UP 750ML, rate: 45, qty: 2, gst: 28, unit: BTL }
+  - { name: MONACO SALTED 200G, rate: 30, qty: 2, gst: 18, unit: PKT }
+
+shots:
+  - screen: create-invoice
+    duration: 3.6
+    actions:
+      - { at: 0.8, do: addItem, index: 0 }
+      - { at: 1.6, do: addItem, index: 1 }
+      - { at: 2.4, do: addItem, index: 2 }
+      - { at: 3.0, do: tap, target: generate-bill }
+
+  - screen: invoice-created
+    duration: 3.2
+    actions:
+      - { at: 1.6, do: tap, target: share }
+
+  - screen: share-sheet
+    duration: 2.4
+    actions:
+      - { at: 1.0, do: tap, target: contact-0 }
+      - { at: 1.8, do: tap, target: send }
+
+  - screen: wa-attach
+    duration: 2.4
+    actions:
+      - { at: 1.2, do: tap, target: send }
+
+  - screen: wa-chat
+    duration: 2.6
