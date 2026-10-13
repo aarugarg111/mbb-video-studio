@@ -328,3 +328,34 @@
   --mcf-ring-accept: #16A34A;
   --mcf-ring-badge:  #1E2A4A;
 }
+
+/* The browser window the desktop screens are drawn inside. */
+:root {
+  --stage-window-dot:     #4A4A52;
+  --stage-window-url:     #2A2A31;
+  --stage-window-urltext: #9A9AA6;
+}
+
+/* ---------------------------------------------------------------------------
+ * The desktop apps. SAMPLED from reference/frames/dsk-mcf-10.png. Both
+ * myBillBook and myCashFlo are DARK on a laptop where they are light on a
+ * phone - the same product with a different skin - so these are their own
+ * tokens rather than a shade of the --mcf-* ones.
+ * ------------------------------------------------------------------------ */
+:root {
+  --dsk-page:    #040404;  /* SAMPLED - the page behind everything */
+  --dsk-sidebar: #0B1323;  /* SAMPLED - the left rail            */
+  --dsk-panel:   #202222;  /* SAMPLED - cards, fields, pills      */
+  --dsk-modal:   #111111;  /* SAMPLED - the follow-up sheet       */
+  --dsk-blue:    #243D99;  /* SAMPLED - the primary button        */
+  --dsk-active:  #2C3567;  /* SAMPLED - the chosen nav item       */
+  --dsk-ink:     #EDF1FE;  /* SAMPLED - text                      */
+  --dsk-muted:   #8A92A6;
+  --dsk-rule:    #1E2230;
+  --dsk-late:    #E06B63;
+  --dsk-credit:  #4ADE80;
+  --dsk-ai:      #080718;  /* SAMPLED - the AI bar                */
+  --dsk-ai-edge: #2A2550;
+  --dsk-ai-live: #8B7CF6;
+  --dsk-scrim:   rgba(0, 0, 0, 0.62);
+}

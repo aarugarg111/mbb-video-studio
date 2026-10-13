@@ -23,6 +23,7 @@ import * as mcfAiCall from './mcf-ai-call.js';
 import * as tallyReceivables from './tally-receivables.js';
 import * as mcfNewAutomation from './mcf-new-automation.js';
 import * as mcfAiRinging from './mcf-ai-ringing.js';
+import * as mcfDesktop from './mcf-desktop.js';
 
 export const SCREENS = {
   [home.name]: home,
@@ -49,7 +50,8 @@ export const SCREENS = {
   [mcfAiCall.name]: mcfAiCall,
   [tallyReceivables.name]: tallyReceivables,
   [mcfNewAutomation.name]: mcfNewAutomation,
-  [mcfAiRinging.name]: mcfAiRinging
+  [mcfAiRinging.name]: mcfAiRinging,
+  [mcfDesktop.name]: mcfDesktop
 };
 
 /* The shape src/recipe.js validates against: screen name -> its target names. */

@@ -35,7 +35,9 @@ export const SCREENS = {
   /* Tally, approximated - a cutaway, not a myBillBook screen. */
   'tally-receivables': ['f6-age-wise', 'f12-configure', 'bill-row-0'],
   'mcf-new-automation': ['channel-ai', 'channel-whatsapp', 'channel-sms', 'tone-firm', 'turn-on'],
-  'mcf-ai-ringing': ['accept', 'decline']
+  'mcf-ai-ringing': ['accept', 'decline'],
+  /* The first screen drawn as a laptop rather than a phone. */
+  'mcf-desktop': ['ask-ai', 'setup-automation', 'party-row-0', 'continue']
 } as const;
 
 /* Derived, never typed out again. This was a hand-kept second list, and it

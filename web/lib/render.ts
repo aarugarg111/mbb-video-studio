@@ -5,6 +5,9 @@ import { asset } from './base-path';
 import { rasterise } from './rasterise';
 import { createEncoder } from './encode';
 import { STAGE_W, STAGE_H } from '../app/studio/stage';
+/* Shared with the command-line renderer, so the two cannot disagree about
+   which shape a screen is. */
+import { deviceOf, urlFor } from '../../src/device.js';
 const SCREENS = UNTYPED_SCREENS as Record<string, { render(data: unknown, state: unknown): string }>;
 
 type Options = { fps?: number; onProgress?: (done: number, total: number) => void };
@@ -59,7 +62,22 @@ function paint(frame: any, recipe: any, viewport: HTMLElement, endcardRoot: HTML
     );
   }
 
-  viewport.innerHTML = layers.join('');
+  /* Which frame the clip is in follows the screen, the same way stage.js
+     decides it. If these two ever disagree the browser and the command line
+     stop producing the same video. */
+  const screen = SCREENS[frame.screen];
+  const onDesktop = deviceOf(screen) === 'desktop';
+  const phoneFrame = viewport.parentElement as HTMLElement;
+  const desktopFrame = document.getElementById('stage-desktop');
+  const desktopViewport = document.getElementById('stage-desktop-viewport');
+  const desktopUrl = document.getElementById('stage-desktop-url');
+
+  phoneFrame?.classList.toggle('hidden', onDesktop);
+  desktopFrame?.classList.toggle('hidden', !onDesktop);
+  if (onDesktop && desktopUrl) desktopUrl.textContent = urlFor(screen);
+
+  const target = onDesktop && desktopViewport ? desktopViewport : viewport;
+  target.innerHTML = layers.join('');
 
   endcardRoot.innerHTML = frame.endCard
     ? frame.endCard.kind === 'cta'

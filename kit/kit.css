@@ -875,3 +875,61 @@
 .mcf-ringring { width: 62px; height: 62px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--mbb-surface); }
 .mcf-ringring.end { background: var(--mcf-legal-ink); }
 .mcf-ringring.go { background: var(--mcf-ring-accept); }
+
+/* ---------- myCashFlo on a laptop ----------
+ * SAMPLED from reference/frames/dsk-mcf-10.png. The desktop apps are DARK,
+ * where the phone apps are light - the same product, a different skin, so
+ * these are their own tokens rather than a tint of the --mcf-* ones. */
+.dkscreen { background: var(--dsk-page); color: var(--dsk-ink); display: flex; font-size: 11px; }
+
+.dk-side { flex: none; width: 128px; padding: 14px 10px; box-sizing: border-box; background: var(--dsk-sidebar); display: flex; flex-direction: column; gap: 3px; }
+.dk-brand { font-size: 12px; font-weight: 700; margin-bottom: 14px; padding-left: 6px; }
+.dk-nav { display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: 7px; color: var(--dsk-muted); font-size: 10.5px; }
+.dk-nav.on { background: var(--dsk-active); color: var(--dsk-ink); font-weight: 600; }
+.dk-credits { margin-top: auto; padding: 10px 11px; border-radius: 8px; background: var(--dsk-panel); }
+.dk-credits-k { font-size: 8px; letter-spacing: 0.06em; color: var(--dsk-muted); }
+.dk-credits-v { margin-top: 3px; font-size: 16px; font-weight: 700; color: var(--dsk-credit); }
+
+.dk-main { flex: 1; min-width: 0; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.dk-top { display: flex; align-items: center; gap: 12px; }
+.dk-title { font-size: 17px; font-weight: 700; }
+.dk-btn { display: flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 7px; background: var(--dsk-blue); color: var(--dsk-ink); font-size: 10.5px; font-weight: 600; }
+
+/* The AI bar. It carries an instruction in the owner's own words, which is
+   what the product actually does and what the ad is selling. */
+.dk-ai { margin-left: auto; display: flex; align-items: center; gap: 10px; max-width: 310px; padding: 7px 12px; border-radius: 9px; background: var(--dsk-ai); border: 1px solid var(--dsk-ai-edge); }
+.dk-ai.on { border-color: var(--dsk-ai-live); }
+.dk-ai-wave { color: var(--dsk-ai-live); display: flex; }
+.dk-ai-txt { min-width: 0; }
+.dk-ai-ttl { font-size: 10px; font-weight: 700; }
+.dk-ai-said { margin-top: 2px; font-size: 9px; color: var(--dsk-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.dk-filters { display: flex; align-items: center; gap: 8px; }
+.dk-search { flex: 1; display: flex; align-items: center; gap: 7px; padding: 7px 11px; border-radius: 7px; background: var(--dsk-panel); color: var(--dsk-muted); font-size: 10px; }
+.dk-filter { display: flex; align-items: center; gap: 4px; padding: 7px 10px; border-radius: 7px; background: var(--dsk-panel); color: var(--dsk-ink); font-size: 10px; }
+
+.dk-head, .dk-row { display: flex; align-items: center; gap: 10px; padding: 9px 10px; }
+.dk-head { color: var(--dsk-muted); font-size: 8.5px; letter-spacing: 0.05em; border-bottom: 1px solid var(--dsk-rule); }
+.dk-row { border-bottom: 1px solid var(--dsk-rule); font-size: 10.5px; }
+.dk-c.name { flex: 1.6; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.dk-c.amt { width: 72px; flex: none; font-weight: 700; }
+.dk-c.late { width: 54px; flex: none; color: var(--dsk-late); }
+.dk-c.auto { width: 92px; flex: none; }
+.dk-c.seen { width: 62px; flex: none; color: var(--dsk-muted); }
+.dk-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; background: var(--dsk-panel); color: var(--dsk-muted); font-size: 8.5px; }
+.dk-dot { width: 4px; height: 4px; border-radius: 999px; background: var(--dsk-muted); }
+.dk-off { color: var(--dsk-muted); font-size: 9px; }
+
+/* The follow-up sheet, over everything. */
+.dk-scrim { position: absolute; inset: 0; background: var(--dsk-scrim); }
+.dk-sheet { position: absolute; left: 50%; top: 50%; width: 330px; margin: -148px 0 0 -165px; padding: 15px; box-sizing: border-box; border-radius: 12px; background: var(--dsk-modal); border: 1px solid var(--dsk-rule); }
+.dk-sheet-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.dk-sheet-ttl { font-size: 13px; font-weight: 700; }
+.dk-sheet-sub { margin-top: 2px; font-size: 9.5px; color: var(--dsk-muted); }
+.dk-x { margin-left: auto; color: var(--dsk-muted); }
+.dk-field-k { font-size: 8.5px; letter-spacing: 0.05em; color: var(--dsk-muted); margin-bottom: 6px; }
+.dk-field { display: flex; align-items: center; justify-content: space-between; padding: 9px 11px; margin-bottom: 12px; border-radius: 8px; background: var(--dsk-panel); }
+.dk-field-v { font-size: 11px; font-weight: 600; }
+.dk-field-s { margin-top: 2px; font-size: 9px; color: var(--dsk-muted); }
+.dk-go { margin-top: 4px; padding: 10px; border-radius: 8px; background: var(--dsk-blue); text-align: center; font-size: 11px; font-weight: 700; }

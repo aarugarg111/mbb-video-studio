@@ -20,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 import { join, dirname, extname, normalize, sep } from 'node:path';
 import { compile } from './worker/compile.js';
 import { SCREENS } from './screens/index.js';
+import { deviceOf, viewportFor } from './src/device.js';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const TYPES = {
@@ -80,13 +81,19 @@ for (const screen of screens) {
   await page.evaluate(() => window.setTime(0.5));
 
   const ids = Object.keys(mod.targets ?? {});
-  const measured = await page.evaluate(wanted => {
-    const vp = document.getElementById('viewport').getBoundingClientRect();
+  /* A desktop screen is drawn in the browser-window frame and in its own
+   * logical space, so both the element read and the numbers divided by have
+   * to follow the screen rather than being assumed. */
+  const box = viewportFor(mod);
+  const vpId = deviceOf(mod) === 'desktop' ? 'desktop-viewport' : 'viewport';
+
+  const measured = await page.evaluate(({ wanted, vpId, box }) => {
+    const vp = document.getElementById(vpId).getBoundingClientRect();
     /* The phone is scaled about its centre, so the viewport's own rect is
        already in page pixels - dividing by its width recovers the 390-wide
        space the targets are written in. */
-    const kx = 390 / vp.width;
-    const ky = 844 / vp.height;
+    const kx = box.width / vp.width;
+    const ky = box.height / vp.height;
     const out = {};
     for (const id of wanted) {
       const el = document.getElementById(id);
@@ -98,7 +105,7 @@ for (const screen of screens) {
       };
     }
     return out;
-  }, ids);
+  }, { wanted: ids, vpId, box });
 
   console.log(`\n/* ${screen} - MEASURED */\nexport const targets = {`);
   const lines = [];

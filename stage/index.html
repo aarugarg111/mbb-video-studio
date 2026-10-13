@@ -44,6 +44,46 @@
     background: var(--mbb-tint-100);
   }
   .layer { position: absolute; inset: 0; }
+
+  /* The desktop frame. A browser window rather than a phone body, drawn at
+     1.5 so a 720-wide screen fills the same 1080 the phone does. */
+  #desktop {
+    background: var(--stage-phone-body);
+    border-radius: 14px;
+    padding: 0 0 8px;
+    transform: scale(1.5);
+  }
+  #desktop-bar {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+  }
+  #desktop-bar .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--stage-window-dot); }
+  #desktop-url {
+    flex: 1;
+    margin-left: 6px;
+    height: 17px;
+    border-radius: 999px;
+    background: var(--stage-window-url);
+    color: var(--stage-window-urltext);
+    font: 400 9px/17px var(--mbb-font);
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  #desktop-viewport {
+    position: relative;
+    width: 720px;
+    height: 540px;
+    margin: 0 8px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--mbb-tint-100);
+  }
+  /* Only one of the two is on screen at a time. */
+  .hidden { display: none; }
 </style>
 </head>
 <body>
@@ -52,6 +92,13 @@
     <div id="stage-area">
       <div id="phone">
         <div id="viewport"></div>
+      </div>
+      <div id="desktop" class="hidden">
+        <div id="desktop-bar">
+          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <div id="desktop-url"></div>
+        </div>
+        <div id="desktop-viewport"></div>
       </div>
     </div>
     <div id="endcard-root"></div>

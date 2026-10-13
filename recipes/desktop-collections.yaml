@@ -1,0 +1,35 @@
+# myCashFlo on a laptop: the whole book on one screen, the AI told what to do
+# in plain Hinglish, and a follow-up set up from the desk.
+#
+# The first clip that is NOT a phone. Every name is invented.
+video: desktop-collections
+
+business:
+  name: SHREE BALAJI BUILDING MATERIALS
+
+party:
+  name: AGRAWAL CONSTRUCTIONS
+  balance: 1400000
+  overdueDays: 68
+  standby: 3
+
+cashflo:
+  parties:
+    - { name: SHANTI INFRA PROJECTS, balance: 1150000, overdueDays: 94, standby: 3 }
+    - { name: M R BUILDCON, balance: 900000, overdueDays: 41, standby: 2 }
+    - { name: Deepak Hardware Stores, balance: 760000, overdueDays: 22, standby: 2 }
+    - { name: NAVEEN CEMENT AGENCY, balance: 620000, overdueDays: 0, standby: 0 }
+    - { name: Sunil Traders, balance: 370000, overdueDays: 9, standby: 1 }
+
+shots:
+  # The book, and the AI bar across the top.
+  - screen: mcf-desktop
+    duration: 3.6
+    actions:
+      - { at: 1.8, do: tap, target: setup-automation }
+
+  # The follow-up being configured, then handed over.
+  - screen: mcf-desktop
+    duration: 3.4
+    actions:
+      - { at: 1.6, do: tap, target: continue }

@@ -1,7 +1,12 @@
 import { SCREENS } from '../screens/index.js';
 import { stateAt, totalDuration } from '../src/timeline.js';
+import { deviceOf, urlFor } from '../src/device.js';
 
 const viewport = document.getElementById('viewport');
+const phoneFrame = document.getElementById('phone');
+const desktopFrame = document.getElementById('desktop');
+const desktopViewport = document.getElementById('desktop-viewport');
+const desktopUrl = document.getElementById('desktop-url');
 const endcardRoot = document.getElementById('endcard-root');
 let recipe = null;
 
@@ -60,7 +65,16 @@ window.setTime = function setTime(t) {
     );
   }
 
-  viewport.innerHTML = layers.join('');
+  /* Which frame the clip is in follows the screen, not the recipe: a desktop
+     screen is a desktop screen, and a shot that cut from one to the other
+     would otherwise draw a laptop inside a phone. */
+  const screen = SCREENS[frame.screen];
+  const onDesktop = deviceOf(screen) === 'desktop';
+  phoneFrame.classList.toggle('hidden', onDesktop);
+  desktopFrame.classList.toggle('hidden', !onDesktop);
+  if (onDesktop) desktopUrl.textContent = urlFor(screen);
+
+  (onDesktop ? desktopViewport : viewport).innerHTML = layers.join('');
 
   /* Full-bleed: a child of #frame, not of the phone, above the logo band. */
   endcardRoot.innerHTML = frame.endCard
