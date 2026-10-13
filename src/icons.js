@@ -49,6 +49,7 @@ export const icons = {
   phoneOff: (s = 22) => svg(s, '<path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5L17 13l4 1.5v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4 7.2 2 2 0 0 1 6 5z"/><path d="M3 3l18 18"/>', 'stroke-width="1.7"'),
   legal: (s = 22) => svg(s, '<path d="M6 3h8l4 4v14H6z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.7" fill="currentColor"/>', 'stroke-width="1.7"'),
   wallet: (s = 22) => svg(s, '<path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18v3M3 7.5V18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2M3 7.5h16a2 2 0 0 1 2 2V12h-4.5a2 2 0 0 0 0 4H21"/>', 'stroke-width="1.7"'),
+  calendar: (s = 18) => svg(s, '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3"/><circle cx="8.5" cy="13.5" r="1" fill="currentColor"/><circle cx="12" cy="13.5" r="1" fill="currentColor"/><circle cx="15.5" cy="13.5" r="1" fill="currentColor"/>', 'stroke-width="1.7"'),
   clock: (s = 20) => svg(s, '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>', 'stroke-width="1.8"'),
   warning: (s = 20) => svg(s, '<path d="M12 3.5L21.5 20h-19z"/><path d="M12 10v4.5"/><circle cx="12" cy="17.6" r="0.7" fill="currentColor"/>', 'stroke-width="1.8"'),
   /* The four across myCashFlo's bottom bar. */

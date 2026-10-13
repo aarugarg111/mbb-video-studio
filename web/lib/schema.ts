@@ -43,7 +43,8 @@ export const SCREENS = {
   'mbb-desktop-create-invoice': ['upload', 'proceed', 'save', 'add-item'],
   'mbb-desktop-invoice': ['record-payment', 'share', 'download-pdf', 'theme-store'],
   'mbb-desktop-purchase': ['upload', 'proceed', 'save', 'add-party'],
-  'day-sales': ['today', 'sale-row-0', 'profit', 'download']
+  'sales-list': ['change-range', 'sort', 'filter-sales', 'bill-row-0', 'share-link'],
+  'profit-loss': ['change-range', 'pdf', 'excel', 'net-profit']
 } as const;
 
 /* Derived, never typed out again. This was a hand-kept second list, and it

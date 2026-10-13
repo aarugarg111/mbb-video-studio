@@ -22,8 +22,12 @@ items:
   - { name: VEG MOMOS PLATE, rate: 60, qty: 2, gst: 5, unit: PLATE, purchase: 26 }
 
 shots:
-  # The reveal: the figure counts up as she reads the question out.
-  - screen: day-sales
-    duration: 4.5
+  # Every bill of the day, narrowed to today.
+  - screen: sales-list
+    duration: 3.6
     actions:
-      - { at: 2.6, do: tap, target: profit }
+      - { at: 1.8, do: tap, target: change-range }
+
+  # And what it actually earned - Net Profit is the figure the script asks for.
+  - screen: profit-loss
+    duration: 3.8

@@ -1094,3 +1094,61 @@
 .ds-nm { font-size: 11.5px; font-weight: 600; color: var(--mbb-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ds-sub { margin-top: 3px; font-size: 9.5px; color: var(--mbb-ink-muted); }
 .ds-amt { flex: none; font-size: 12.5px; font-weight: 700; color: var(--mbb-ink); }
+
+/* ---------- The sales list, and the Profit and Loss report ----------
+ * Both rebuilt from reference/frames/rep-8.png and rep-24.png, replacing a
+ * screen that was invented. */
+.slscreen { background: var(--mbb-tint-100); display: flex; flex-direction: column; }
+
+.sl-search { position: relative; display: flex; align-items: center; gap: 11px; margin: 14px 16px 0; padding: 0 0 0 14px; height: 44px; border-radius: 10px; background: var(--mbb-field-grey); color: var(--mbb-ink-muted); font-size: 12px; }
+.sl-sort { margin-left: auto; display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 14px; border-radius: 10px; background: var(--mbb-ink); color: var(--mbb-surface); font-size: 10.5px; font-weight: 700; }
+
+.sl-filters { display: flex; gap: 8px; margin: 11px 0 0 16px; overflow: hidden; }
+.sl-filter { flex: none; padding: 8px 13px; border-radius: 8px; border: 1px solid var(--mbb-border); background: var(--mbb-surface); color: var(--mbb-ink); font-size: 11px; }
+.sl-filter.on { border-color: var(--mbb-primary); color: var(--mbb-primary); font-weight: 600; }
+
+.sl-range { display: flex; align-items: center; gap: 9px; margin-top: 12px; padding: 11px 16px; background: var(--mbb-surface); border-top: 1px solid var(--mbb-line); border-bottom: 1px solid var(--mbb-line); }
+.sl-range .ico { color: var(--mbb-primary); }
+.sl-range-k { font-size: 12.5px; font-weight: 600; color: var(--mbb-ink); }
+.sl-range-v { font-size: 11px; color: var(--mbb-ink-muted); }
+.sl-change { margin-left: auto; font-size: 11.5px; font-weight: 700; color: var(--mbb-primary); }
+
+.sl-list { flex: 1; min-height: 0; padding: 11px 16px 0; display: flex; flex-direction: column; gap: 10px; }
+.sl-card { padding: 13px 15px; border-radius: 9px; background: var(--mbb-surface); box-shadow: 0 1px 4px var(--mbb-card-shadow); }
+.sl-party { font-size: 12.5px; font-weight: 700; color: var(--mbb-ink); }
+.sl-mid { display: flex; align-items: baseline; justify-content: space-between; margin-top: 7px; }
+.sl-inv { font-size: 11.5px; color: var(--mbb-ink-muted); }
+.sl-amt { font-size: 13px; font-weight: 700; color: var(--mbb-ink); }
+.sl-bot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+.sl-when { font-size: 10.5px; color: var(--mbb-ink-muted); }
+.sl-pill { padding: 4px 11px; border-radius: 7px; font-size: 10px; font-weight: 600; }
+.sl-pill.paid { border: 1px solid var(--mbb-paid-border); color: var(--mbb-paid-ink); }
+.sl-pill.unpaid { background: var(--mbb-unpaid); color: var(--mbb-surface); }
+.sl-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--mbb-line); }
+.sl-act { display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; color: var(--mbb-primary); }
+.sl-act.paylink { color: var(--mbb-scan-done); }
+
+/* ---------- Profit and Loss ---------- */
+.plscreen { background: var(--mbb-surface); display: flex; flex-direction: column; }
+.pl-pdf { color: var(--mbb-unpaid); }
+.pl-xls { color: var(--mbb-scan-done); }
+
+.pl-range { display: flex; align-items: center; gap: 9px; padding: 11px 16px; border-bottom: 1px solid var(--mbb-line); }
+.pl-range .ico { color: var(--mbb-ink); }
+.pl-range-k { font-size: 12.5px; font-weight: 600; color: var(--mbb-ink); }
+.pl-range-v { font-size: 11px; color: var(--mbb-ink-muted); }
+.pl-change { margin-left: auto; font-size: 11.5px; font-weight: 700; color: var(--mbb-primary); }
+
+.pl-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 15px 16px 0; }
+.pl-biz { font-size: 11.5px; font-weight: 700; color: var(--mbb-ink); }
+.pl-report { font-size: 11px; font-weight: 700; color: var(--mbb-ink); text-decoration: underline; }
+.pl-rule { height: 1px; margin: 14px 16px 0; background: var(--mbb-line); }
+.pl-duration { margin: 12px 16px 0; padding: 9px 12px; border: 1px solid var(--mbb-border); border-radius: 4px; text-align: right; font-size: 9.5px; font-weight: 700; color: var(--mbb-ink); }
+
+.pl-table { margin: 14px 16px 0; }
+.pl-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid var(--mbb-line); font-size: 10.5px; color: var(--mbb-ink); }
+.pl-row.head { background: var(--mbb-field-grey); font-weight: 700; border-bottom: 0; }
+/* Gross Profit and Net Profit sit on their own shaded rows, as the app has
+   them - they are the two figures anybody actually reads. */
+.pl-row.total { background: var(--mbb-field-grey); font-weight: 700; }
+.pl-v { font-variant-numeric: tabular-nums; }

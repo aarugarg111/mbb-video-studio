@@ -8,6 +8,8 @@
 import { THEME_SLUGS } from './themes.js';
 import yaml from 'js-yaml';
 import { DEFAULT_INVOICE } from './invoice.js';
+import { deviceOf } from './device.js';
+import { SCREENS } from '../screens/index.js';
 
 export const DEFAULT_END_CARD = { duration: 1.6, tagline: 'India ka No.1 Billing App' };
 export const DEFAULT_CTA = { duration: 1.8 };
@@ -343,6 +345,18 @@ export function parse(text, catalogue, options = {}) {
    * chat is where the clip should rest. Cutting back into the app afterwards
    * reads as a mistake - which is exactly what it looked like the first time
    * a generated video did it. */
+  /* A clip that cuts between a laptop and a phone mid-thought reads as two
+   * different videos spliced together. Both render perfectly well, which is
+   * why this is worth saying out loud. */
+  const shapes = new Set(recipe.shots.map(shot => deviceOf(SCREENS[shot.screen])));
+  if (shapes.size > 1) {
+    warnings.push(
+      'This clip cuts between a laptop and a phone. Both render, but on video it reads ' +
+      'as two different films spliced together. Keep to one, unless the script really ' +
+      'does move from a desk to a counter.'
+    );
+  }
+
   /* myCashFlo and myBillBook are two different apps with two different looks.
    * A clip that cuts between them reads as footage of the wrong product
    * spliced in by mistake - so this is worth saying out loud, even though
