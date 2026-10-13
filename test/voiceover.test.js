@@ -116,3 +116,34 @@ test('it survives a recipe with nothing in it', () => {
   assert.deepEqual(shotStarts({}), []);
   assert.deepEqual(voiceLines({ shots: [{ screen: 'nope', duration: 2 }] }), []);
 });
+
+test('no two captions are ever on screen at once', () => {
+  /* A fixed length is only right until two lines fall closer together than
+     that, and then the subtitle file has overlapping cues - which some editors
+     refuse outright. The real file had a 0.4s overlap while every test above
+     passed; this is the one that would have caught it. */
+  const recipe = build([
+    '  - { screen: mcf-parties, duration: 4 }',
+    '  - { screen: mcf-ai-call, duration: 9.5 }'
+  ]);
+  const lines = voiceLines(recipe);
+  assert.ok(lines.length > 1);
+  for (let i = 0; i < lines.length - 1; i++) {
+    assert.ok(
+      lines[i].until <= lines[i + 1].at,
+      `"${lines[i].text}" is still up when "${lines[i + 1].text}" starts`
+    );
+    assert.ok(lines[i].until > lines[i].at, 'and every line is still on screen for a while');
+  }
+});
+
+test('the subtitle file itself has no overlapping cues', () => {
+  const srt = toSrt(voiceLines(build([
+    '  - { screen: mcf-parties, duration: 4 }',
+    '  - { screen: mcf-ai-call, duration: 9.5 }'
+  ])));
+  const times = [...srt.matchAll(/(\d\d:\d\d:\d\d,\d\d\d) --> (\d\d:\d\d:\d\d,\d\d\d)/g)];
+  for (let i = 0; i < times.length - 1; i++) {
+    assert.ok(times[i][2] <= times[i + 1][1], `cue ${i + 1} overruns cue ${i + 2}`);
+  }
+});

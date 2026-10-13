@@ -58,6 +58,9 @@ export function voiceLines(recipe) {
       if (at >= endOfShot) continue;
       lines.push({
         at,
+        /* Trimmed below where the next line starts, further down. A caption
+         * that is still up when the next one arrives puts two on screen at
+         * once, and some editors refuse the file outright. */
         until: Math.min(at + LINE_SECONDS, endOfShot),
         speaker: line.who === 'ai' ? 'myCashFlo AI' : partyName(recipe),
         text: line.text,
@@ -66,7 +69,16 @@ export function voiceLines(recipe) {
     }
   });
 
-  return lines.sort((a, b) => a.at - b.at);
+  lines.sort((a, b) => a.at - b.at);
+
+  /* No line may outlast the one after it. Found by opening the subtitle file
+   * rather than by the tests, which were happy: a fixed length is only right
+   * until two lines fall closer together than that. */
+  for (let i = 0; i < lines.length - 1; i++) {
+    lines[i].until = Math.min(lines[i].until, lines[i + 1].at);
+  }
+
+  return lines;
 }
 
 function partyName(recipe) {
