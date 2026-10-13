@@ -1,0 +1,25 @@
+# "Aaj ki kamaai kitni hui?" - the day's bills, then the camera pushes in on
+# Net Profit so the figure is the last thing on screen.
+video: zoom-profit
+
+business:
+  name: JHANVI MOMOS CORNER
+
+invoice:
+  number: 108
+  date: "13/10/2026"
+
+items:
+  - { name: VEG MOMOS PLATE, rate: 60, qty: 2, gst: 5, unit: PLATE, purchase: 26 }
+
+shots:
+  - screen: sales-list
+    duration: 3.4
+    actions:
+      - { at: 1.6, do: tap, target: change-range }
+
+  - screen: profit-loss
+    duration: 5.4
+    actions:
+      - { at: 1.4, do: zoom, target: net-profit, to: 2.4 }
+      - { at: 4.2, do: zoomOut }

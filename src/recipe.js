@@ -18,7 +18,12 @@ const BRAND_KEYS = ['endCard', 'cta'];
 const CTA_KEYS = ['duration'];
 const END_CARD_KEYS = ['duration', 'tagline'];
 
-export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem'];
+export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem', 'zoom', 'zoomOut'];
+
+/* How close a zoom may push. Past about four the screen is a few words wide
+ * and the viewer loses where they are; below 1.2 nothing appears to happen. */
+export const ZOOM_RANGE = { min: 1.2, max: 4 };
+export const DEFAULT_ZOOM = 2;
 
 const VIDEO_NAME = /^[A-Za-z0-9_-]+$/;
 
@@ -260,6 +265,18 @@ export function parse(text, catalogue, options = {}) {
         errors.push(`${at} is not a mapping.`);
         return;
       }
+      /* A zoom names a target the same way a tap does, because it is the same
+       * list of measured points - "zoom in on Net Profit" means the point the
+       * screen already calls net-profit. */
+      if (action.do === 'zoom') {
+        const to = action.to ?? DEFAULT_ZOOM;
+        if (!(Number(to) >= ZOOM_RANGE.min && Number(to) <= ZOOM_RANGE.max)) {
+          errors.push(
+            `${at}: zoom "to" must be between ${ZOOM_RANGE.min} and ${ZOOM_RANGE.max}, got ${JSON.stringify(action.to)}.`
+          );
+        }
+      }
+
       if (!ACTIONS.includes(action.do)) {
         errors.push(`${at}: unknown action "${action.do}". Valid actions: ${ACTIONS.join(', ')}.`);
         return;
@@ -275,7 +292,7 @@ export function parse(text, catalogue, options = {}) {
         return;
       }
 
-      if ((action.do === 'tap' || action.do === 'type') && !targets.includes(action.target)) {
+      if ((action.do === 'tap' || action.do === 'type' || action.do === 'zoom') && !targets.includes(action.target)) {
         errors.push(
           `${at}: "${action.target}" is not on the ${shot.screen} screen. ` +
           `Valid targets: ${targets.join(', ')}.`

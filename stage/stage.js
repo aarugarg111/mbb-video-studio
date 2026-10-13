@@ -1,6 +1,6 @@
 import { SCREENS } from '../screens/index.js';
 import { stateAt, totalDuration } from '../src/timeline.js';
-import { deviceOf, urlFor } from '../src/device.js';
+import { deviceOf, urlFor, viewportFor } from '../src/device.js';
 
 const viewport = document.getElementById('viewport');
 const phoneFrame = document.getElementById('phone');
@@ -74,7 +74,25 @@ window.setTime = function setTime(t) {
   desktopFrame.classList.toggle('hidden', !onDesktop);
   if (onDesktop) desktopUrl.textContent = urlFor(screen);
 
-  (onDesktop ? desktopViewport : viewport).innerHTML = layers.join('');
+  const stack = onDesktop ? desktopViewport : viewport;
+  /* The camera push, if the shot asks for one. It goes on a layer INSIDE the
+     viewport: putting it on the viewport scales its own clipping box, and the
+     picture grows out past the phone. */
+const z = frame.zoom;
+  let camera = '<div class="camera">';
+  if (z) {
+    const box = viewportFor(screen);
+    /* Clamped to the screen's edges, the way a map pan is: without this a
+       zoom near an edge slides blank space into frame. */
+    const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+    const dx = clamp(box.width / 2 - z.x * z.scale, box.width * (1 - z.scale), 0).toFixed(2);
+    const dy = clamp(box.height / 2 - z.y * z.scale, box.height * (1 - z.scale), 0).toFixed(2);
+    camera =
+      '<div class="camera" style="transform-origin: 0 0; transform: translate(' +
+      dx + 'px, ' + dy + 'px) scale(' + z.scale.toFixed(4) + ')">';
+  }
+  stack.innerHTML = camera + layers.join('') + '</div>';
+
 
   /* Full-bleed: a child of #frame, not of the phone, above the logo band. */
   endcardRoot.innerHTML = frame.endCard

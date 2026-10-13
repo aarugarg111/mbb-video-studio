@@ -53,7 +53,7 @@ export const SCREENS = {
  * the model to propose, because this is what it is actually constrained to. */
 export const SCREEN_NAMES = Object.keys(SCREENS) as [keyof typeof SCREENS, ...(keyof typeof SCREENS)[]];
 
-export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem'] as const;
+export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem', 'zoom', 'zoomOut'] as const;
 
 /* Mirrors the PNGs in kit/themes/, plus the built-in CSS washes. A theme named
  * here but absent from that folder renders plain and warns - never fails. */

@@ -21,7 +21,7 @@ export const targets = {
   'change-range': { x: 349, y: 74 },
   'pdf': { x: 329, y: 28 },
   'excel': { x: 364, y: 28 },
-  'net-profit': { x: 195, y: 572 }
+  'net-profit': { x: 349, y: 571 }
 };
 
 /* The app prints these to one decimal, even when they are whole. */
@@ -101,9 +101,11 @@ export function render(data, state) {
     ${row('Gross Profit', pl.gross, 'total')}
     ${row('Other Income(+)', pl.otherIncome)}
     ${row('Indirect Expenses (-)', pl.indirect)}
-    <div class="pl-row total" id="net-profit">
+    <div class="pl-row total">
       <div class="pl-k">Net Profit</div>
-      <div class="pl-v">${esc(amount(pl.net))}</div>
+      <!-- The id is on the FIGURE: a zoom should frame the number, not the
+           empty middle of a full-width row. -->
+      <div class="pl-v" id="net-profit">${esc(amount(pl.net))}</div>
     </div>
   </div>
 </div>`;

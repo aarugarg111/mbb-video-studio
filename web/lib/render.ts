@@ -7,7 +7,7 @@ import { createEncoder } from './encode';
 import { STAGE_W, STAGE_H } from '../app/studio/stage';
 /* Shared with the command-line renderer, so the two cannot disagree about
    which shape a screen is. */
-import { deviceOf, urlFor } from '../../src/device.js';
+import { deviceOf, urlFor, viewportFor } from '../../src/device.js';
 const SCREENS = UNTYPED_SCREENS as Record<string, { render(data: unknown, state: unknown): string }>;
 
 type Options = { fps?: number; onProgress?: (done: number, total: number) => void };
@@ -77,7 +77,22 @@ function paint(frame: any, recipe: any, viewport: HTMLElement, endcardRoot: HTML
   if (onDesktop && desktopUrl) desktopUrl.textContent = urlFor(screen);
 
   const target = onDesktop && desktopViewport ? desktopViewport : viewport;
-  target.innerHTML = layers.join('');
+  /* Inside the viewport, not on it - see stage.js. */
+const z = frame.zoom;
+  let camera = '<div class="camera">';
+  if (z) {
+    const box = viewportFor(screen);
+    /* Clamped to the screen's edges, the way a map pan is: without this a
+       zoom near an edge slides blank space into frame. */
+    const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+    const dx = clamp(box.width / 2 - z.x * z.scale, box.width * (1 - z.scale), 0).toFixed(2);
+    const dy = clamp(box.height / 2 - z.y * z.scale, box.height * (1 - z.scale), 0).toFixed(2);
+    camera =
+      '<div class="camera" style="transform-origin: 0 0; transform: translate(' +
+      dx + 'px, ' + dy + 'px) scale(' + z.scale.toFixed(4) + ')">';
+  }
+  target.innerHTML = camera + layers.join('') + '</div>';
+
 
   endcardRoot.innerHTML = frame.endCard
     ? frame.endCard.kind === 'cta'

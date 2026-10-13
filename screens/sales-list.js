@@ -21,13 +21,21 @@ export const targets = {
   'sort': { x: 336, y: 36 },
   'filter-sales': { x: 92, y: 85 },
   'bill-row-0': { x: 195, y: 211 },
-  'share-link': { x: 295, y: 482 }
+  'share-link': { x: 295, y: 482 },
+  'received-payment': { x: 97, y: 781 },
+  'new-bill': { x: 299, y: 781 }
 };
 
 /* Narrowing the range to today is the beat a day-in-the-life script wants. */
 export const tapEffects = { 'change-range': { today: 1 } };
 
 const FILTERS = ['All', 'Sales', 'Received Payment', 'Sales Return', 'Credit Note'];
+
+/* The bar across the bottom of every myBillBook screen. */
+const NAV = [
+  ['Dashboard', 'navDashboard'], ['Parties', 'navParties'], ['Items', 'navItems'],
+  ['For You', 'navForYou'], ['More', 'navMore']
+];
 
 /* A day of trading. Fixed rather than read off a clock, so two renders of one
  * recipe are the same file. Quantities vary the way a real day does. */
@@ -112,5 +120,16 @@ export function render(data, state) {
   </div>
 
   <div class="sl-list">${day.bills.map(card).join('')}</div>
+
+  <div class="floatbtns">
+    <div class="fb dark" id="received-payment">Received Payment</div>
+    <div class="fb round green"><span class="ico">${icons.plus(20)}</span></div>
+    <div class="fb create" id="new-bill">+ Bill / Invoice</div>
+  </div>
+
+  <div class="tabnav">
+    ${NAV.map(([label, ic], i) => `
+      <div class="${i === 0 ? 'on' : ''}"><span class="ico">${icons[ic](22)}</span>${label}</div>`).join('')}
+  </div>
 </div>`;
 }

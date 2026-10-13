@@ -96,6 +96,7 @@ video { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 20px; di
   background: var(--mbb-tint-100);
 }
 #stage-viewport .layer { position: absolute; inset: 0; }
+.camera { position: absolute; inset: 0; }
 
 /* The desktop frame - a browser window. Mirrors stage/index.html. */
 .stage-desktop {

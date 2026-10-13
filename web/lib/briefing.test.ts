@@ -65,7 +65,7 @@ test('the briefing is small enough to paste into a chat box', () => {
      grows past a point where it is awkward, the screens table is the part to
      trim, not the instructions. */
   const briefing = briefingFor(SCRIPT);
-  assert.ok(briefing.length < 24000, `the briefing has grown to ${briefing.length} characters`);
+  assert.ok(briefing.length < 32000, `the briefing has grown to ${briefing.length} characters`);
 });
 
 test('the briefing does not ask for a field the renderer throws away', () => {

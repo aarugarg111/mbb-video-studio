@@ -23,6 +23,9 @@ const PARTY_SECONDS = 0.3;
 const ITEM_SECONDS = 0.35;
 const RIPPLE_SECONDS = 0.6;
 const TYPE_SECONDS = 1.2;
+/* Long enough to read as a move, short enough not to eat the shot. */
+const ZOOM_SECONDS = 0.55;
+
 const SHEET_DELAY_SECONDS = 0.2;
 const SHEET_SECONDS = 0.5;
 const SHEET_CLOSE_SECONDS = 0.3;
@@ -97,6 +100,8 @@ export function stateAt(recipe, t) {
   };
 
   let ripple = null;
+  /* Where the camera is pushed in, and how far. Null is the whole screen. */
+  let zoom = null;
 
   /* A bill, once built, stays built: every earlier shot is applied at its full
    * duration (its actions have finished), the current shot at localT. Only the
@@ -162,6 +167,34 @@ export function stateAt(recipe, t) {
           }
           break;
         }
+        case 'zoom': {
+          if (at < action.at) break;
+          const targets = SCREENS[s.screen]?.targets;
+          const point = targets?.[action.target];
+          if (!point) {
+            const known = targets ? Object.keys(targets).join(', ') : '(unknown screen)';
+            throw new Error(
+              `Shot ${i}: screen "${s.screen}" has no point "${action.target}" to zoom to. ` +
+              `Valid points: ${known}`
+            );
+          }
+          /* Eases in rather than cutting, so it reads as a camera move and not
+           * as a different shot. */
+          const to = Number(action.to) || 2;
+          const grown = 1 + (to - 1) * easeOut(ramp(at, action.at, ZOOM_SECONDS));
+          zoom = { x: point.x, y: point.y, scale: grown };
+          break;
+        }
+        case 'zoomOut': {
+          if (at < action.at) break;
+          /* Pulls back to whatever it was pushed in from, over the same beat. */
+          if (zoom) {
+            const back = easeOut(ramp(at, action.at, ZOOM_SECONDS));
+            const scale = zoom.scale + (1 - zoom.scale) * back;
+            zoom = scale <= 1.001 ? null : { ...zoom, scale };
+          }
+          break;
+        }
       }
     }
   }
@@ -180,5 +213,5 @@ export function stateAt(recipe, t) {
     ? { screen: recipe.shots[index - 1].screen, progress: localT / TRANSITION_SECONDS }
     : null;
 
-  return { t: clamped, shotIndex: index, screen: shot.screen, outgoing, screenState, ripple, endCard };
+  return { t: clamped, shotIndex: index, screen: shot.screen, outgoing, screenState, ripple, zoom, endCard };
 }

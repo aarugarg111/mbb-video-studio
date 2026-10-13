@@ -7,6 +7,7 @@ export const STAGE_CSS = `
 .stage-phone { padding: 11px; background: var(--stage-phone-body); border-radius: 46px; transform: scale(1.8); }
 #stage-viewport { position: relative; width: 390px; height: 844px; border-radius: 36px; overflow: hidden; background: var(--mbb-tint-100); }
 #stage-viewport .layer { position: absolute; inset: 0; }
+.camera { position: absolute; inset: 0; }
 
 /* The desktop frame. Without these the browser render drew an empty phone
    while the command line drew a laptop - the same recipe, two different

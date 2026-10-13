@@ -1172,3 +1172,9 @@
    them - they are the two figures anybody actually reads. */
 .pl-row.total { background: var(--mbb-field-grey); font-weight: 700; }
 .pl-v { font-variant-numeric: tabular-nums; }
+
+/* The three buttons across the bottom of the sales list, as the app has them:
+   a dark "Received Payment", a round green add, and the purple bill button. */
+.floatbtns .fb.dark { background: var(--mbb-ink); color: var(--mbb-surface); }
+.floatbtns .fb.round.green { width: 44px; padding: 0; border-radius: 999px; justify-content: center; background: var(--mbb-green); color: var(--mbb-surface); }
+.slscreen .floatbtns { bottom: 76px; gap: 9px; }
