@@ -876,59 +876,79 @@
 .mcf-ringring.end { background: var(--mcf-legal-ink); }
 .mcf-ringring.go { background: var(--mcf-ring-accept); }
 
-/* ---------- myCashFlo on a laptop ----------
- * SAMPLED from reference/frames/dsk-mcf-10.png. The desktop apps are DARK,
- * where the phone apps are light - the same product, a different skin, so
- * these are their own tokens rather than a tint of the --mcf-* ones. */
-.dkscreen { background: var(--dsk-page); color: var(--dsk-ink); display: flex; font-size: 11px; }
+/* ---------- myCashFlo on a laptop, rebuilt ----------
+ * SAMPLED from reference/frames/dmcf-3.png. Two rails: myBillBook's own on
+ * the far left, because this page is reached from inside it as AI Collections,
+ * and myCashFlo's beside it. */
+.dkscreen { background: var(--dsk-table); color: var(--dsk-ink); display: flex; font-size: 10px; }
 
-.dk-side { flex: none; width: 128px; padding: 14px 10px; box-sizing: border-box; background: var(--dsk-sidebar); display: flex; flex-direction: column; gap: 3px; }
-.dk-brand { font-size: 12px; font-weight: 700; margin-bottom: 14px; padding-left: 6px; }
-.dk-nav { display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: 7px; color: var(--dsk-muted); font-size: 10.5px; }
+.dk-host { flex: none; width: 112px; padding: 9px 7px; box-sizing: border-box; background: var(--dsk-sidebar); display: flex; flex-direction: column; gap: 1px; }
+.dk-host-biz { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.dk-avatar { flex: none; width: 16px; height: 16px; border-radius: 999px; background: var(--mbb-primary); color: var(--mbb-surface); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; }
+.dk-host-nm { font-size: 8px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dk-host-cta { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 5px 4px; margin-bottom: 7px; border-radius: 6px; background: var(--dsk-panel); font-size: 7.5px; font-weight: 600; white-space: nowrap; }
+.dk-head-k { margin: 7px 0 3px; padding-left: 5px; font-size: 6.5px; letter-spacing: .07em; color: var(--dsk-muted); }
+.dk-hnav { display: flex; align-items: center; gap: 6px; padding: 5px; border-radius: 5px; color: var(--dsk-muted); font-size: 8.5px; white-space: nowrap; }
+.dk-hnav.on { background: var(--dsk-active); color: var(--dsk-ink); font-weight: 600; }
+.dk-new { margin-left: auto; padding: 1px 4px; border-radius: 999px; background: var(--dsk-new); color: var(--mbb-surface); font-size: 5.5px; font-weight: 700; }
+
+.dk-side { flex: none; width: 104px; padding: 11px 8px; box-sizing: border-box; background: var(--dsk-mcf-rail); display: flex; flex-direction: column; gap: 2px; }
+.dk-brand { font-size: 11px; font-weight: 700; margin-bottom: 12px; padding-left: 5px; }
+.dk-nav { display: flex; align-items: center; gap: 7px; padding: 6px 7px; border-radius: 6px; color: var(--dsk-muted); font-size: 9px; }
 .dk-nav.on { background: var(--dsk-active); color: var(--dsk-ink); font-weight: 600; }
-.dk-credits { margin-top: auto; padding: 10px 11px; border-radius: 8px; background: var(--dsk-panel); }
-.dk-credits-k { font-size: 8px; letter-spacing: 0.06em; color: var(--dsk-muted); }
-.dk-credits-v { margin-top: 3px; font-size: 16px; font-weight: 700; color: var(--dsk-credit); }
+.dk-credits { margin-top: auto; padding: 8px 9px; border-radius: 7px; background: var(--dsk-panel); }
+.dk-credits-k { font-size: 6.5px; letter-spacing: .06em; color: var(--dsk-muted); }
+.dk-credits-v { margin-top: 2px; font-size: 14px; font-weight: 700; color: var(--dsk-credit); }
 
-.dk-main { flex: 1; min-width: 0; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.dk-main { flex: 1; min-width: 0; padding: 11px 12px; display: flex; flex-direction: column; gap: 9px; }
+.dk-top { display: flex; align-items: center; gap: 9px; }
+.dk-title { font-size: 15px; font-weight: 700; }
+.dk-btn { display: flex; align-items: center; gap: 4px; padding: 6px 11px; border-radius: 6px; background: var(--dsk-blue); color: var(--dsk-ink); font-size: 9px; font-weight: 600; white-space: nowrap; }
 
-.dk-top { display: flex; align-items: center; gap: 12px; }
-.dk-title { font-size: 17px; font-weight: 700; }
-.dk-btn { display: flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 7px; background: var(--dsk-blue); color: var(--dsk-ink); font-size: 10.5px; font-weight: 600; }
-
-/* The AI bar. It carries an instruction in the owner's own words, which is
-   what the product actually does and what the ad is selling. */
-.dk-ai { margin-left: auto; display: flex; align-items: center; gap: 10px; max-width: 310px; padding: 7px 12px; border-radius: 9px; background: var(--dsk-ai); border: 1px solid var(--dsk-ai-edge); }
-.dk-ai.on { border-color: var(--dsk-ai-live); }
+/* The AI bar is the brightest thing on the page in the recording, and it
+   should be: it is what the ad is selling. */
+.dk-ai { margin-left: auto; display: flex; align-items: center; gap: 8px; max-width: 232px; padding: 6px 9px; border-radius: 8px; background: var(--dsk-ai-bar); }
+.dk-ai.on { box-shadow: 0 0 0 1px var(--dsk-ai-live); }
 .dk-ai-wave { color: var(--dsk-ai-live); display: flex; }
 .dk-ai-txt { min-width: 0; }
-.dk-ai-ttl { font-size: 10px; font-weight: 700; }
-.dk-ai-said { margin-top: 2px; font-size: 9px; color: var(--dsk-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dk-ai-ttl { font-size: 9px; font-weight: 700; }
+.dk-ai-said { margin-top: 1px; font-size: 7.5px; color: var(--dsk-ai-said); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dk-ai-mic { flex: none; width: 19px; height: 19px; border-radius: 999px; background: var(--dsk-ai-mic); color: var(--mbb-surface); display: flex; align-items: center; justify-content: center; }
 
-.dk-filters { display: flex; align-items: center; gap: 8px; }
-.dk-search { flex: 1; display: flex; align-items: center; gap: 7px; padding: 7px 11px; border-radius: 7px; background: var(--dsk-panel); color: var(--dsk-muted); font-size: 10px; }
-.dk-filter { display: flex; align-items: center; gap: 4px; padding: 7px 10px; border-radius: 7px; background: var(--dsk-panel); color: var(--dsk-ink); font-size: 10px; }
+.dk-filters { display: flex; align-items: center; gap: 6px; }
+.dk-search { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; padding: 6px 9px; border-radius: 6px; background: var(--dsk-panel); color: var(--dsk-muted); font-size: 8.5px; white-space: nowrap; overflow: hidden; }
+.dk-filter { flex: none; display: flex; align-items: center; gap: 3px; padding: 6px 8px; border-radius: 6px; background: var(--dsk-panel); color: var(--dsk-ink); font-size: 8.5px; }
 
-.dk-head, .dk-row { display: flex; align-items: center; gap: 10px; padding: 9px 10px; }
-.dk-head { color: var(--dsk-muted); font-size: 8.5px; letter-spacing: 0.05em; border-bottom: 1px solid var(--dsk-rule); }
-.dk-row { border-bottom: 1px solid var(--dsk-rule); font-size: 10.5px; }
-.dk-c.name { flex: 1.6; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-.dk-c.amt { width: 72px; flex: none; font-weight: 700; }
-.dk-c.late { width: 54px; flex: none; color: var(--dsk-late); }
-.dk-c.auto { width: 92px; flex: none; }
-.dk-c.seen { width: 62px; flex: none; color: var(--dsk-muted); }
-.dk-pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; background: var(--dsk-panel); color: var(--dsk-muted); font-size: 8.5px; }
-.dk-dot { width: 4px; height: 4px; border-radius: 999px; background: var(--dsk-muted); }
-.dk-off { color: var(--dsk-muted); font-size: 9px; }
+/* Six columns. The two on the right are the ones worth filming: what is being
+   done about the party, and what the AI last did. */
+.dk-rows { flex: 1; min-height: 0; }
+.dk-row { display: flex; align-items: center; gap: 8px; padding: 9px 8px; border-bottom: 1px solid var(--dsk-rule); }
+.dk-c.who { flex: 1.5; min-width: 0; }
+.dk-nm { font-size: 9.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dk-ph { margin-top: 2px; font-size: 7.5px; color: var(--dsk-muted); }
+.dk-c.state { width: 60px; flex: none; }
+.dk-c.amt { width: 46px; flex: none; text-align: right; font-size: 10px; font-weight: 700; }
+.dk-c.late { width: 54px; flex: none; font-size: 8px; color: var(--dsk-late); }
+.dk-c.auto { width: 58px; flex: none; }
+.dk-c.seen { width: 88px; flex: none; min-width: 0; }
+.dk-note { font-size: 7.5px; line-height: 1.3; color: var(--dsk-ink); overflow: hidden; }
+.dk-ago { margin-top: 2px; font-size: 6.5px; color: var(--dsk-muted); }
+.dk-off { font-size: 8px; color: var(--dsk-muted); }
+
+.dk-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: 999px; font-size: 7.5px; font-weight: 600; white-space: nowrap; }
+.dk-chip.breach { background: var(--dsk-breach-bg); color: var(--dsk-late); }
+.dk-chip.daily { background: var(--dsk-daily-bg); color: var(--dsk-credit); }
+.dk-chip.standby { background: var(--dsk-panel); color: var(--dsk-muted); }
+.dk-dot { width: 3px; height: 3px; border-radius: 999px; background: var(--dsk-muted); }
 
 /* The follow-up sheet, over everything. */
 .dk-scrim { position: absolute; inset: 0; background: var(--dsk-scrim); }
-.dk-sheet { position: absolute; left: 50%; top: 50%; width: 330px; margin: -148px 0 0 -165px; padding: 15px; box-sizing: border-box; border-radius: 12px; background: var(--dsk-modal); border: 1px solid var(--dsk-rule); }
+.dk-sheet { position: absolute; left: 50%; top: 50%; width: 320px; margin: -146px 0 0 -160px; padding: 15px; box-sizing: border-box; border-radius: 12px; background: var(--dsk-modal); border: 1px solid var(--dsk-rule); }
 .dk-sheet-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .dk-sheet-ttl { font-size: 13px; font-weight: 700; }
 .dk-sheet-sub { margin-top: 2px; font-size: 9.5px; color: var(--dsk-muted); }
 .dk-x { margin-left: auto; color: var(--dsk-muted); }
-.dk-field-k { font-size: 8.5px; letter-spacing: 0.05em; color: var(--dsk-muted); margin-bottom: 6px; }
+.dk-field-k { font-size: 8.5px; letter-spacing: .05em; color: var(--dsk-muted); margin-bottom: 6px; }
 .dk-field { display: flex; align-items: center; justify-content: space-between; padding: 9px 11px; margin-bottom: 12px; border-radius: 8px; background: var(--dsk-panel); }
 .dk-field-v { font-size: 11px; font-weight: 600; }
 .dk-field-s { margin-top: 2px; font-size: 9px; color: var(--dsk-muted); }

@@ -78,7 +78,7 @@ test('the desktop screen renders with nothing at all', () => {
 
 test('the follow-up sheet is there only once it is opened', () => {
   const closed = SCREENS['mcf-desktop'].render({}, {});
-  const open = SCREENS['mcf-desktop'].render({}, { sheet: 1 });
+  const open = SCREENS['mcf-desktop'].render({}, { followup: 1 });
   assert.ok(!closed.includes('New Call Follow-Up'));
   assert.ok(open.includes('New Call Follow-Up'));
   assert.ok(open.includes('Step 1 of 2'));

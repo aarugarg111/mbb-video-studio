@@ -384,3 +384,14 @@
   --dsk-unpaid-bg: #3A1D1D;
   --dsk-paid-bg:   #14301F;
 }
+
+/* myCashFlo on a laptop, rebuilt. SAMPLED from reference/frames/dmcf-3.png. */
+:root {
+  --dsk-table:      #161818;  /* SAMPLED - the table ground        */
+  --dsk-mcf-rail:   #111111;  /* SAMPLED - myCashFlo's own rail    */
+  --dsk-ai-bar:     #2F277C;  /* SAMPLED - the AI Accountant bar   */
+  --dsk-ai-mic:     #7530DE;  /* SAMPLED - its mic button          */
+  --dsk-ai-said:    #BFB8E8;
+  --dsk-breach-bg:  #261F1F;  /* SAMPLED - "Promise Breached"      */
+  --dsk-daily-bg:   #15231C;  /* SAMPLED - the daily WhatsApp pill */
+}
