@@ -7,10 +7,17 @@ compatibility_date = "2026-01-01"
 # Next export, so a render still costs nothing and runs in the viewer's browser.
 # A Worker runs in the Cloudflare data centre nearest whoever opened the page,
 # and calls Anthropic from there. Anthropic does not serve every country, so a
-# teammate whose request happened to run in an unsupported one - Hong Kong, in
-# the first report of this - was refused at Anthropic's edge before the request
-# ever reached Claude. It looked exactly like the key being turned off, and it
-# was not: the key was fine and the same script worked for everybody else.
+# request that runs in an unsupported one is refused at Anthropic's edge before
+# it ever reaches Claude. It looks exactly like the key being turned off, and
+# it is not: the key is fine and the same script works for everybody else.
+#
+# The part worth writing down, because it is the opposite of what anybody
+# assumes: the teammate this happened to was in BANGALORE. India is served.
+# Cloudflare routes by network peering rather than by geography, and a good
+# deal of Indian traffic reaches it through Hong Kong - so the person was in a
+# supported country and their code was not. "They are in India, so it cannot
+# be a region problem" is the wrong conclusion, and it is the first one
+# everyone reaches.
 #
 # Smart placement runs the Worker near what it talks to rather than near the
 # viewer, so the call to Anthropic leaves from one place instead of from
