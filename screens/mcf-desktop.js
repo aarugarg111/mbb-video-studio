@@ -35,12 +35,26 @@ export const targets = {
   'party-row-0': { x: 468, y: 110 },
   /* Measured with the follow-up sheet open - it does not exist before that,
    * which is why measure-targets.mjs reports it missing in the default state. */
-  'continue': { x: 360, y: 339 }
+  /* This was 67px below the button it names, so the tap that moves the sheet
+   * on to step 2 landed under it. Nothing failed - the ripple simply appeared
+   * in the wrong place, and the sheet changed anyway because the timeline
+   * applies the effect whether or not the coordinates are any good. */
+  'continue': { x: 360, y: 272 },
+  /* Step 2's own buttons, which exist only once Continue has been tapped. */
+  'select-all': { x: 234, y: 189 },
+  'party-pick-0': { x: 360, y: 224 },
+  'party-pick-1': { x: 360, y: 264 },
+  activate: { x: 360, y: 383 }
 };
 
 export const tapEffects = {
   'setup-automation': { followup: 1 },
-  'ask-ai': { asking: 1 }
+  'ask-ai': { asking: 1 },
+  /* Step 1 configures the window and the frequency; step 2 picks the parties
+   * and turns it on. Both are the same sheet, as in the app. */
+  continue: { step: 2 },
+  'select-all': { all: 1 },
+  activate: { followup: 0, live: 1 }
 };
 
 /* myBillBook's own rail, trimmed to what fits at this width. AI Collections is
@@ -83,6 +97,8 @@ export function render(data, state) {
   /* NOT "sheet": that name belongs to the timeline's own sheet-slide, which
    * ramps to 1 by itself. This one only opens when the button is tapped. */
   const sheet = Number(state?.followup ?? 0) > 0;
+  const step = Number(state?.step ?? 1) >= 2 ? 2 : 1;
+  const all = Number(state?.all ?? 0) > 0;
   const asking = Number(state?.asking ?? 0) > 0;
   const rows = book.parties.slice(0, 6);
 
@@ -173,14 +189,16 @@ export function render(data, state) {
     <div class="dk-scrim"></div>
     <div class="dk-sheet">
       <div class="dk-sheet-head">
+        ${step === 2 ? `<span class="ico dk-back">${icons.back(12)}</span>` : ''}
         <span class="mcf-round">${icons.phone(14)}</span>
         <div>
           <div class="dk-sheet-ttl">New Call Follow-Up</div>
-          <div class="dk-sheet-sub">Step 1 of 2 &#183; Configure</div>
+          <div class="dk-sheet-sub">Step ${step} of 2 &#183; ${step === 1 ? 'Configure' : 'Choose parties'}</div>
         </div>
         <span class="ico dk-x">${icons.close(14)}</span>
       </div>
 
+      ${step === 1 ? `
       <div class="dk-field-k">WHEN SHOULD WE FOLLOW UP WITH PARTIES?</div>
       <div class="dk-field">
         <div>
@@ -196,7 +214,36 @@ export function render(data, state) {
         <span class="ico">${icons.chevDown(12)}</span>
       </div>
 
-      <div class="dk-go" id="continue">Continue &#183; Select parties</div>
+      <div class="dk-go" id="continue">Continue &#183; Select parties</div>` : `
+      <!-- What was configured, kept in view while the parties are chosen: the
+           owner is deciding who gets rung, and needs to see what they are
+           being signed up for. -->
+      <div class="dk-conf">
+        <div class="dk-conf-k">CONFIGURED AUTOMATION<span class="dk-conf-edit">Edit</span></div>
+        <div class="dk-conf-chips">
+          <span class="dk-conf-chip"><span class="ico">${icons.phone(9)}</span>Call Follow-Up</span>
+          <span class="dk-conf-chip">Friendly &#183; Alternate days</span>
+          <span class="dk-conf-chip">Overdue 3m&#8211;6m</span>
+        </div>
+      </div>
+
+      <div class="dk-pickbar">
+        <span class="dk-pickall" id="select-all">Select all</span>
+        <span class="dk-picksearch"><span class="ico">${icons.search(10)}</span>Search parties...</span>
+      </div>
+
+      <div class="dk-picks">
+        ${rows.slice(0, 4).map((p, i) => `
+          <div class="dk-pick ${all || i === 0 ? 'on' : ''}" ${i < 2 ? `id="party-pick-${i}"` : ''}>
+            <span class="dk-tick">${all || i === 0 ? icons.check(10) : ''}</span>
+            <div>
+              <div class="dk-pick-nm">${esc(p.name)}</div>
+              <div class="dk-pick-s">${short(p.balance)}${p.overdueDays > 0 ? ' &#183; <b>' + p.overdueDays + 'd overdue</b>' : ''}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+
+      <div class="dk-go" id="activate">Activate Automation</div>`}
     </div>` : ''}
 </div>`;
 }

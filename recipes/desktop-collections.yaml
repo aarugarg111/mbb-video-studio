@@ -35,17 +35,19 @@ shots:
     actions:
       - { at: 2.0, do: tap, target: setup-followups }
 
-  # The whole book, worst first, with what is being done about each one.
+  # The whole book, worst first, and the automation set up over it in one
+  # unbroken take: configure it, choose who it is pointed at, turn it on.
+  #
+  # One shot rather than two, because a screen's state starts fresh with each
+  # shot - so a sheet opened in one shot is shut again by the time the next
+  # one begins, and the whole of step 2 was being played to a closed sheet.
   - screen: mcf-desktop
-    duration: 3.6
+    duration: 11.0
     actions:
       - { at: 1.8, do: tap, target: setup-automation }
-
-  # The follow-up being configured, then handed over.
-  - screen: mcf-desktop
-    duration: 3.4
-    actions:
-      - { at: 1.6, do: tap, target: continue }
+      - { at: 4.0, do: tap, target: continue }
+      - { at: 6.2, do: tap, target: select-all }
+      - { at: 8.4, do: tap, target: activate }
 
   # And what is left running: the automations, with the parties each one is
   # chasing. This is the beat the clip never had.

@@ -1633,3 +1633,23 @@
 /* The bill is drawn at the phone's own width and scaled to fit, so its
    proportions survive - the same trick mbb-desktop-invoice uses. */
 .dts-paper { width: 390px; transform: scale(0.385); transform-origin: top left; }
+
+/* Step 2 of the laptop's follow-up sheet: what was configured, and who it is
+   about to be pointed at (reference/frames/dsk-mcf-18.png). */
+.dk-conf { margin-top: 10px; padding: 9px 10px; border-radius: 8px; background: var(--dsk-panel); }
+.dk-conf-k { display: flex; align-items: center; justify-content: space-between; font-size: 7px; font-weight: 700; letter-spacing: .06em; color: var(--dsk-muted); }
+.dk-conf-edit { color: var(--dsk-blue); letter-spacing: 0; font-size: 8px; }
+.dk-conf-chips { margin-top: 7px; display: flex; flex-wrap: wrap; gap: 5px; }
+.dk-conf-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: 999px; background: var(--dsk-card); font-size: 7.5px; font-weight: 600; color: var(--dsk-ink); }
+.dk-pickbar { margin-top: 10px; display: flex; align-items: center; gap: 8px; }
+.dk-pickall { font-size: 8px; font-weight: 700; color: var(--dsk-ink); white-space: nowrap; }
+.dk-picksearch { flex: 1; display: flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 6px; background: var(--dsk-panel); font-size: 8px; color: var(--dsk-muted); }
+.dk-picks { margin-top: 8px; display: flex; flex-direction: column; gap: 5px; }
+.dk-pick { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 7px; background: var(--dsk-panel); }
+.dk-pick.on { background: var(--dsk-card); box-shadow: inset 0 0 0 1px var(--dsk-blue); }
+.dk-tick { flex: none; width: 13px; height: 13px; border-radius: 999px; border: 1px solid var(--dsk-rule); display: grid; place-items: center; color: var(--mbb-surface); }
+.dk-pick.on .dk-tick { background: var(--dsk-blue); border-color: var(--dsk-blue); }
+.dk-pick-nm { font-size: 9px; font-weight: 700; color: var(--dsk-ink); }
+.dk-pick-s { margin-top: 2px; font-size: 7.5px; color: var(--dsk-muted); }
+.dk-pick-s b { color: var(--dsk-late); font-weight: 700; }
+.dk-back { color: var(--dsk-muted); margin-right: 2px; }

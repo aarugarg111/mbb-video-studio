@@ -46,7 +46,10 @@ export const SCREENS = {
     'tone-friendly', 'tone-assertive', 'tone-final', 'tone-legal', 'turn-on'],
   'mcf-ai-ringing': ['accept', 'decline'],
   /* The first screen drawn as a laptop rather than a phone. */
-  'mcf-desktop': ['ask-ai', 'setup-automation', 'party-row-0', 'continue'],
+  /* Setting an automation up on a laptop is two steps in one sheet: configure
+     it, then choose who it is pointed at and turn it on. The second step was
+     missing, so a clip set up an automation that applied to nobody. */
+  'mcf-desktop': ['ask-ai', 'setup-automation', 'party-row-0', 'continue', 'select-all', 'party-pick-0', 'party-pick-1', 'activate'],
   /* The rest of myCashFlo on a laptop. Without these a laptop collections clip
      had to start on the parties table and stop before anything was set up -
      half the process, which is the half that does not sell it. */
