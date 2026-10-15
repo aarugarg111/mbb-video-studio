@@ -1,0 +1,56 @@
+# Scan & Record on a laptop. The SAME flow as the phone - a bill goes in, the
+# app reads it, a purchase entry comes out - drawn in the laptop's interface.
+#
+# The difference is how the bill gets into a computer. On a phone you point the
+# camera at it. On a laptop you either drop the file on the window, or send the
+# photo across from the phone in your hand - and this clip shows both, because
+# which one an owner uses depends on whether the bill arrived by email or on
+# paper, and the answer is usually both.
+#
+# Every name and figure is invented.
+video: desktop-scan
+
+business:
+  name: SAGAR SUPERBAZAAR
+
+party:
+  name: ASHOK TRADING CO
+  address: Sadar Bazaar, Agra
+  balance: 21846
+
+invoice:
+  number: 5946
+  date: "08/10/2026"
+
+items:
+  - { name: SUGAR 5KG, rate: 310, qty: 2, gst: 5, unit: PKT, purchase: 272, stock: 4 }
+  - { name: TATA SALT 1KG, rate: 28, qty: 6, gst: 5, unit: PKT, purchase: 24, stock: 8 }
+
+shots:
+  # Where the feature lives, and what it has already done - the count is the
+  # argument for using it, so it is on screen before anything is tapped.
+  - screen: mbb-desktop-scan
+    duration: 9.0
+    actions:
+      # The paper bill in your hand: the phone photographs it, the laptop gets
+      # the picture. This is the step that is a camera on the phone.
+      - { at: 1.4, do: tap, target: add-from-phone }
+      # The one that arrived by email: dropped straight on the window.
+      - { at: 4.2, do: tap, target: upload-file }
+      - { at: 6.6, do: tap, target: read-bill }
+
+  # The wait, which is short, and says so.
+  - screen: mbb-desktop-scan-reading
+    duration: 3.4
+    actions: []
+
+  # What it was for.
+  - screen: mbb-desktop-scan-done
+    duration: 2.6
+    actions: []
+
+  # And the entry it made, as a purchase that can be edited like any other.
+  - screen: mbb-desktop-purchase
+    duration: 3.2
+    actions:
+      - { at: 1.6, do: tap, target: save }

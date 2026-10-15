@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { rawColoursIn } from '../src/colour-guard.js';
 import { readFile } from 'node:fs/promises';
 import { SCREENS, catalogue } from '../screens/index.js';
-import { deviceOf, viewportFor, urlFor, DEVICES } from '../src/device.js';
+import { deviceOf, viewportFor, urlFor, chromeOf, titleFor, DEVICES } from '../src/device.js';
 
 test('a screen that says nothing is a phone screen', () => {
   assert.equal(deviceOf(SCREENS.home), 'phone');
@@ -29,7 +29,9 @@ test('every screen built before this one is unchanged', () => {
     [
       'mbb-desktop-create-invoice', 'mbb-desktop-create-item', 'mbb-desktop-dashboard', 'mbb-desktop-invoice',
       'mbb-desktop-items', 'mbb-desktop-parties', 'mbb-desktop-purchase',
-      'mbb-desktop-reports', 'mbb-desktop-sales-list', 'mcf-desktop'
+      'mbb-desktop-reports', 'mbb-desktop-sales-list',
+      'mbb-desktop-scan', 'mbb-desktop-scan-done', 'mbb-desktop-scan-reading', 'mcf-desktop',
+      'tally-receivables'
     ],
     'only the screens that asked for it are desktop screens'
   );
@@ -130,4 +132,37 @@ test('the CSS handed to the rasteriser describes both frames', async () => {
   assert.ok(inlined.includes(`width: ${DEVICES.desktop.width}px`), 'the inlined desktop is another width');
   assert.ok(inlined.includes(`height: ${DEVICES.desktop.height}px`), 'the inlined desktop is another height');
   assert.ok(inlined.includes('scale(1.5)'), 'the inlined desktop is another scale');
+});
+
+test('Tally is a desktop program, and is never drawn as a web page', () => {
+  /* Tally runs on the owner's Windows machine. It was a phone screen for a
+     while, which put a Windows accounting program on a mobile it has never
+     shipped on, and drawing it in the laptop's browser frame would have put a
+     myBillBook address on somebody else's software. Both are claims an ad
+     should not make. */
+  assert.equal(deviceOf(SCREENS['tally-receivables']), 'desktop');
+  assert.equal(chromeOf(SCREENS['tally-receivables']), 'app');
+  assert.equal(titleFor(SCREENS['tally-receivables']), 'TallyPrime');
+});
+
+test('every other desktop screen is still a browser with an address', () => {
+  for (const name of Object.keys(catalogue())) {
+    const screen = SCREENS[name];
+    if (deviceOf(screen) !== 'desktop' || name === 'tally-receivables') continue;
+    assert.equal(chromeOf(screen), 'browser', name + ' stopped being a browser window');
+    assert.ok(urlFor(screen).length > 0, name + ' has no address to show');
+  }
+});
+
+test('both renderers draw the title bar the same way', async () => {
+  /* The pair that has silently disagreed before: one renderer showing Tally
+     with a title bar and the other with "mybillbook.in" in an address pill
+     would be two different videos from one recipe. */
+  const cli = await readFile(new URL('../stage/stage.js', import.meta.url), 'utf8');
+  const web = await readFile(new URL('../web/lib/render.ts', import.meta.url), 'utf8');
+  for (const [file, src] of [['stage.js', cli], ['render.ts', web]]) {
+    assert.ok(/chromeOf/.test(src), file + ' never asks what kind of window this is');
+    assert.ok(/titleFor/.test(src), file + ' never shows a program title');
+    assert.ok(src.includes("classList.toggle('app'"), file + ' never switches the bar over');
+  }
 });

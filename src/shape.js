@@ -20,6 +20,10 @@ const ON_A_LAPTOP = {
   'sales-list': 'mbb-desktop-sales-list',
   'profit-loss': 'mbb-desktop-reports',
   'create-item': 'mbb-desktop-create-item',
+  'scan-bills': 'mbb-desktop-scan',
+  'scan-camera': 'mbb-desktop-scan',
+  'scan-reading': 'mbb-desktop-scan-reading',
+  'scan-done': 'mbb-desktop-scan-done',
   'share-sheet': 'mbb-desktop-invoice',
   parties: 'mbb-desktop-parties',
   items: 'mbb-desktop-items',
@@ -69,6 +73,12 @@ const SAME_BUTTON = {
   'party-field': 'add-party',
   'generate-bill': 'save',
   'scan-record': 'upload',
+  /* Scan & Record. A laptop has no camera pointed at a bill, so the phone's
+   * "Open Camera" becomes the laptop's "Add image from phone" - the same step,
+   * done the way a desk does it - and "Upload PDF" stays an upload. */
+  'open-camera': 'add-from-phone',
+  'upload-pdf': 'upload-file',
+  'browse-gallery': 'browse-files',
   'create-purchase': 'save',
   'new-automation': 'setup-automation',
   'turn-on': 'continue',

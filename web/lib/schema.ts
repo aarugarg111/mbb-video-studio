@@ -34,7 +34,12 @@ export const SCREENS = {
   'mcf-ai-call': ['end-call', 'listen', 'mute'],
   /* Tally, approximated - a cutaway, not a myBillBook screen. */
   'tally-receivables': ['f6-age-wise', 'f12-configure', 'bill-row-0'],
-  'mcf-new-automation': ['channel-ai', 'channel-whatsapp', 'channel-sms', 'tone-firm', 'turn-on'],
+  /* Language and tone are choices a script asks for out loud - "Tamil mein
+     baat karega", "legal notice bhej do" - so each one is a button a clip can
+     be seen pressing. 'tone-firm' is gone; it is 'tone-assertive' now. */
+  'mcf-new-automation': ['channel-ai', 'channel-whatsapp', 'channel-sms',
+    'lang-hindi', 'lang-english', 'lang-hinglish',
+    'tone-friendly', 'tone-assertive', 'tone-final', 'tone-legal', 'turn-on'],
   'mcf-ai-ringing': ['accept', 'decline'],
   /* The first screen drawn as a laptop rather than a phone. */
   'mcf-desktop': ['ask-ai', 'setup-automation', 'party-row-0', 'continue'],
@@ -44,6 +49,12 @@ export const SCREENS = {
   'mbb-desktop-sales-list': ['new-bill', 'create-sales-invoice', 'bill-row-0', 'change-range', 'total-sales'],
   'mbb-desktop-reports': ['create-sales-invoice', 'change-range', 'net-profit', 'excel'],
   'mbb-desktop-create-item': ['item-name', 'hsn', 'tab-stock', 'batching', 'save'],
+  /* Scan & Record on a laptop. A desk has no camera pointed at a bill, so the
+     two ways in are a file dropped on the window and a photo sent across from
+     the phone - the same flow as the phone's, which is the whole rule. */
+  'mbb-desktop-scan': ['create-sales-invoice', 'upload-file', 'browse-files', 'add-from-phone', 'read-bill', 'scan-row-0'],
+  'mbb-desktop-scan-reading': [],
+  'mbb-desktop-scan-done': [],
   /* "create-sales-invoice" is the rail's own button, on every myBillBook
      laptop screen: it is where a laptop bill starts, the way the + Bill /
      Invoice pill is on the phone. */

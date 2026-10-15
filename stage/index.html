@@ -77,6 +77,21 @@
     overflow: hidden;
     white-space: nowrap;
   }
+
+  /* Tally is a program, not a web page: its window has a title bar and no
+     address. Same frame otherwise - it is the same machine. */
+  #desktop-bar.app { background: var(--stage-window-title); }
+  #desktop-bar.app .dot { background: var(--stage-window-dot); }
+  #desktop-url.app {
+    flex: 1;
+    margin-left: 6px;
+    height: 17px;
+    border-radius: 0;
+    background: none;
+    color: var(--stage-window-titletext);
+    font: 600 9px/17px var(--mbb-font);
+    text-align: left;
+  }
   #desktop-viewport {
     position: relative;
     width: 720px;

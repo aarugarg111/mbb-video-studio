@@ -22,7 +22,13 @@ export const targets = {
   'channel-ai': { x: 195, y: 139 },
   'channel-whatsapp': { x: 195, y: 217 },
   'channel-sms': { x: 195, y: 295 },
-  'tone-firm': { x: 133, y: 410 },
+  'lang-hindi': { x: 58, y: 410 },
+  'lang-english': { x: 124, y: 410 },
+  'lang-hinglish': { x: 198, y: 410 },
+  'tone-friendly': { x: 66, y: 511 },
+  'tone-assertive': { x: 146, y: 511 },
+  'tone-final': { x: 237, y: 511 },
+  'tone-legal': { x: 77, y: 547 },
   'turn-on': { x: 195, y: 802 }
 };
 
@@ -32,7 +38,18 @@ export const tapEffects = {
   'channel-ai': { channel: 'ai' },
   'channel-whatsapp': { channel: 'whatsapp' },
   'channel-sms': { channel: 'sms' },
-  'tone-firm': { tone: 'Firm' },
+  /* Which language the AI speaks, and how hard it pushes. A script that says
+   * "Tamil mein baat karega" or "legal notice bhejo" was asking for something
+   * the screen could not be seen choosing - it had one tappable tone and no
+   * language at all - so the clip showed the owner setting up an automation
+   * that was not the one the voiceover described. */
+  'lang-hindi': { language: 'Hindi' },
+  'lang-english': { language: 'English' },
+  'lang-hinglish': { language: 'Hinglish' },
+  'tone-friendly': { tone: 'Friendly' },
+  'tone-assertive': { tone: 'Assertive' },
+  'tone-final': { tone: 'Final Notice' },
+  'tone-legal': { tone: 'Legal Action' },
   'turn-on': { on: 1 }
 };
 
@@ -48,7 +65,27 @@ const CHANNELS = [
   { id: 'sms', icon: 'send', title: 'SMS', blurb: 'A short reminder, for numbers not on WhatsApp.' }
 ];
 
-const TONES = ['Friendly', 'Firm', 'Final Notice'];
+/* DISCLOSED: the language list is not verified against the real app. These are
+ * the languages a collections call in this market is actually made in; if
+ * myCashFlo offers a different set, correct this list. */
+const LANGUAGES = [
+  { id: 'lang-hindi', label: 'Hindi' },
+  { id: 'lang-english', label: 'English' },
+  { id: 'lang-hinglish', label: 'Hinglish' },
+  { id: null, label: 'Tamil' },
+  { id: null, label: 'Marathi' },
+  { id: null, label: 'Gujarati' }
+];
+
+/* "Legal Action" is the last step a collections flow has, and it is the one a
+ * script reaches for when it wants to sound like the end of patience. It was
+ * missing, and "Firm" is now called what the scripts call it. */
+const TONES = [
+  { id: 'tone-friendly', label: 'Friendly' },
+  { id: 'tone-assertive', label: 'Assertive' },
+  { id: 'tone-final', label: 'Final Notice' },
+  { id: 'tone-legal', label: 'Legal Action' }
+];
 const WHEN = ['Daily', 'Alternate days', 'Weekly'];
 
 export function render(data, state) {
@@ -57,6 +94,7 @@ export function render(data, state) {
    * that has to tap it first would waste a second saying so. */
   const channel = state?.channel ?? 'ai';
   const tone = state?.tone ?? 'Friendly';
+  const language = state?.language ?? 'Hindi';
   const on = Number(state?.on ?? 0) > 0;
   const chasing = book.parties.filter(p => p.overdueDays > 0).length;
 
@@ -87,11 +125,22 @@ export function render(data, state) {
     </div>
 
     <div class="mcf-card">
-      <div class="mcf-label">TONE</div>
+      <div class="mcf-label">LANGUAGE</div>
+      <div class="mcf-chiprow">
+        ${LANGUAGES.map(l => `
+          <div class="mcf-pick ${l.label === language ? 'on' : ''}" ${l.id ? `id="${l.id}"` : ''}>${esc(l.label)}</div>`).join('')}
+      </div>
+
+      <div class="mcf-label spaced">TONE</div>
       <div class="mcf-chiprow">
         ${TONES.map(t => `
-          <div class="mcf-pick ${t === tone ? 'on' : ''}" ${t === 'Firm' ? 'id="tone-firm"' : ''}>${esc(t)}</div>`).join('')}
+          <div class="mcf-pick ${t.label === tone ? 'on' : ''} ${t.label === 'Legal Action' ? 'legal' : ''}" id="${t.id}">${esc(t.label)}</div>`).join('')}
       </div>
+
+      ${tone === 'Legal Action' ? `
+        <div class="mcf-legal-note">
+          <span class="ico">${icons.legal(13)}</span>A legal notice is drafted and sent by registered post. The party is told before the call.
+        </div>` : ''}
 
       <div class="mcf-label spaced">HOW OFTEN</div>
       <div class="mcf-chiprow">

@@ -94,7 +94,7 @@ const SHOTS = {
   'mcf-tally': [CASHFLO, 2.6],
   'mcf-ai-call': [CASHFLO, 7.8],
   'mcf-ai-ringing': [CASHFLO, 0.5],
-  'mcf-new-automation': [CASHFLO, 2.2, [T('turn-on')]],
+  'mcf-new-automation': [CASHFLO, 3.4, [T('lang-hinglish'), T('tone-legal', 1.4), T('turn-on', 2.6)]],
   'tally-receivables': [CASHFLO, 1],
   'mcf-desktop': [CASHFLO, 2.2, [T('setup-automation')]],
   'mbb-desktop-parties': [SHOP, 1],

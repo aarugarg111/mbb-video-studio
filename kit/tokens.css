@@ -270,6 +270,11 @@
   --mcf-due-soon:    #DE851C;  /* DUE SOON                           */
   --mcf-wallet:      #0E9442;  /* the wallet balance in the header   */
   --mcf-call-bg:     #DBE0EB;
+  /* The legal-action tone. Built from the overdue red the app already uses,
+     so the firmest setting looks like the rest of the product's warnings. */
+  --mcf-legal-bg:    #FBE9EA;
+  --mcf-legal-ink:   #9E2126;
+  --mcf-legal-edge:  #E8B4B6;
   --mcf-call-ink:    #232E77;
   --mcf-legal-bg:    #F2E2E3;
   --mcf-legal-ink:   #F03E4A;
@@ -334,6 +339,10 @@
   --stage-window-dot:     #4A4A52;
   --stage-window-url:     #2A2A31;
   --stage-window-urltext: #9A9AA6;
+  /* A program's title bar rather than a browser's address bar. Darker than the
+     window body so the title reads as chrome and not as part of the report. */
+  --stage-window-title:     #1E1E24;
+  --stage-window-titletext: #C8C8D2;
 }
 
 /* ---------------------------------------------------------------------------

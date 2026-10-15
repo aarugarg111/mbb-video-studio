@@ -7,7 +7,7 @@ import { createEncoder } from './encode';
 import { STAGE_W, STAGE_H } from '../app/studio/stage';
 /* Shared with the command-line renderer, so the two cannot disagree about
    which shape a screen is. */
-import { deviceOf, urlFor } from '../../src/device.js';
+import { deviceOf, urlFor, chromeOf, titleFor } from '../../src/device.js';
 import { innerTransform, windowTransform } from '../../src/camera.js';
 const SCREENS = UNTYPED_SCREENS as Record<string, { render(data: unknown, state: unknown): string }>;
 
@@ -77,7 +77,14 @@ function paint(frame: any, recipe: any, viewport: HTMLElement, endcardRoot: HTML
 
   phoneFrame?.classList.toggle('hidden', onDesktop);
   desktopFrame?.classList.toggle('hidden', !onDesktop);
-  if (onDesktop && desktopUrl) desktopUrl.textContent = urlFor(screen);
+  /* A browser shows an address; a program shows its name. Kept identical to
+     stage/stage.js - the two renderers must agree on every frame. */
+  if (onDesktop && desktopUrl) {
+    const app = chromeOf(screen) === 'app';
+    desktopUrl.textContent = app ? titleFor(screen) : urlFor(screen);
+    desktopUrl.classList.toggle('app', app);
+    desktopUrl.parentElement?.classList.toggle('app', app);
+  }
 
   const target = onDesktop && desktopViewport ? desktopViewport : viewport;
   /* On a phone the camera moves the layers inside the viewport; on a laptop it

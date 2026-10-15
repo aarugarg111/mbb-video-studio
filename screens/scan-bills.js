@@ -18,7 +18,10 @@ export const targets = {
  * owner's own phone, so these are blank document tiles instead. The caption
  * under them is the app's own - it has not read them yet, so it does not know
  * whose they are. */
-const RECENT = [
+/* Exported so the laptop's Scan & Record shows the SAME history. Two copies
+ * of this list would drift, and one business would have scanned two different
+ * sets of bills depending on which shape the reel was cut in. */
+export const RECENT = [
   { party: 'Cash Sale', doc: 32, items: 3, amount: 8436, done: true },
   { party: 'Cash Sale', doc: 31, items: 3, amount: 8436, done: true },
   { party: 'Vikram Stores', doc: 30, items: 4, amount: 8594.87, done: true },

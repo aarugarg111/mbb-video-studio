@@ -200,7 +200,10 @@ test('invoice-created shows the party and the final total', () => {
 /* Two screens are the app working, not the user working: the scan is read
  * and the result confirmed, and the clip moves on by itself. They are named
  * here so that a new screen with no targets still fails this test. */
-const PASSIVE = new Set(['scan-reading', 'scan-done']);
+const PASSIVE = new Set([
+  'scan-reading', 'scan-done',
+  'mbb-desktop-scan-reading', 'mbb-desktop-scan-done'
+]);
 
 test('every registered screen has at least one tap target', () => {
   for (const [key, mod] of Object.entries(SCREENS)) {

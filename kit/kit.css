@@ -794,7 +794,7 @@
  * recording - the only screen here built that way, and deliberately so. */
 .tyscreen { background: var(--tally-body); color: var(--tally-ink); display: flex; flex-direction: column; font-family: var(--mbb-font); }
 
-.ty-top { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 0 13px; padding: 7px 10px; background: var(--tally-bar); color: var(--mbb-surface); font-size: 9px; }
+.ty-top { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 0 18px; padding: 6px 14px; background: var(--tally-bar); color: var(--mbb-surface); font-size: 9px; }
 .ty-key b { font-weight: 700; }
 
 .ty-sub { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; background: var(--tally-sub); color: var(--mbb-surface); }
@@ -811,24 +811,24 @@
 /* The fixed columns have to add up to LESS than the sheet beside the button
    panel, or they overflow under it - which hid the overdue count, the one
    number this screen exists to show. 44+64+44+28 = 180 of 316. */
-.ty-c { padding: 7px 5px; font-size: 8.5px; line-height: 1.3; }
-.ty-c.date { width: 42px; flex: none; }
+.ty-c { padding: 6px 8px; font-size: 9px; line-height: 1.3; }
+.ty-c.date { width: 74px; flex: none; }
 .ty-c.party { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ty-c.amt { width: 62px; flex: none; text-align: right; }
-.ty-c.due { width: 42px; flex: none; }
+.ty-c.amt { width: 108px; flex: none; text-align: right; }
+.ty-c.due { width: 74px; flex: none; }
 /* Wide enough for the word "Overdue" in the header, which clipped at 28. */
-.ty-c.late { width: 38px; flex: none; text-align: right; }
+.ty-c.late { width: 60px; flex: none; text-align: right; }
 
 .ty-rows { flex: 1; }
 .ty-row .late { color: var(--tally-late); font-weight: 700; }
 .ty-row.total { background: var(--tally-total); font-weight: 700; border-top: 1px solid var(--tally-rule); }
 .ty-row.total .party { text-align: right; }
 
-.ty-side { flex: none; width: 74px; padding: 8px 6px; background: var(--tally-panel); border-left: 1px solid var(--tally-rule); }
-.ty-sidekey { padding: 7px 4px; font-size: 8.5px; color: var(--tally-ink); }
+.ty-side { flex: none; width: 112px; padding: 8px 10px; background: var(--tally-panel); border-left: 1px solid var(--tally-rule); }
+.ty-sidekey { padding: 9px 6px; font-size: 9px; color: var(--tally-ink); }
 .ty-sidekey b { color: var(--tally-panel-k); font-weight: 700; }
 
-.ty-status { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 7px 12px; background: var(--tally-status); color: var(--mbb-surface); font-size: 8.5px; }
+.ty-status { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; background: var(--tally-status); color: var(--mbb-surface); font-size: 8.5px; }
 
 /* ---------- myCashFlo: choosing who does the chasing ---------- */
 
@@ -1454,3 +1454,86 @@
 .mb-share-k { font-size: 8px; color: var(--dsk-muted); margin-bottom: 5px; }
 .mb-share-i { display: flex; align-items: center; gap: 7px; padding: 6px 7px; border-radius: 6px; font-size: 9px; font-weight: 600; }
 .mb-share-i:first-of-type { background: var(--dsk-panel); }
+
+/* The firmest tone reads as a warning rather than as one more chip, and says
+   what it actually does - a legal notice is not a louder reminder. */
+.mcf-pick.legal.on { background: var(--mcf-legal-bg); color: var(--mcf-legal-ink); border-color: var(--mcf-legal-edge); }
+.mcf-legal-note { display: flex; align-items: flex-start; gap: 7px; margin-top: 11px; padding: 9px 11px; border-radius: 9px; background: var(--mcf-legal-bg); color: var(--mcf-legal-ink); font-size: 11px; line-height: 1.4; }
+.mcf-legal-note .ico { flex: none; margin-top: 1px; }
+
+/* ---- Scan & Record on a laptop ---------------------------------------- */
+.dsc-stats { margin-left: auto; display: flex; align-items: center; gap: 14px; font-size: 8px; color: var(--dsk-muted); }
+.dsc-stats b { color: var(--dsk-ink); }
+.dsc-stats .ico { margin-right: 4px; vertical-align: -1px; }
+
+.dsc-ways { display: flex; align-items: stretch; gap: 10px; padding: 10px 14px 0; }
+.dsc-drop {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; padding: 14px 10px; border-radius: 9px; text-align: center;
+  border: 1px dashed var(--dsk-mira); background: var(--dsk-drop);
+}
+.dsc-drop.done { border-style: solid; border-color: var(--dsk-in); background: var(--dsk-in-edge); }
+.dsc-drop .ico.big, .dsc-phone .ico { color: var(--dsk-blue); }
+.dsc-drop.done .ico.big { color: var(--dsk-in); }
+.dsc-drop-k { font-size: 10px; font-weight: 700; color: var(--dsk-ink); }
+.dsc-drop-s { font-size: 8px; color: var(--dsk-muted); line-height: 1.4; }
+.dsc-link { color: var(--dsk-blue); font-weight: 600; }
+
+.dsc-or { align-self: center; font-size: 8px; color: var(--dsk-muted); }
+
+.dsc-phone {
+  flex: 1; display: flex; align-items: center; gap: 10px; padding: 14px 12px;
+  border-radius: 9px; border: 1px solid var(--dsk-rule); background: var(--dsk-card);
+}
+.dsc-phone.on { border-color: var(--dsk-in); background: var(--dsk-in-edge); }
+/* A code to point a phone at, drawn rather than generated: a real one would
+   encode a real address, and nothing in a rendered ad should be scannable. */
+.dsc-qr {
+  flex: none; width: 46px; height: 46px; display: grid; gap: 2px; padding: 3px;
+  grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+  border-radius: 5px; background: var(--dsk-card); border: 1px solid var(--dsk-rule);
+  place-items: center;
+}
+.dsc-qr i { width: 100%; height: 100%; border-radius: 1px; background: var(--dsk-ink); }
+.dsc-qr i:nth-child(2), .dsc-qr i:nth-child(4), .dsc-qr i:nth-child(6), .dsc-qr i:nth-child(8) { background: var(--dsk-table); }
+.dsc-qr .ico { color: var(--dsk-in); grid-column: 1 / -1; grid-row: 1 / -1; }
+.dsc-phone-txt { min-width: 0; }
+
+.dsc-go { padding: 10px 14px 0; display: flex; justify-content: flex-end; }
+
+.dsc-table { margin: 10px 14px 0; border: 1px solid var(--dsk-rule); border-radius: 8px; overflow: hidden; background: var(--dsk-card); }
+.dsc-row { display: flex; align-items: center; border-bottom: 1px solid var(--dsk-rule); }
+.dsc-row:last-child { border-bottom: none; }
+.dsc-row.head { background: var(--dsk-table); font-weight: 700; color: var(--dsk-muted); font-size: 7.5px; text-transform: uppercase; letter-spacing: .03em; }
+.dsc-c { padding: 7px 9px; font-size: 8.5px; color: var(--dsk-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dsc-c.party { width: 130px; flex: none; font-weight: 600; }
+.dsc-c.doc { flex: 1; min-width: 0; color: var(--dsk-muted); }
+.dsc-c.lines { width: 62px; flex: none; color: var(--dsk-muted); }
+.dsc-c.amt { width: 84px; flex: none; text-align: right; font-weight: 700; }
+.dsc-c.stat { width: 80px; flex: none; text-align: right; }
+
+/* The reading window and the confirmation, over the page rather than instead
+   of it - a laptop keeps you where you were. */
+.dsc-read, .dsc-done {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 300px; padding: 20px 22px; border-radius: 12px; text-align: center;
+  background: var(--dsk-card); box-shadow: 0 10px 34px var(--dsk-scrim);
+}
+.dsc-read-glass { width: 50px; height: 50px; margin: 0 auto 10px; border-radius: 999px; display: grid; place-items: center; background: var(--dsk-table); color: var(--dsk-blue); }
+.dsc-read-k { font-size: 12px; font-weight: 700; color: var(--dsk-ink); }
+.dsc-read-secs { margin-top: 2px; font-size: 16px; font-weight: 700; color: var(--dsk-blue); }
+.dsc-read-tip { margin-top: 12px; padding: 9px 11px; border-radius: 8px; background: var(--dsk-table); text-align: left; }
+.dsc-read-tip-k { display: flex; align-items: center; gap: 5px; font-size: 8px; font-weight: 700; color: var(--dsk-muted); text-transform: uppercase; }
+.dsc-read-tip-t { margin-top: 4px; font-size: 9px; line-height: 1.45; color: var(--dsk-ink); }
+.dsc-read-dots { margin-top: 7px; display: flex; gap: 4px; }
+.dsc-read-dots i { width: 4px; height: 4px; border-radius: 999px; background: var(--dsk-rule); }
+.dsc-read-dots i.on { background: var(--dsk-blue); width: 12px; }
+.dsc-read-by { margin-top: 10px; font-size: 8px; color: var(--dsk-muted); }
+.dsc-read-warn { margin-top: 7px; display: flex; align-items: flex-start; gap: 5px; font-size: 7.5px; line-height: 1.4; color: var(--dsk-muted); text-align: left; }
+
+.dsc-done-tick { width: 58px; height: 58px; margin: 0 auto 12px; border-radius: 999px; display: grid; place-items: center; background: var(--dsk-in-edge); color: var(--dsk-in); }
+.dsc-done-k { font-size: 15px; font-weight: 700; color: var(--dsk-ink); }
+.dsc-done-s { margin-top: 4px; font-size: 10px; color: var(--dsk-muted); }
+/* Scanned bills are Completed or Incomplete, not paid or unpaid. */
+.mb-pill.done { background: var(--dsk-paid-bg); color: var(--dsk-in); }
+.mb-pill.open { background: var(--dsk-unpaid-bg); color: var(--dsk-out); }

@@ -1,6 +1,6 @@
 import { SCREENS } from '../screens/index.js';
 import { stateAt, totalDuration } from '../src/timeline.js';
-import { deviceOf, urlFor } from '../src/device.js';
+import { deviceOf, urlFor, chromeOf, titleFor } from '../src/device.js';
 import { innerTransform, windowTransform } from '../src/camera.js';
 
 const viewport = document.getElementById('viewport');
@@ -75,7 +75,14 @@ window.setTime = function setTime(t) {
   const onDesktop = deviceOf(screen) === 'desktop';
   phoneFrame.classList.toggle('hidden', onDesktop);
   desktopFrame.classList.toggle('hidden', !onDesktop);
-  if (onDesktop) desktopUrl.textContent = urlFor(screen);
+  /* A browser shows an address; a program shows its name. Both renderers do
+     this the same way or one of them draws Tally inside a browser. */
+  if (onDesktop) {
+    const app = chromeOf(screen) === 'app';
+    desktopUrl.textContent = app ? titleFor(screen) : urlFor(screen);
+    desktopUrl.classList.toggle('app', app);
+    desktopUrl.parentElement?.classList.toggle('app', app);
+  }
 
   const stack = onDesktop ? desktopViewport : viewport;
   /* Where the camera is. On a phone it moves the layers inside the viewport;

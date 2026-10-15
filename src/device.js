@@ -58,3 +58,22 @@ export function viewportFor(screen) {
 export function urlFor(screen) {
   return screen?.url ?? 'mybillbook.in';
 }
+
+/* Not every desktop screen is a web page. Tally is a program that runs on the
+ * owner's Windows machine: it has no address, and drawing it inside a browser
+ * window with "mybillbook.in" in the bar would say something untrue about what
+ * he is looking at - in a clip whose whole point is that Tally and myCashFlo
+ * are separate systems that now agree with each other.
+ *
+ * So a desktop screen says which kind of window it is. 'browser' is the
+ * default, so every laptop screen built before this is unchanged; 'app' swaps
+ * the address pill for a title bar. The frame is otherwise identical, because
+ * it is the same machine. */
+export function chromeOf(screen) {
+  return screen?.chrome === 'app' ? 'app' : 'browser';
+}
+
+/* What the window says it is when there is no address to show. */
+export function titleFor(screen) {
+  return screen?.windowTitle ?? 'Desktop app';
+}

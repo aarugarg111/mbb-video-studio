@@ -48,11 +48,16 @@ shots:
     actions:
       - { at: 1.5, do: tap, target: party-row-0 }
 
-  # The owner chooses the AI to do the chasing instead of doing it himself.
+  # The owner chooses the AI to do the chasing instead of doing it himself -
+  # and chooses how it will speak. The language and the tone are the two things
+  # a shopkeeper actually worries about before letting a machine ring his
+  # customers, so the clip shows them being set rather than assumed.
   - screen: mcf-new-automation
-    duration: 3.6
+    duration: 6.4
     actions:
-      - { at: 1.8, do: tap, target: turn-on }
+      - { at: 1.3, do: tap, target: lang-hinglish }
+      - { at: 2.8, do: tap, target: tone-assertive }
+      - { at: 4.6, do: tap, target: turn-on }
 
   # The call as the party receives it - a phone ringing in somebody else's hand.
   - screen: mcf-ai-ringing
@@ -63,6 +68,21 @@ shots:
   # commitment at 7.4s.
   - screen: mcf-ai-call
     duration: 9.5
+
+  # The party's own page, with the call now on its record - this is where an
+  # owner checks what the AI actually got out of them.
+  - screen: mcf-party
+    duration: 3.4
+    actions:
+      - { at: 1.6, do: tap, target: tab-whatsapp }
+
+  # And the reminder itself, running: the thing that will keep happening after
+  # the owner closes the laptop. A collections clip that never shows this has
+  # shown one phone call rather than a system.
+  - screen: mcf-automations
+    duration: 3.2
+    actions:
+      - { at: 1.5, do: tap, target: automation-0 }
 
   # Scene 5: back to the dashboard, the money now being chased.
   - screen: mcf-dashboard

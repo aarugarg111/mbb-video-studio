@@ -29,16 +29,54 @@ test('asking for a laptop puts the laptop screens in the shot list', () => {
 });
 
 test('a screen with no laptop version is left as it is', () => {
-  /* Scan & Record is only drawn as a phone - on a laptop the same feature is
-     Mira's panel on the bill form, not a screen of its own. A clip that passes
-     through it should keep it rather than fail or silently lose the beat. */
-  assert.equal(screenOnShape('scan-camera', 'laptop'), 'scan-camera');
+  /* WhatsApp is somebody else's app and is only ever drawn as a phone. A clip
+     that passes through it should keep it rather than fail or silently lose
+     the beat.
+
+     This test used to say that of Scan & Record, on the grounds that a laptop
+     does that feature through Mira's panel rather than a screen of its own.
+     That was wrong: the laptop app has the whole flow, and a clip that cut
+     away to a phone to scan a bill was showing a different story from the one
+     the script asked for. */
+  assert.equal(screenOnShape('wa-chat', 'laptop'), 'wa-chat');
   const { recipe } = recastShape(
-    { video: 'x', shots: [{ screen: 'scan-camera', duration: 2, actions: [] }] },
+    { video: 'x', shots: [{ screen: 'wa-chat', duration: 2, actions: [] }] },
     'laptop',
     CAT
   );
-  assert.equal(recipe.shots[0].screen, 'scan-camera');
+  assert.equal(recipe.shots[0].screen, 'wa-chat');
+});
+
+test('Scan & Record is the whole flow on a laptop too', () => {
+  /* Same beats as the phone, in the interface a desk gives you. The laptop has
+     no camera worth pointing at a bill, so the phone's "open the camera" step
+     becomes "send the photo over from your phone" - the same step of the same
+     flow - and both land on the same page, which is why two shots in a row
+     become one. */
+  assert.equal(screenOnShape('scan-bills', 'laptop'), 'mbb-desktop-scan');
+  assert.equal(screenOnShape('scan-camera', 'laptop'), 'mbb-desktop-scan');
+  assert.equal(screenOnShape('scan-reading', 'laptop'), 'mbb-desktop-scan-reading');
+  assert.equal(screenOnShape('scan-done', 'laptop'), 'mbb-desktop-scan-done');
+
+  const { recipe, dropped } = recastShape({
+    video: 'x',
+    shots: [
+      { screen: 'scan-bills', duration: 2, actions: [{ at: 0.5, do: 'tap', target: 'upload-pdf' }] },
+      { screen: 'scan-camera', duration: 2, actions: [{ at: 0.5, do: 'tap', target: 'open-camera' }] },
+      { screen: 'scan-reading', duration: 2, actions: [] },
+      { screen: 'scan-done', duration: 2, actions: [] }
+    ]
+  }, 'laptop', CAT);
+
+  assert.deepEqual(dropped, [], 'every step of the scan survives the recast');
+  assert.deepEqual(
+    recipe.shots.map(s => s.screen),
+    ['mbb-desktop-scan', 'mbb-desktop-scan-reading', 'mbb-desktop-scan-done'],
+    'the two ways in are one page on a laptop, so those shots join'
+  );
+
+  const taps = recipe.shots[0].actions.map(a => a.target);
+  assert.deepEqual(taps, ['upload-file', 'add-from-phone'], 'both ways in survive, renamed');
 });
 
 test('the dashboard and the sales list have laptop versions of their own', () => {
@@ -141,7 +179,7 @@ test('every phone screen a laptop can show has a laptop screen to show it on', (
     'scan-bills', 'scan-camera', 'scan-reading', 'scan-done',
     'wa-attach', 'wa-chat', 'create-bill', 'theme-store',
     'mcf-dashboard', 'mcf-party', 'mcf-automations', 'mcf-new-automation',
-    'mcf-tally', 'mcf-ai-call', 'mcf-ai-ringing', 'tally-receivables',
+    'mcf-tally', 'mcf-ai-call', 'mcf-ai-ringing',
     'create-purchase', 'invoice-created', 'create-invoice'
   ];
   const missing = [];
@@ -152,4 +190,13 @@ test('every phone screen a laptop can show has a laptop screen to show it on', (
     if (screenOnShape(name, 'laptop') === name) missing.push(name);
   }
   assert.deepEqual(missing, [], 'these phone screens have no laptop version: ' + missing.join(', '));
+});
+
+test('Tally stays a desktop window whichever shape the reel is', () => {
+  /* A phone reel that needs Tally cuts away to the computer - which is what
+     actually happens, because Tally is not on the phone. So recasting must
+     leave it alone in BOTH directions rather than hunting for a phone
+     counterpart that cannot exist. */
+  assert.equal(screenOnShape('tally-receivables', 'phone'), 'tally-receivables');
+  assert.equal(screenOnShape('tally-receivables', 'laptop'), 'tally-receivables');
 });

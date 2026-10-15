@@ -9,7 +9,9 @@ export const targets = {};
  * a counter that climbs, a rotating Quick Tip, and the app's own caution that
  * the reading may be wrong. The counter is derived from the shot clock rather
  * than stored, so the screen stays a pure function of time. */
-const TIPS = [
+/* Exported so the laptop's reading window says the same things in the same
+ * order. Two copies would drift into two different pieces of advice. */
+export const TIPS = [
   'Any Party / Item tagged New will be created and added to your inventory',
   'Verify GSTIN, HSN code and GST rates carefully'
 ];

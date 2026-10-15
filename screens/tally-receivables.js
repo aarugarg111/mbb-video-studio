@@ -14,10 +14,16 @@ export const name = 'tally-receivables';
  * days) - and is meant to be recognisable rather than exact, which is what was
  * asked for. If a recording ever arrives, rebuild it from that.
  *
- * It is also drawn in portrait rather than at a desktop's proportions. A
- * landscape window shrunk into a 390-wide frame puts the text at about four
- * pixels and nobody can read it; in a clip that is on screen for two seconds,
- * legible beats geometrically honest.
+ * It is a DESKTOP screen, because that is the only place Tally exists. It was
+ * drawn in portrait for a while, as a phone screen, for a reason that was true
+ * at the time: a landscape window shrunk into a 390-wide frame puts the text at
+ * about four pixels and nobody can read it. The camera that moves the window
+ * rather than the layers inside it removed that problem - a 16:9 window is
+ * pushed in until it fills the picture - so the honest shape is now also the
+ * legible one. A phone clip that needs Tally cuts away to this window, which is
+ * what actually happens: the owner turns to his computer.
+ *
+ * It is an 'app' window, not a browser one. Tally has no address bar.
  *
  * The figures come from the SAME ledger myCashFlo reads, because the whole
  * point of the script is that the two agree. If Tally showed one total and
@@ -25,10 +31,24 @@ export const name = 'tally-receivables';
  *
  * Coordinates MEASURED.
  */
+export const device = 'desktop';
+export const chrome = 'app';
+export const windowTitle = 'TallyPrime';
+
+/* The whole window, not a band of it. Every other laptop screen is pushed in
+ * until its sides go out of frame, because what leaves is chrome. Here what
+ * would leave is the Date column and Tally's F-key panel down the right - and
+ * that panel is half of what makes a glance at this read as Tally rather than
+ * as any other table. So this screen frames the window whole and accepts the
+ * empty bands above and below, which is what a cutaway to a computer looks
+ * like anyway. */
+export const focus = { x: 360, y: 203, scale: 1 };
+
+/* Coordinates are in the desktop's 720x405 space and are MEASURED. */
 export const targets = {
-  'f6-age-wise': { x: 347, y: 166 },
-  'f12-configure': { x: 347, y: 216 },
-  'bill-row-0': { x: 152, y: 120 }
+  'f6-age-wise': { x: 654, y: 169 },
+  'f12-configure': { x: 654, y: 229 },
+  'bill-row-0': { x: 294, y: 105 }
 };
 
 const TOP_KEYS = [
