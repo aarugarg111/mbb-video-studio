@@ -1,0 +1,58 @@
+# The call that is NOT answered, and what happens next.
+#
+# Every myCashFlo clip so far showed the call that works: the AI rings once,
+# the party picks up, a date is agreed. That is the happy path, and a product
+# that only ever shows the happy path is not describing collections.
+#
+# This one is the argument: nobody picked up, so it tried the other number on
+# file, then sent a WhatsApp, then rang again the next morning - and stopped
+# the moment somebody committed to a date. A person would have given up at the
+# first number.
+#
+# Every name and figure is invented.
+video: cashflo-persistence
+
+business:
+  name: SHREE BALAJI BUILDING MATERIALS
+
+party:
+  name: AGRAWAL CONSTRUCTIONS
+  balance: 1400000
+  overdueDays: 68
+  standby: 3
+
+cashflo:
+  parties:
+    - { name: SHANTI INFRA PROJECTS, balance: 1150000, overdueDays: 94, standby: 3 }
+    - { name: M R BUILDCON, balance: 900000, overdueDays: 41, standby: 2 }
+    - { name: Deepak Hardware Stores, balance: 760000, overdueDays: 22, standby: 2 }
+
+shots:
+  # The call going out, as the party's phone sees it.
+  - screen: mcf-ai-ringing
+    duration: 2.4
+    actions: []
+
+  # Nobody picks up - and the AI does not shrug. It has a second number on
+  # file for this party.
+  - screen: mcf-ai-noanswer
+    duration: 4.0
+    actions:
+      - { at: 2.0, do: tap, target: try-alternate }
+
+  # The other number, which answers. The screen knows it is the alternate one
+  # because mcf-ai-noanswer persists that choice into this shot.
+  - screen: mcf-ai-call
+    duration: 9.5
+    actions: []
+
+  # What has been tried, in order, and the one that worked.
+  - screen: mcf-attempts
+    duration: 5.0
+    actions: []
+
+  # And the automation that did all of it, still running.
+  - screen: mcf-automations
+    duration: 3.0
+    actions:
+      - { at: 1.4, do: tap, target: automation-0 }

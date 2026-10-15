@@ -24,6 +24,9 @@ import * as tallyReceivables from './tally-receivables.js';
 import * as mcfNewAutomation from './mcf-new-automation.js';
 import * as mcfAiRinging from './mcf-ai-ringing.js';
 import * as mcfDesktop from './mcf-desktop.js';
+import * as mcfAiNoanswer from './mcf-ai-noanswer.js';
+import * as mcfAttempts from './mcf-attempts.js';
+import * as mcfDesktopHistory from './mcf-desktop-history.js';
 import * as mcfDesktopDashboard from './mcf-desktop-dashboard.js';
 import * as mcfDesktopAutomations from './mcf-desktop-automations.js';
 import * as mbbDesktopDashboard from './mbb-desktop-dashboard.js';
@@ -71,6 +74,9 @@ export const SCREENS = {
   [mcfNewAutomation.name]: mcfNewAutomation,
   [mcfAiRinging.name]: mcfAiRinging,
   [mcfDesktop.name]: mcfDesktop,
+  [mcfAiNoanswer.name]: mcfAiNoanswer,
+  [mcfAttempts.name]: mcfAttempts,
+  [mcfDesktopHistory.name]: mcfDesktopHistory,
   [mcfDesktopDashboard.name]: mcfDesktopDashboard,
   [mcfDesktopAutomations.name]: mcfDesktopAutomations,
   [mbbDesktopDashboard.name]: mbbDesktopDashboard,

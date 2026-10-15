@@ -39,7 +39,14 @@ export const targets = {
    * on to step 2 landed under it. Nothing failed - the ripple simply appeared
    * in the wrong place, and the sheet changed anyway because the timeline
    * applies the effect whether or not the coordinates are any good. */
-  'continue': { x: 360, y: 272 },
+  'lang-hindi': { x: 234, y: 280 },
+  'lang-english': { x: 280, y: 280 },
+  'lang-hinglish': { x: 330, y: 280 },
+  'tone-friendly': { x: 240, y: 314 },
+  'tone-assertive': { x: 295, y: 314 },
+  'tone-final': { x: 357, y: 314 },
+  'tone-legal': { x: 424, y: 314 },
+  'continue': { x: 360, y: 343 },
   /* Step 2's own buttons, which exist only once Continue has been tapped. */
   'select-all': { x: 234, y: 189 },
   'party-pick-0': { x: 360, y: 224 },
@@ -52,6 +59,13 @@ export const tapEffects = {
   'ask-ai': { asking: 1 },
   /* Step 1 configures the window and the frequency; step 2 picks the parties
    * and turns it on. Both are the same sheet, as in the app. */
+  'lang-hindi': { language: 'Hindi' },
+  'lang-english': { language: 'English' },
+  'lang-hinglish': { language: 'Hinglish' },
+  'tone-friendly': { tone: 'Friendly' },
+  'tone-assertive': { tone: 'Assertive' },
+  'tone-final': { tone: 'Final Notice' },
+  'tone-legal': { tone: 'Legal Action' },
   continue: { step: 2 },
   'select-all': { all: 1 },
   activate: { followup: 0, live: 1 }
@@ -73,6 +87,22 @@ const MCF_NAV = [
 ];
 
 const FILTERS = ['Overdue', 'Due Soon', 'Balance', 'Category'];
+
+/* The same choices the phone's mcf-new-automation offers, under the same
+ * names, so a shot list recast between the two shapes keeps its taps. */
+const LANGUAGES = [
+  { id: 'lang-hindi', label: 'Hindi' },
+  { id: 'lang-english', label: 'English' },
+  { id: 'lang-hinglish', label: 'Hinglish' },
+  { id: null, label: 'Tamil' }
+];
+
+const TONES = [
+  { id: 'tone-friendly', label: 'Friendly' },
+  { id: 'tone-assertive', label: 'Assertive' },
+  { id: 'tone-final', label: 'Final Notice' },
+  { id: 'tone-legal', label: 'Legal Action' }
+];
 
 /* What the AI is told to do, in the owner's own words - the bar carries
  * exactly this kind of instruction. */
@@ -99,6 +129,8 @@ export function render(data, state) {
   const sheet = Number(state?.followup ?? 0) > 0;
   const step = Number(state?.step ?? 1) >= 2 ? 2 : 1;
   const all = Number(state?.all ?? 0) > 0;
+  const language = state?.language ?? 'Hindi';
+  const tone = state?.tone ?? 'Friendly';
   const asking = Number(state?.asking ?? 0) > 0;
   const rows = book.parties.slice(0, 6);
 
@@ -212,6 +244,18 @@ export function render(data, state) {
       <div class="dk-field">
         <div class="dk-field-v">Daily</div>
         <span class="ico">${icons.chevDown(12)}</span>
+      </div>
+
+      <div class="dk-field-k">LANGUAGE</div>
+      <div class="dk-chiprow">
+        ${LANGUAGES.map(l => `
+          <span class="dk-chip2 ${l.label === language ? 'on' : ''}" ${l.id ? `id="${l.id}"` : ''}>${esc(l.label)}</span>`).join('')}
+      </div>
+
+      <div class="dk-field-k">TONE</div>
+      <div class="dk-chiprow">
+        ${TONES.map(t => `
+          <span class="dk-chip2 ${t.label === tone ? 'on' : ''} ${t.label === 'Legal Action' ? 'legal' : ''}" id="${t.id}">${esc(t.label)}</span>`).join('')}
       </div>
 
       <div class="dk-go" id="continue">Continue &#183; Select parties</div>` : `

@@ -179,7 +179,9 @@ test('every phone screen a laptop can show has a laptop screen to show it on', (
     'scan-bills', 'scan-camera', 'scan-reading', 'scan-done',
     'wa-attach', 'wa-chat', 'create-bill',
     'mcf-party', 'mcf-new-automation',
-    'mcf-tally', 'mcf-ai-call', 'mcf-ai-ringing',
+    /* A call is a call: these three are a phone ringing in somebody's hand,
+         not a page of an app, so there is nothing for a laptop to show. */
+      'mcf-tally', 'mcf-ai-call', 'mcf-ai-ringing', 'mcf-ai-noanswer',
     'create-purchase', 'invoice-created', 'create-invoice'
   ];
   const missing = [];

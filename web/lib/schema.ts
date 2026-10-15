@@ -36,6 +36,14 @@ export const SCREENS = {
   'mcf-automations': ['new-automation', 'automation-0', 'automation-1', 'nav-dashboard', 'nav-parties'],
   'mcf-tally': ['sync-now', 'tally-status', 'nav-dashboard', 'nav-parties'],
   'mcf-ai-call': ['end-call', 'listen', 'mute'],
+  /* The call nobody answers, and the second number the AI rings instead. Every
+     clip until now showed only the call that works, so a script that said the
+     party did not pick up had nothing to cut to. */
+  'mcf-ai-noanswer': ['try-alternate', 'end-call'],
+  /* What has actually been tried on a party, in order - the beat that makes it
+     persistence rather than one lucky phone call. */
+  'mcf-attempts': ['attempt-0', 'attempt-1', 'call-again', 'pause-calls'],
+  'mcf-desktop-history': ['attempt-0', 'attempt-3', 'nav-parties', 'nav-automations', 'ask-ai'],
   /* Tally, approximated - a cutaway, not a myBillBook screen. */
   'tally-receivables': ['f6-age-wise', 'f12-configure', 'bill-row-0'],
   /* Language and tone are choices a script asks for out loud - "Tamil mein
@@ -49,7 +57,10 @@ export const SCREENS = {
   /* Setting an automation up on a laptop is two steps in one sheet: configure
      it, then choose who it is pointed at and turn it on. The second step was
      missing, so a clip set up an automation that applied to nobody. */
-  'mcf-desktop': ['ask-ai', 'setup-automation', 'party-row-0', 'continue', 'select-all', 'party-pick-0', 'party-pick-1', 'activate'],
+  'mcf-desktop': ['ask-ai', 'setup-automation', 'party-row-0',
+    'lang-hindi', 'lang-english', 'lang-hinglish',
+    'tone-friendly', 'tone-assertive', 'tone-final', 'tone-legal',
+    'continue', 'select-all', 'party-pick-0', 'party-pick-1', 'activate'],
   /* The rest of myCashFlo on a laptop. Without these a laptop collections clip
      had to start on the parties table and stop before anything was set up -
      half the process, which is the half that does not sell it. */

@@ -24,12 +24,20 @@ test('both screens render with nothing at all', () => {
 });
 
 test('both are in the catalogue with targets that exist', () => {
+  /* Some targets live behind a state - "Try alternate number" exists only once
+     the call has gone unanswered - so each screen is rendered in every state
+     it can be in, and a target counts if it appears in ANY of them. A target
+     that appears in none is one no clip could ever tap. */
+  const STATES = [{ t: 9 }, { t: 9, outcome: 'no-answer' }, { t: 9, outcome: 'alternate' }];
   const cat = catalogue();
   for (const name of ['mcf-tally', 'mcf-ai-call']) {
     assert.ok(cat[name].length > 0, name);
-    const html = SCREENS[name].render(DATA, { t: 9 });
+    const renders = STATES.map(state => SCREENS[name].render(DATA, state));
     for (const id of cat[name]) {
-      assert.ok(html.includes(`id="${id}"`), `${name}: nothing carries id="${id}"`);
+      assert.ok(
+        renders.some(html => html.includes(`id="${id}"`)),
+        `${name}: nothing carries id="${id}" in any state`
+      );
     }
   }
 });

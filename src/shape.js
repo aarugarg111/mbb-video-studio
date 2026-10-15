@@ -37,6 +37,7 @@ const ON_A_LAPTOP = {
   'mcf-party': 'mcf-desktop',
   'mcf-dashboard': 'mcf-desktop-dashboard',
   'mcf-automations': 'mcf-desktop-automations',
+  'mcf-attempts': 'mcf-desktop-history',
   'mcf-new-automation': 'mcf-desktop'
 };
 
@@ -56,6 +57,7 @@ const ON_A_PHONE = {
   'mcf-desktop': 'mcf-parties',
   'mcf-desktop-dashboard': 'mcf-dashboard',
   'mcf-desktop-automations': 'mcf-automations',
+  'mcf-desktop-history': 'mcf-attempts',
   'mbb-desktop-create-party': 'create-party',
   'mbb-desktop-theme-store': 'theme-store'
 };

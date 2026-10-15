@@ -52,6 +52,9 @@ export function render(data, state) {
   const book = ledger(data);
   const party = book.parties[0];
   const t = Number(state?.t ?? 0);
+  /* Set by mcf-ai-noanswer in an earlier shot, which persists it: this is the
+   * same call screen, dialling the OTHER number the party has on file. */
+  const alternate = state?.outcome === 'alternate';
   const said = spokenBy(t);
   const committed = t >= COMMITMENT_AT;
 
@@ -80,10 +83,13 @@ export function render(data, state) {
 <div class="screen mcfscreen callscreen">
   <div class="mcf-callhead">
     <div class="mcf-calllabel">
-      <span class="mcf-live"></span>AI is calling
+      <span class="mcf-live"></span>${alternate ? 'Calling alternate number' : 'AI is calling'}
     </div>
     <div class="mcf-callname">${esc(party.name)}</div>
-    <div class="mcf-callowed">${short(party.balance)} &#183; ${party.overdueDays}d overdue</div>
+    <div class="mcf-callowed">
+      ${short(party.balance)} &#183; ${party.overdueDays}d overdue
+      ${alternate ? '<span class="mcf-altnum">&#183; alternate number</span>' : ''}
+    </div>
     <div class="mcf-wave">${bars}</div>
     <div class="mcf-calltime">${callTimer(t)}</div>
   </div>

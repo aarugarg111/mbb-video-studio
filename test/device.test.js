@@ -34,6 +34,7 @@ test('every screen built before this one is unchanged', () => {
       'mbb-desktop-scan', 'mbb-desktop-scan-done', 'mbb-desktop-scan-reading',
       'mbb-desktop-theme-store',
       'mcf-desktop', 'mcf-desktop-automations', 'mcf-desktop-dashboard',
+      'mcf-desktop-history',
       'tally-receivables'
     ],
     'only the screens that asked for it are desktop screens'
