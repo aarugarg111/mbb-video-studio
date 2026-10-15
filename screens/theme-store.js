@@ -42,7 +42,7 @@ const COLUMNS = 4;
 /* data.themeArt, when the renderer supplies it, lists the slugs that have a
  * PNG in kit/themes. Without it every card tries its PNG and the tint behind
  * shows through wherever the file is missing. */
-function thumb(slug, themeArt) {
+export function themeThumb(slug, themeArt) {
   const tint = `linear-gradient(var(--mbb-theme-${slug}), var(--mbb-theme-${slug}))`;
   const png = `url(../kit/themes/${slug}.png)`;
   if (Array.isArray(themeArt)) {
@@ -64,7 +64,7 @@ export function render(data, state) {
     const on = i === selected;
     return `
       <div class="tcard${on ? ' on' : ''}" id="theme-${i}" data-theme="${t.slug}">
-        ${thumb(t.slug, art)}
+        ${themeThumb(t.slug, art)}
         ${on ? `<span class="tbadge">${icons.close(7)}</span>` : ''}
         <div class="tn">${esc(t.name)}</div>
       </div>`;

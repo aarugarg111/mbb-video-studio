@@ -20,6 +20,8 @@ const ON_A_LAPTOP = {
   'sales-list': 'mbb-desktop-sales-list',
   'profit-loss': 'mbb-desktop-reports',
   'create-item': 'mbb-desktop-create-item',
+  'create-party': 'mbb-desktop-create-party',
+  'theme-store': 'mbb-desktop-theme-store',
   'scan-bills': 'mbb-desktop-scan',
   'scan-camera': 'mbb-desktop-scan',
   'scan-reading': 'mbb-desktop-scan-reading',
@@ -53,7 +55,9 @@ const ON_A_PHONE = {
   'mbb-desktop-purchase': 'create-purchase',
   'mcf-desktop': 'mcf-parties',
   'mcf-desktop-dashboard': 'mcf-dashboard',
-  'mcf-desktop-automations': 'mcf-automations'
+  'mcf-desktop-automations': 'mcf-automations',
+  'mbb-desktop-create-party': 'create-party',
+  'mbb-desktop-theme-store': 'theme-store'
 };
 
 /* What a tap becomes on the other screen. Only where the name differs and the

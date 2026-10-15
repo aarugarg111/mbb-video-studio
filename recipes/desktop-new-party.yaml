@@ -1,0 +1,55 @@
+# Adding a customer and theming their bill, on a laptop. The same process as
+# recipes/new-party.yaml, in the laptop's interface: both forms open as windows
+# over the page you were on, and the Theme Store puts the picker BESIDE the
+# bill rather than in a sheet over it - which is the one thing a desk is better
+# at than a phone.
+#
+# Every name and figure is invented.
+video: desktop-new-party
+
+business:
+  name: SAGAR SUPERBAZAAR
+  gstin: 27AAAAA0000A1Z5
+
+party:
+  name: ASHOK TRADING CO
+  phone: "98765 43210"
+  address: Sadar Bazaar, Agra
+  balance: 0
+
+invoice:
+  number: 5947
+  date: "08/10/2026"
+  theme: none
+
+items:
+  - { name: SUGAR 5KG, rate: 310, qty: 2, gst: 5, unit: PKT, purchase: 272, stock: 4 }
+
+shots:
+  # The book of customers, and the button that adds one.
+  - screen: mbb-desktop-parties
+    duration: 3.0
+    actions:
+      - { at: 1.5, do: tap, target: create-party }
+
+  # The form, as a window over the page.
+  - screen: mbb-desktop-create-party
+    duration: 8.0
+    actions:
+      - { at: 1.0, do: type, target: party-name, text: ASHOK TRADING CO, duration: 1.6 }
+      - { at: 3.4, do: tap, target: type-supplier }
+      - { at: 5.0, do: tap, target: gstin }
+      - { at: 6.6, do: tap, target: save }
+
+  # The themes, with the bill changing beside them as each is chosen.
+  - screen: mbb-desktop-theme-store
+    duration: 6.4
+    actions:
+      - { at: 1.2, do: tap, target: theme-2 }
+      - { at: 3.0, do: tap, target: variant-2 }
+      - { at: 4.8, do: tap, target: unlock }
+
+  # And the bill itself, wearing it.
+  - screen: mbb-desktop-invoice
+    duration: 3.2
+    actions: []

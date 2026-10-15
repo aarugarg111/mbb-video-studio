@@ -177,7 +177,7 @@ test('every phone screen a laptop can show has a laptop screen to show it on', (
      myBillBook screen in either shape. */
   const PHONE_ONLY = [
     'scan-bills', 'scan-camera', 'scan-reading', 'scan-done',
-    'wa-attach', 'wa-chat', 'create-bill', 'theme-store',
+    'wa-attach', 'wa-chat', 'create-bill',
     'mcf-party', 'mcf-new-automation',
     'mcf-tally', 'mcf-ai-call', 'mcf-ai-ringing',
     'create-purchase', 'invoice-created', 'create-invoice'
@@ -214,4 +214,14 @@ test('the myCashFlo process exists in both shapes', () => {
      page that matches rather than on the parties table every time */
   assert.equal(screenOnShape('mcf-desktop-dashboard', 'phone'), 'mcf-dashboard');
   assert.equal(screenOnShape('mcf-desktop-automations', 'phone'), 'mcf-automations');
+});
+
+test('adding a party, and theming a bill, work in both shapes', () => {
+  /* Both were buttons with nothing behind them: "Create Party" on the parties
+     screen in either shape, and the theme strip on the laptop's invoice. A
+     clip could show the tap and then had nowhere to cut to. */
+  assert.equal(screenOnShape('create-party', 'laptop'), 'mbb-desktop-create-party');
+  assert.equal(screenOnShape('theme-store', 'laptop'), 'mbb-desktop-theme-store');
+  assert.equal(screenOnShape('mbb-desktop-create-party', 'phone'), 'create-party');
+  assert.equal(screenOnShape('mbb-desktop-theme-store', 'phone'), 'theme-store');
 });

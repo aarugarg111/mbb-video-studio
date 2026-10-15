@@ -27,10 +27,12 @@ test('every screen built before this one is unchanged', () => {
   assert.deepEqual(
     desktop.sort(),
     [
-      'mbb-desktop-create-invoice', 'mbb-desktop-create-item', 'mbb-desktop-dashboard', 'mbb-desktop-invoice',
+      'mbb-desktop-create-invoice', 'mbb-desktop-create-item', 'mbb-desktop-create-party',
+      'mbb-desktop-dashboard', 'mbb-desktop-invoice',
       'mbb-desktop-items', 'mbb-desktop-parties', 'mbb-desktop-purchase',
       'mbb-desktop-reports', 'mbb-desktop-sales-list',
       'mbb-desktop-scan', 'mbb-desktop-scan-done', 'mbb-desktop-scan-reading',
+      'mbb-desktop-theme-store',
       'mcf-desktop', 'mcf-desktop-automations', 'mcf-desktop-dashboard',
       'tally-receivables'
     ],

@@ -30,6 +30,9 @@ import * as mbbDesktopDashboard from './mbb-desktop-dashboard.js';
 import * as mbbDesktopSalesList from './mbb-desktop-sales-list.js';
 import * as mbbDesktopReports from './mbb-desktop-reports.js';
 import * as mbbDesktopCreateItem from './mbb-desktop-create-item.js';
+import * as createParty from './create-party.js';
+import * as mbbDesktopCreateParty from './mbb-desktop-create-party.js';
+import * as mbbDesktopThemeStore from './mbb-desktop-theme-store.js';
 import * as mbbDesktopScan from './mbb-desktop-scan.js';
 import * as mbbDesktopScanReading from './mbb-desktop-scan-reading.js';
 import * as mbbDesktopScanDone from './mbb-desktop-scan-done.js';
@@ -72,6 +75,9 @@ export const SCREENS = {
   [mcfDesktopAutomations.name]: mcfDesktopAutomations,
   [mbbDesktopDashboard.name]: mbbDesktopDashboard,
   [mbbDesktopSalesList.name]: mbbDesktopSalesList,
+  [createParty.name]: createParty,
+  [mbbDesktopCreateParty.name]: mbbDesktopCreateParty,
+  [mbbDesktopThemeStore.name]: mbbDesktopThemeStore,
   [mbbDesktopScan.name]: mbbDesktopScan,
   [mbbDesktopScanReading.name]: mbbDesktopScanReading,
   [mbbDesktopScanDone.name]: mbbDesktopScanDone,

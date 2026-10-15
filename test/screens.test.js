@@ -552,3 +552,35 @@ test('the dashboard and the sales list name the same bills for the same money', 
   }
   assert.doesNotMatch(html, new RegExp('Sales Invoice #' + day.bills[0].no));
 });
+
+test('no screen uses an id the stage has already taken', () => {
+  /* The stage's own markup carries ids - the phone body is #phone, the frames
+     are #viewport and #desktop-viewport, the address bar is #desktop-url. A
+     screen that names a target the same thing wins nothing and loses badly:
+     document.getElementById returns the STAGE's element, so measure-targets
+     reads the whole phone frame's centre and the tap lands in the middle of
+     the screen instead of on the field.
+
+     create-party had a field called "phone" and measured 239px away from where
+     it actually was. Nothing failed; the ripple would simply have appeared
+     somewhere else. */
+  const STAGE_IDS = [
+    'phone', 'viewport', 'desktop', 'desktop-viewport', 'desktop-url',
+    'desktop-bar', 'stage', 'camera', 'logo', 'endcard'
+  ];
+  for (const [key, mod] of Object.entries(SCREENS)) {
+    for (const id of Object.keys(mod.targets ?? {})) {
+      assert.ok(
+        !STAGE_IDS.includes(id),
+        `${key} has a target called "${id}", which is the stage's own element`
+      );
+    }
+    const html = mod.render(DATA, {});
+    for (const id of STAGE_IDS) {
+      assert.ok(
+        !html.includes(`id="${id}"`),
+        `${key} draws an element with id="${id}", which the stage already uses`
+      );
+    }
+  }
+});

@@ -22,6 +22,10 @@ export const SCREENS = {
   'scan-done': [],
   'create-purchase': ['create-purchase', 'additional-charges', 'discount'],
   'create-item': ['item-name', 'hsn', 'tab-stock', 'batching', 'save'],
+  /* Adding a customer or a supplier. "Create Party" was a button with nothing
+     behind it in both shapes, so the first thing every new user does was the
+     one process that could not be filmed. */
+  'create-party': ['party-name', 'party-phone', 'type-supplier', 'opening-balance', 'gstin', 'save'],
   'share-sheet': ['contact-0', 'contact-1', 'send'],
   'wa-attach': ['caption', 'send'],
   'wa-chat': ['back', 'attachment'],
@@ -54,6 +58,10 @@ export const SCREENS = {
   'mbb-desktop-sales-list': ['new-bill', 'create-sales-invoice', 'bill-row-0', 'change-range', 'total-sales'],
   'mbb-desktop-reports': ['create-sales-invoice', 'change-range', 'net-profit', 'excel'],
   'mbb-desktop-create-item': ['item-name', 'hsn', 'tab-stock', 'batching', 'save'],
+  'mbb-desktop-create-party': ['party-name', 'party-phone', 'type-supplier', 'opening-balance', 'gstin', 'save'],
+  /* The Theme Store on a laptop puts the picker BESIDE the bill instead of in
+     a sheet over it, which is the one thing a desk does better than a phone. */
+  'mbb-desktop-theme-store': ['theme-0', 'theme-1', 'theme-2', 'theme-3', 'theme-4', 'theme-5', 'variant-1', 'variant-2', 'unlock', 'close'],
   /* Scan & Record on a laptop. A desk has no camera pointed at a bill, so the
      two ways in are a file dropped on the window and a photo sent across from
      the phone - the same flow as the phone's, which is the whole rule. */

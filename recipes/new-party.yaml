@@ -1,0 +1,60 @@
+# Adding a customer, end to end, and then theming the bill you send them.
+#
+# "Create Party" has been a button on the parties screen since it was built and
+# nothing was behind it, so the first thing every new user does was the one
+# process the studio could not film. Same for the Theme Store on a laptop: the
+# invoice advertised it and the tap led nowhere.
+#
+# Cut as a phone clip. The same shot list recast to a laptop lands on
+# mbb-desktop-create-party and mbb-desktop-theme-store, which are the same
+# forms in the laptop's interface.
+#
+# Every name and figure is invented.
+video: new-party
+
+business:
+  name: SAGAR SUPERBAZAAR
+  gstin: 27AAAAA0000A1Z5
+
+party:
+  name: ASHOK TRADING CO
+  phone: "98765 43210"
+  address: Sadar Bazaar, Agra
+  balance: 0
+
+invoice:
+  number: 5947
+  date: "08/10/2026"
+  theme: none
+
+items:
+  - { name: SUGAR 5KG, rate: 310, qty: 2, gst: 5, unit: PKT, purchase: 272, stock: 4 }
+
+shots:
+  # The book of customers, and the button that adds one.
+  - screen: parties
+    duration: 3.0
+    actions:
+      - { at: 1.5, do: tap, target: create-party }
+
+  # The form: who they are, how to reach them, which way the money goes, and
+  # the GSTIN that fills in the rest.
+  - screen: create-party
+    duration: 8.0
+    actions:
+      - { at: 1.0, do: type, target: party-name, text: ASHOK TRADING CO, duration: 1.6 }
+      - { at: 3.4, do: tap, target: type-supplier }
+      - { at: 5.0, do: tap, target: gstin }
+      - { at: 6.6, do: tap, target: save }
+
+  # And what the new party is for: a bill, and a bill that looks like something.
+  - screen: theme-store
+    duration: 5.4
+    actions:
+      - { at: 1.2, do: tap, target: theme-2 }
+      - { at: 2.8, do: tap, target: variant-2 }
+      - { at: 4.2, do: tap, target: unlock }
+
+  - screen: invoice-created
+    duration: 3.0
+    actions: []

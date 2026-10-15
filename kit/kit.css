@@ -1604,3 +1604,32 @@
 .dka-c.late { width: 74px; flex: none; text-align: right; color: var(--dsk-late); }
 .dka-row.head .dka-c.late { color: var(--dsk-muted); }
 .dka-live { display: inline-flex; align-items: center; gap: 3px; padding: 1px 5px; border-radius: 4px; font-size: 6.5px; font-weight: 700; color: var(--mcf-wallet); background: var(--mbb-success-tint); }
+
+/* ---- Create Party, and the Theme Store, on a laptop -------------------- */
+.ci-pp { display: flex; gap: 6px; margin-top: 3px; }
+.ci-chip { padding: 3px 9px; border-radius: 999px; border: 1px solid var(--dsk-rule); font-size: 8px; font-weight: 600; color: var(--dsk-muted); }
+.ci-chip.on { background: var(--dsk-blue); border-color: var(--dsk-blue); color: var(--dsk-ink); }
+.ci-note { display: flex; align-items: center; gap: 5px; margin-top: 8px; padding: 6px 9px; border-radius: 6px; background: var(--dsk-in-edge); color: var(--dsk-in); font-size: 8px; font-weight: 600; }
+
+/* The picker beside the bill, which is the whole point of doing this on a
+   laptop: the phone's sheet covers the thing you are theming. */
+.dts-win {
+  position: absolute; left: 96px; right: 96px; top: 40px; bottom: 34px;
+  display: flex; flex-direction: column; border-radius: 10px; overflow: hidden;
+  background: var(--dsk-modal); border: 1px solid var(--dsk-rule);
+}
+.dts-body { flex: 1; min-height: 0; display: flex; gap: 10px; padding: 10px; }
+.dts-pick { flex: 1; min-width: 0; }
+.dts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.dts-card { border-radius: 6px; overflow: hidden; border: 1px solid var(--dsk-rule); }
+.dts-card.on { border-color: var(--dsk-blue); box-shadow: 0 0 0 1px var(--dsk-blue); }
+.dts-card .th { height: 42px; background-size: cover; background-position: center; }
+.dts-nm { padding: 3px 5px; font-size: 7px; font-weight: 600; color: var(--dsk-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dts-chips { display: flex; gap: 6px; margin-top: 8px; height: 19px; }
+.dts-chip { padding: 3px 8px; border-radius: 999px; border: 1px solid var(--dsk-rule); font-size: 7.5px; font-weight: 600; color: var(--dsk-muted); }
+.dts-chip.on { background: var(--dsk-blue); border-color: var(--dsk-blue); color: var(--dsk-ink); }
+.mb-abtn.wide { margin-top: 10px; width: 100%; box-sizing: border-box; justify-content: center; }
+.dts-preview { flex: none; width: 150px; align-self: stretch; border-radius: 6px; overflow: hidden; background: var(--mbb-surface); }
+/* The bill is drawn at the phone's own width and scaled to fit, so its
+   proportions survive - the same trick mbb-desktop-invoice uses. */
+.dts-paper { width: 390px; transform: scale(0.385); transform-origin: top left; }
