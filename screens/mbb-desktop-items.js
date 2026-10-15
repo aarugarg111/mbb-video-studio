@@ -2,7 +2,7 @@ import { esc } from '../src/esc.js';
 import { icons } from '../src/icons.js';
 import { formatINR } from '../src/money.js';
 import { isLow } from './items.js';
-import { sidebar, topActions } from './mbb-desktop-chrome.js';
+import { sidebar, topActions, referralStrip, pendingActions } from './mbb-desktop-chrome.js';
 
 export const name = 'mbb-desktop-items';
 
@@ -15,14 +15,21 @@ export const name = 'mbb-desktop-items';
  * follows.
  */
 export const device = 'desktop';
+
+/* Where the camera rests. A 16:9 window inside a 9:16 video has to be pushed
+ * in on to fill the picture, and what goes out of frame when it is should be
+ * chrome rather than content - so the camera sits right of the rail. */
+export const focus = { x: 423, y: 203 };
 export const url = 'mybillbook.in/app/home/items';
 
 /* Coordinates are in the desktop's 720x540 space and are MEASURED. */
 export const targets = {
-  'create-item': { x: 667, y: 133 },
-  'low-stock': { x: 431, y: 80 },
-  'item-row-0': { x: 431, y: 210 },
-  'bulk-actions': { x: 572, y: 133 }
+  /* The rail's own button, where a laptop bill starts. */
+  'create-sales-invoice': { x: 63, y: 46 },
+  'create-item': { x: 674, y: 166 },
+  'low-stock': { x: 423, y: 118 },
+  'item-row-0': { x: 423, y: 233 },
+  'bulk-actions': { x: 590, y: 165 }
 };
 
 /* Tapping Low Stock narrows the table, the same way the phone's pill does. */
@@ -34,13 +41,20 @@ const FILLERS = [
   { name: 'ANJEER PREMEIUM 500GM', rate: 1200, purchase: 950, stock: 99 },
   { name: 'ARHAR DAL GOLD 1KG', rate: 180, purchase: 140, stock: 95 },
   { name: 'BESAN 1KG', rate: 110, purchase: 94, stock: 91 },
-  { name: 'BELLA VITA PERFUME SET', rate: 650, purchase: 250, stock: 199 }
+  { name: 'BELLA VITA PERFUME SET', rate: 650, purchase: 250, stock: 199 },
+  { name: 'BOURNVITA 500GM', rate: 245, purchase: 212, stock: 36 },
+  { name: 'BRITANNIA MARIE GOLD', rate: 40, purchase: 33, stock: 120 },
+  { name: 'CHANA DAL 1KG', rate: 95, purchase: 78, stock: 64 },
+  { name: 'COLGATE STRONG TEETH 200G', rate: 115, purchase: 96, stock: 48 }
 ];
+
+/* See mbb-desktop-parties.js - what fits above the floating pill. */
+const ROWS = 6;
 
 export function itemsFor(data) {
   const own = Array.isArray(data?.items) ? data.items : [];
   const rest = FILLERS.filter(f => !own.some(o => String(o.name).toLowerCase() === f.name.toLowerCase()));
-  return [...own, ...rest].slice(0, 7);
+  return [...own, ...rest].slice(0, ROWS);
 }
 
 export function render(data, state) {
@@ -68,7 +82,7 @@ export function render(data, state) {
 
   return `
 <div class="screen mbscreen">
-  ${sidebar(data?.business?.name, 'Items')}
+  ${sidebar(data?.business?.name, 'Items', 'Inventory')}
 
   <div class="mb-main">
     <div class="mb-top">
@@ -78,6 +92,8 @@ export function render(data, state) {
         { label: 'Reports', icon: 'ledger', kind: 'ghost' }
       ])}
     </div>
+
+    ${referralStrip()}
 
     <div class="mb-stats">
       ${card('Stock Value', formatINR(stockValue), 'navItems', 'all')}
@@ -103,5 +119,7 @@ export function render(data, state) {
         : '<div class="mb-empty">Nothing is running low.</div>'}
     </div>
   </div>
+
+  ${pendingActions()}
 </div>`;
 }

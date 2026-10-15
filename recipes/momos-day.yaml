@@ -28,6 +28,13 @@ shots:
     actions:
       - { at: 1.8, do: tap, target: change-range }
 
+  # Dashboard -> Reports. Without this beat the video cut from the day's bills
+  # straight into the Profit and Loss report with nothing explaining the jump.
+  - screen: home
+    duration: 2.2
+    actions:
+      - { at: 1.2, do: tap, target: reports }
+
   # And what it actually earned - Net Profit is the figure the script asks for.
   - screen: profit-loss
     duration: 3.8

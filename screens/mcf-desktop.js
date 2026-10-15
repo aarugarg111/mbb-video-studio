@@ -18,6 +18,14 @@ export const name = 'mcf-desktop';
  * numbers and real call notes.
  */
 export const device = 'desktop';
+
+/* Where the camera rests. A 16:9 window inside a 9:16 video has to be pushed
+ * in on to fill the picture, and what goes out of frame when it is should be
+ * chrome rather than content - so the camera sits right of the rail. */
+/* This screen carries two rails - myBillBook's and myCashFlo's own - so the
+ * camera sits further left than on a myBillBook screen: far enough to lose
+ * myBillBook's rail, not so far that it clips the word "myCashFlo". */
+export const focus = { x: 410, y: 203 };
 export const url = 'app.mycashflo.in/parties';
 
 /* Coordinates are in the desktop's 720x540 space and are MEASURED. */

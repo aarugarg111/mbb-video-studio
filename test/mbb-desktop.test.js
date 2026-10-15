@@ -4,7 +4,7 @@ import { rawColoursIn } from '../src/colour-guard.js';
 import { SCREENS, catalogue } from '../screens/index.js';
 import { deviceOf } from '../src/device.js';
 import { itemsFor } from '../screens/mbb-desktop-items.js';
-import { SCANNED } from '../screens/mbb-desktop-create-invoice.js';
+import { SCANNED } from '../screens/mbb-desktop-chrome.js';
 
 const DESKTOP = ['mbb-desktop-parties', 'mbb-desktop-items', 'mbb-desktop-create-invoice'];
 
@@ -20,7 +20,7 @@ const DATA = {
 
 test('all three render with nothing at all', () => {
   for (const name of DESKTOP) {
-    assert.ok(SCREENS[name].render({}, {}).includes('class="screen mbscreen"'), name);
+    assert.ok(/class="screen mbscreen/.test(SCREENS[name].render({}, {})), name);
   }
 });
 
@@ -34,7 +34,10 @@ test('every target exists on its screen, in some state', () => {
      correct - you cannot add a line to a bill that has not been read yet. So
      a target has to exist in SOME state, not in every one. */
   const cat = catalogue();
-  const states = [{}, { filled: 1 }, { lowStock: 1 }];
+  /* The item catalogue's own rows only exist while it is open, which is why
+     "picker" is one of the states here: without it, half the billing flow's
+     targets look unreachable. */
+  const states = [{}, { filled: 1 }, { lowStock: 1 }, { picker: 1 }, { picker: 1, items: [1, 1] }];
   for (const name of DESKTOP) {
     const rendered = states.map(st => SCREENS[name].render(DATA, st));
     for (const id of cat[name]) {
@@ -95,22 +98,40 @@ test('tapping Low Stock narrows the table', () => {
   assert.ok(low.includes('SUGAR 5KG'));
 });
 
-test('an item list the recipe gives is not padded past seven', () => {
+test('an item list fills the table and stops before the floating pill', () => {
+  /* The 16:9 window is shorter than the 4:3 one was, and a row past the bottom
+     of it runs under the Pending Actions pill. */
   const many = itemsFor({ items: Array.from({ length: 12 }, (_, i) => ({ name: 'ITEM ' + i, rate: 10, stock: 50 })) });
-  assert.equal(many.length, 7);
+  assert.equal(many.length, 6);
 });
 
-test('the invoice form is empty until the AI reads the bill', () => {
-  const before = SCREENS['mbb-desktop-create-invoice'].render(DATA, {});
+test('the bill is empty until items are put on it', () => {
+  /* Billing on a laptop is the phone's flow in another interface: the form
+     opens with the party on it and no lines, the catalogue puts the lines on,
+     and only then does the bill come to anything. */
+  const empty = SCREENS['mbb-desktop-create-invoice'].render(DATA, {});
+  assert.ok(!empty.includes('SUGAR 5KG'), 'no line is on the bill yet');
+  assert.ok(empty.includes('+ Add Item'), 'and the way to add one is on screen');
+  assert.ok(!empty.includes('Add to Bill [F7]'), 'the catalogue is not open');
+
+  const open = SCREENS['mbb-desktop-create-invoice'].render(DATA, { picker: 1 });
+  assert.ok(open.includes('Add to Bill [F7]'), 'tapping + Add Item opens the catalogue');
+  assert.ok(open.includes('SUGAR 5KG'), 'which lists what the shop sells');
+
+  const picked = SCREENS['mbb-desktop-create-invoice'].render(DATA, { picker: 1, items: [1, 1] });
+  assert.ok(picked.includes('Show 2 Item(s) Selected'), picked.slice(0, 200));
+
+  const onBill = SCREENS['mbb-desktop-create-invoice'].render(DATA, { items: [1, 1] });
+  assert.ok(!onBill.includes('Add to Bill [F7]'), 'the catalogue closes behind them');
+  assert.ok(onBill.includes('SUGAR 5KG'), 'and the lines are on the bill');
+});
+
+test('Mira AI fills the same bill the other way round', () => {
   const after = SCREENS['mbb-desktop-create-invoice'].render(DATA, { filled: 1 });
-
-  assert.ok(!before.includes('ASHOK TRADING CO'), 'the party is not there yet');
-  assert.ok(before.includes('mb-blank'), 'the field is an outline waiting to be filled');
-  assert.ok(before.includes('Drag'), 'and the panel is still asking for a bill');
-
-  assert.ok(after.includes('ASHOK TRADING CO'));
   assert.ok(after.includes('SUGAR 5KG'));
   assert.ok(after.includes('Bill read'));
+  assert.ok(SCREENS['mbb-desktop-create-invoice'].render(DATA, {}).includes('Drag'),
+    'and asks for a document until it has one');
 });
 
 test('the totals agree with the lines above them', () => {

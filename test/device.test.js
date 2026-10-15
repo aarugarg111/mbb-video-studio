@@ -27,8 +27,9 @@ test('every screen built before this one is unchanged', () => {
   assert.deepEqual(
     desktop.sort(),
     [
-      'mbb-desktop-create-invoice', 'mbb-desktop-invoice', 'mbb-desktop-items',
-      'mbb-desktop-parties', 'mbb-desktop-purchase', 'mcf-desktop'
+      'mbb-desktop-create-invoice', 'mbb-desktop-create-item', 'mbb-desktop-dashboard', 'mbb-desktop-invoice',
+      'mbb-desktop-items', 'mbb-desktop-parties', 'mbb-desktop-purchase',
+      'mbb-desktop-reports', 'mbb-desktop-sales-list', 'mcf-desktop'
     ],
     'only the screens that asked for it are desktop screens'
   );
@@ -66,9 +67,13 @@ test('both renderers draw the same two frames', async () => {
   /* And at the same size, or the two renders differ by a scale factor. */
   const css = await readFile(new URL('../web/app/globals.css', import.meta.url), 'utf8');
   for (const [file, src] of [['stage/index.html', cli], ['globals.css', css]]) {
-    assert.ok(src.includes('width: 720px'), `${file} draws the desktop at another width`);
-    assert.ok(src.includes('height: 540px'), `${file} draws the desktop at another height`);
-    assert.ok(src.includes('scale(1.5)'), `${file} scales the desktop differently`);
+    /* Read off DEVICES rather than typed out again: these were three literals
+       that had to be edited in step with src/device.js, and the day the window
+       changed shape they failed for being out of date rather than for anything
+       being wrong. */
+    assert.ok(src.includes(`width: ${DEVICES.desktop.width}px`), `${file} draws the desktop at another width`);
+    assert.ok(src.includes(`height: ${DEVICES.desktop.height}px`), `${file} draws the desktop at another height`);
+    assert.ok(src.includes(`scale(${DEVICES.desktop.scale})`), `${file} scales the desktop differently`);
   }
 });
 
@@ -122,7 +127,7 @@ test('the CSS handed to the rasteriser describes both frames', async () => {
   }
 
   /* And at the same size as everywhere else. */
-  assert.ok(inlined.includes('width: 720px'), 'the inlined desktop is another width');
-  assert.ok(inlined.includes('height: 540px'), 'the inlined desktop is another height');
+  assert.ok(inlined.includes(`width: ${DEVICES.desktop.width}px`), 'the inlined desktop is another width');
+  assert.ok(inlined.includes(`height: ${DEVICES.desktop.height}px`), 'the inlined desktop is another height');
   assert.ok(inlined.includes('scale(1.5)'), 'the inlined desktop is another scale');
 });

@@ -74,6 +74,12 @@ export function parse(text, catalogue, options = {}) {
      * show that figure, so a recipe may name the parties itself instead of
      * taking the invented ones. Anything not named here is filled in. */
     cashflo: { ...(doc.cashflo || {}) },
+    /* The myBillBook dashboard's tiles. Same reason as cashflo: a script that
+     * names a figure - "mera 4 lakh collect karna hai" - needs the tile to show
+     * that figure. Left out, each tile is worked out from the rest of the
+     * recipe rather than from the number the reference recording happened to
+     * have, so the dashboard moves with the script either way. */
+    dashboard: { ...(doc.dashboard || {}) },
     brand: { endCard: null, cta: { ...DEFAULT_CTA, image: true, tagline: DEFAULT_END_CARD.tagline } },
     shots: []
   };
@@ -212,6 +218,29 @@ export function parse(text, catalogue, options = {}) {
           errors.push(`${at}.balance must be a number, got ${JSON.stringify(p.balance)}.`);
         }
       });
+    }
+  }
+
+  /* Each dashboard figure is money, so it is a number or it is a typo. Naming a
+   * tile that does not exist is a typo too, and a silent one: the video would
+   * render with the worked-out figure and the author would never learn why. */
+  if (doc.dashboard != null) {
+    if (typeof doc.dashboard !== 'object' || Array.isArray(doc.dashboard)) {
+      errors.push('"dashboard" must be a mapping of tile names to amounts.');
+    } else {
+      const tiles = ['toCollect', 'toPay', 'weekSale'];
+      for (const [key, value] of Object.entries(doc.dashboard)) {
+        if (!tiles.includes(key)) {
+          errors.push(`dashboard.${key} is not a tile. Known: ${tiles.join(', ')}.`);
+        } else if (value == null) {
+          /* A shot list written by a model fills every field, and writes null
+           * for the ones the script never settled. Null means "work it out",
+           * so the tile is dropped rather than rendered as nothing. */
+          delete recipe.dashboard[key];
+        } else if (!(Number(value) >= 0)) {
+          errors.push(`dashboard.${key} must be an amount, got ${JSON.stringify(value)}.`);
+        }
+      }
     }
   }
 

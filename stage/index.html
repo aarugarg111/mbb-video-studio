@@ -23,8 +23,11 @@
   /* The space below the 150px logo band. The phone's layout box is 412x866;
    * scale() works about its centre, so centring the box centres the result:
    * 741.6 x 1558.8 inside 1080 x 1770. */
+  /* Clipped: a laptop window pushed in on grows past the sides of the
+     picture, and without this it would also grow up into the logo band. */
   #stage-area {
     flex: 1;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -77,7 +80,7 @@
   #desktop-viewport {
     position: relative;
     width: 720px;
-    height: 540px;
+    height: 405px;
     margin: 0 8px;
     border-radius: 6px;
     overflow: hidden;

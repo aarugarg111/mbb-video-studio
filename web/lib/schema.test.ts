@@ -28,6 +28,23 @@ test('every tap target the studio offers exists on the screen', () => {
   }
 });
 
+test('every tap target a screen has is one the studio offers', () => {
+  /* The other direction, which was missing: a target added to a screen and not
+     to this list is one the model can never propose, so the beat it was added
+     for never reaches a video - the dashboard's "reports" tile sat unreachable
+     exactly that way. */
+  const real = catalogue() as Record<string, string[]>;
+  for (const [screen, targets] of Object.entries(real)) {
+    const offered = (SCREENS as Record<string, readonly string[]>)[screen] ?? [];
+    for (const target of targets) {
+      assert.ok(
+        offered.includes(target),
+        `${screen} has "${target}", which the schema does not offer the model`
+      );
+    }
+  }
+});
+
 test('the names the model is constrained to are the keys of the one map', () => {
   assert.deepEqual([...SCREEN_NAMES], Object.keys(SCREENS));
   assert.ok(SCREEN_NAMES.length > 0, 'an empty enum would reject every shot list');

@@ -102,6 +102,13 @@ export function stateAt(recipe, t) {
   let ripple = null;
   /* Where the camera is pushed in, and how far. Null is the whole screen. */
   let zoom = null;
+  /* Every point this shot taps, whether or not the ripple is showing right
+   * now. A laptop window is wider than the picture, so part of it is always
+   * out of frame, and a tap on the part that is out of frame happens where
+   * nobody can see it - which is what became of the button that starts a
+   * laptop bill. The camera is given these so it can keep them in shot for
+   * the whole shot rather than lurching to each one as it happens. */
+  const taps = [];
 
   /* A bill, once built, stays built: every earlier shot is applied at its full
    * duration (its actions have finished), the current shot at localT. Only the
@@ -160,6 +167,9 @@ export function stateAt(recipe, t) {
           if (SCREENS[s.screen].closes?.includes(action.target)) {
             screenState.sheet *= 1 - easeOut(ramp(at, action.at, SHEET_CLOSE_SECONDS));
           }
+          /* The camera is told about this tap for the whole shot, not only
+           * while its ring is on screen, so the picture holds still. */
+          if (current) taps.push({ x: targets[action.target].x, y: targets[action.target].y });
           const progress = (at - action.at) / RIPPLE_SECONDS;
           if (progress >= 0 && progress <= 1) {
             const point = targets[action.target];
@@ -213,5 +223,5 @@ export function stateAt(recipe, t) {
     ? { screen: recipe.shots[index - 1].screen, progress: localT / TRANSITION_SECONDS }
     : null;
 
-  return { t: clamped, shotIndex: index, screen: shot.screen, outgoing, screenState, ripple, zoom, endCard };
+  return { t: clamped, shotIndex: index, screen: shot.screen, outgoing, screenState, ripple, zoom, taps, endCard };
 }

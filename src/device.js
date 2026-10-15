@@ -15,17 +15,29 @@
  * is how much fits, not how big the pixels are:
  *
  *   phone    390 x 844  at 1.8  -> 702 x 1519
- *   desktop  720 x 540  at 1.5  -> 1080 x 810
+ *   desktop  720 x 405  at 1.5  -> 1080 x 608
  *
  * The desktop scale is deliberately high. A real 1280-wide window shrunk into
  * a 1080-wide vertical video puts its text at about four pixels, which nobody
  * can read; 720 logical pixels is a window with fewer things in it, drawn
  * large enough to survive a phone screen held at arm's length.
+ *
+ * It is 16:9 because the app's own window is - reference/frames/dmbb-7.png is
+ * 1900 x 1080. It was 4:3 for a while, a third taller for its width, and every
+ * laptop screen drawn in it came out stretched down the page: rows too deep,
+ * cards too tall, the whole thing looking like the app with something wrong
+ * with it. Nobody could say what, and everybody could see it.
+ *
+ * "framing" is where the camera sits before a shot asks for anything. A 16:9
+ * window in a 9:16 video is a band across the middle with a great deal of
+ * nothing above and below, so the window is pushed in on until it fills the
+ * picture and its sides go out of frame - which is what a screen recording in
+ * a Reel does too. A shot that zooms further does so from here.
  */
 
 export const DEVICES = {
   phone: { width: 390, height: 844, scale: 1.8 },
-  desktop: { width: 720, height: 540, scale: 1.5 }
+  desktop: { width: 720, height: 405, scale: 1.5, framing: 1.26 }
 };
 
 export const DEFAULT_DEVICE = 'phone';

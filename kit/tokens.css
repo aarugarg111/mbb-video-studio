@@ -381,6 +381,17 @@
 
 /* Paid and unpaid, on the desktop invoice. */
 :root {
+  /* The invoice preview on a laptop. SAMPLED from
+   * reference/frames/dsk-mbb-52.png: the app shows the bill on its own dark
+   * page, not as a white sheet. */
+  --dsk-bill-page: #111111;  /* SAMPLED - the bill ground          */
+  --dsk-bill-edge: #443E10;  /* SAMPLED - the themed border        */
+  --dsk-bill-band: #303030;  /* SAMPLED - the item table's header  */
+  --dsk-bill-rule: #2A2A2A;
+  --dsk-bill-shop: #C9CFF9;  /* SAMPLED - the shop's own name      */
+  --dsk-bill-back: #252525;  /* SAMPLED - the pane behind the bill */
+  --dsk-explore:   #1A8BC4;  /* SAMPLED - the Explore Now button    */
+  --dsk-link-edge: #27406B;  /* the e-document buttons' outline     */
   --dsk-unpaid-bg: #3A1D1D;
   --dsk-paid-bg:   #14301F;
 }
@@ -394,4 +405,13 @@
   --dsk-ai-said:    #BFB8E8;
   --dsk-breach-bg:  #261F1F;  /* SAMPLED - "Promise Breached"      */
   --dsk-daily-bg:   #15231C;  /* SAMPLED - the daily WhatsApp pill */
+}
+
+/* myBillBook on a laptop, rebuilt. SAMPLED from reference/frames/dmbb-7.png. */
+:root {
+  --dsk-promo:     #1C262C;  /* SAMPLED - the referral strip   */
+  --dsk-promo-ico: #0B8EDA;  /* SAMPLED - its gift icon        */
+  --dsk-pending:   #46A159;  /* SAMPLED - the Pending Actions pill */
+  --dsk-in-edge:   #2A5B3F;
+  --dsk-out-edge:  #5E2B2B;
 }

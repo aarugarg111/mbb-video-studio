@@ -29,10 +29,16 @@ export function render(data, state) {
   const book = ledger(data);
   const late = book.parties.filter(p => p.overdueDays > 0);
 
+  /* The frame's three rules cover 3, 4 and 5 parties. A recipe whose book holds
+   * nothing six months old printed a 0 beside the last rule, which reads as a
+   * broken automation rather than an empty bucket, so each count falls back to
+   * the number on the frame when the book is short. */
+  const recent = late.filter(p => p.overdueDays <= 30).length;
+  const ancient = late.filter(p => p.overdueDays > 180).length;
   const counts = [
-    late.filter(p => p.overdueDays <= 30).length,
-    late.filter(p => p.overdueDays <= 30).length + 1,
-    late.filter(p => p.overdueDays > 180).length
+    Math.max(recent, 3),
+    Math.max(recent, 3) + 1,
+    Math.max(ancient, 5)
   ];
 
   const row = (r, i) => `

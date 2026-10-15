@@ -9,7 +9,7 @@ import { z } from 'zod';
  * model can never propose the screen. */
 
 export const SCREENS = {
-  home: ['create-invoice-cta', 'received-payment'],
+  home: ['create-invoice-cta', 'received-payment', 'reports'],
   'create-bill': ['party-field', 'add-items', 'scan-record'],
   'create-invoice': ['item-search', 'add-item-0', 'add-item-1', 'generate-bill'],
   'invoice-created': ['share', 'done'],
@@ -38,12 +38,23 @@ export const SCREENS = {
   'mcf-ai-ringing': ['accept', 'decline'],
   /* The first screen drawn as a laptop rather than a phone. */
   'mcf-desktop': ['ask-ai', 'setup-automation', 'party-row-0', 'continue'],
-  'mbb-desktop-parties': ['create-party', 'to-collect', 'party-row-0', 'reports'],
-  'mbb-desktop-items': ['create-item', 'low-stock', 'item-row-0', 'bulk-actions'],
-  'mbb-desktop-create-invoice': ['upload', 'proceed', 'save', 'add-item'],
-  'mbb-desktop-invoice': ['record-payment', 'share', 'download-pdf', 'theme-store'],
-  'mbb-desktop-purchase': ['upload', 'proceed', 'save', 'add-party'],
-  'sales-list': ['change-range', 'sort', 'filter-sales', 'bill-row-0', 'share-link'],
+  /* The laptop counterparts of the phone's dashboard and sales list. Same
+     flow, wider interface - a laptop clip starts where a phone clip starts. */
+  'mbb-desktop-dashboard': ['create-sales-invoice', 'to-collect', 'to-pay', 'transactions', 'collections'],
+  'mbb-desktop-sales-list': ['new-bill', 'create-sales-invoice', 'bill-row-0', 'change-range', 'total-sales'],
+  'mbb-desktop-reports': ['create-sales-invoice', 'change-range', 'net-profit', 'excel'],
+  'mbb-desktop-create-item': ['item-name', 'hsn', 'tab-stock', 'batching', 'save'],
+  /* "create-sales-invoice" is the rail's own button, on every myBillBook
+     laptop screen: it is where a laptop bill starts, the way the + Bill /
+     Invoice pill is on the phone. */
+  'mbb-desktop-parties': ['create-sales-invoice', 'create-party', 'to-collect', 'party-row-0', 'reports'],
+  'mbb-desktop-items': ['create-sales-invoice', 'create-item', 'low-stock', 'item-row-0', 'bulk-actions'],
+  /* The billing flow itself: open the catalogue, search it, add lines, put
+     them on the bill, save. The same beats as the phone's create-invoice. */
+  'mbb-desktop-create-invoice': ['add-item', 'item-search', 'add-item-0', 'add-item-1', 'add-to-bill', 'save', 'add-party', 'upload', 'proceed'],
+  'mbb-desktop-invoice': ['create-sales-invoice', 'record-payment', 'share', 'share-whatsapp', 'download-pdf', 'theme-store'],
+  'mbb-desktop-purchase': ['add-item', 'item-search', 'add-item-0', 'add-item-1', 'add-to-bill', 'upload', 'proceed', 'save', 'add-party'],
+  'sales-list': ['change-range', 'sort', 'filter-sales', 'bill-row-0', 'share-link', 'received-payment', 'new-bill'],
   'profit-loss': ['change-range', 'pdf', 'excel', 'net-profit']
 } as const;
 
@@ -79,6 +90,27 @@ export const RecipeSchema = z.object({
       unit: z.string()
     })
   ),
+  /* Figures a script says out loud. Without these fields a shot list had
+   * nowhere to put "mera 4 lakh collect karna hai" or "market mein 52 lakh
+   * atka hai", so the screens showed what they always showed and the video
+   * contradicted its own voiceover. Null means the script never settled the
+   * figure and the studio works it out from the rest of the recipe. */
+  dashboard: z.object({
+    toCollect: z.number().nullable(),
+    toPay: z.number().nullable(),
+    weekSale: z.number().nullable()
+  }),
+  /* The collections book the myCashFlo screens read from. An empty list leaves
+   * the studio's own stand-in parties in place. */
+  cashflo: z.object({
+    parties: z.array(
+      z.object({
+        name: z.string(),
+        balance: z.number(),
+        overdueDays: z.number()
+      })
+    )
+  }),
   /* Nullable rather than optional: a strict output schema is more reliable
    * when every field is always present, so the model emits endCard: null when
    * the clip should not close on a branded card. Without this field at all,

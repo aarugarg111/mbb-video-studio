@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { SCREENS, catalogue } from '../screens/index.js';
-import { summarise } from '../src/money.js';
+import { formatINR, summarise } from '../src/money.js';
 import { stateAt } from '../src/timeline.js';
 
 const DATA = {
@@ -34,7 +34,7 @@ test('screens use tokens, never raw hex colours', () => {
 
 test('catalogue maps every screen to its target names', () => {
   const c = catalogue();
-  assert.deepEqual(c.home, ['create-invoice-cta', 'received-payment']);
+  assert.deepEqual(c.home, ['create-invoice-cta', 'received-payment', 'reports']);
 });
 
 /* These labels are the live app's own wording. If someone "translates" them
@@ -53,7 +53,7 @@ test('home uses the app English labels, not Hinglish', () => {
 
 test('home shows a transaction with a paid and an unpaid pill', () => {
   const html = SCREENS.home.render(DATA, {});
-  assert.match(html, /ASHOK POLITHIN CENTER/);
+  assert.match(html, new RegExp(DATA.party.name));
   assert.match(html, /Sales Invoice #\d+/);
   assert.match(html, />Paid</);
   assert.match(html, />Unpaid</);
@@ -502,4 +502,50 @@ test('catalogue lists the WhatsApp screens and their targets', () => {
   assert.deepEqual(c['share-sheet'], ['contact-0', 'contact-1', 'send']);
   assert.deepEqual(c['wa-attach'], ['caption', 'send']);
   assert.deepEqual(c['wa-chat'], ['back', 'attachment']);
+});
+
+/* The dashboard used to carry the three figures the reference recording had on
+ * it, written into the file: a script that asked for different numbers got the
+ * recording's numbers on every video. */
+test('the dashboard tiles move with the recipe instead of the recording', () => {
+  const html = SCREENS.home.render(DATA, {});
+  assert.doesNotMatch(html, /14,94,157/, 'To Collect is still the recording\'s figure');
+  assert.doesNotMatch(html, /2,98,729/, 'To Pay is still the recording\'s figure');
+  assert.doesNotMatch(html, /ASHOK POLITHIN CENTER/, 'a transaction is still the recording\'s party');
+});
+
+test('a dashboard tile the recipe names outright is the tile that renders', () => {
+  const html = SCREENS.home.render(
+    { ...DATA, dashboard: { toCollect: 400000, toPay: 125000, weekSale: 36500 } },
+    {}
+  );
+  assert.match(html, /4,00,000/);
+  assert.match(html, /1,25,000/);
+  assert.match(html, /36,500/);
+});
+
+test('an unnamed tile is worked out from the rest of the recipe', async () => {
+  /* To Collect is the customers on the Parties screen; This Week's Sale is the
+   * day the sales list and the Profit and Loss report both add up. */
+  const { partyRows } = await import('../screens/parties.js');
+  const { salesOf } = await import('../screens/sales-list.js');
+  const owed = partyRows(DATA)
+    .filter(p => p.kind === 'Customer')
+    .reduce((t, p) => t + p.balance, 0);
+
+  const html = SCREENS.home.render(DATA, {});
+  assert.ok(html.includes(formatINR(owed)), `To Collect should read ${formatINR(owed)}`);
+  assert.ok(html.includes(formatINR(salesOf(DATA).total)), 'This Week\'s Sale should be the day\'s takings');
+});
+
+test('the dashboard and the sales list name the same bills for the same money', async () => {
+  const { salesOf } = await import('../screens/sales-list.js');
+  const day = salesOf(DATA);
+  const html = SCREENS.home.render(DATA, {});
+  /* The first bill of the day is the one the video is about to create, so the
+   * dashboard shows the two behind it. */
+  for (const b of day.bills.slice(1, 3)) {
+    assert.match(html, new RegExp('Sales Invoice #' + b.no));
+  }
+  assert.doesNotMatch(html, new RegExp('Sales Invoice #' + day.bills[0].no));
 });

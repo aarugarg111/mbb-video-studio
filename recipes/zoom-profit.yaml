@@ -18,6 +18,13 @@ shots:
     actions:
       - { at: 1.6, do: tap, target: change-range }
 
+  # Dashboard -> Reports. Without this beat the video cut from the day's bills
+  # straight into the Profit and Loss report with nothing explaining the jump.
+  - screen: home
+    duration: 2.2
+    actions:
+      - { at: 1.2, do: tap, target: reports }
+
   - screen: profit-loss
     duration: 5.4
     actions:

@@ -75,37 +75,31 @@ for (const screen of screens) {
   }
 
   /* Mounted as a one-shot recipe of its own, so the screen is on camera at
-   * t=0 whatever the real recipe's running order is. */
-  await page.evaluate(r => window.mount(r), { ...recipe, shots: [{ screen, duration: 1, actions: [] }], brand: { cta: false } });
+   * t=0 whatever the real recipe's running order is - but carrying the actions
+   * the real recipe performs on it, because a target can be behind a state: the
+   * item picker's rows do not exist until something opens the picker, and
+   * measuring without the actions reported them as unreachable. */
+  const own = recipe.shots.filter(s => s.screen === screen).flatMap(s => s.actions ?? []);
+  const span = own.reduce((t, a) => Math.max(t, Number(a.at) || 0), 0) + 1.5;
+  await page.evaluate(r => window.mount(r), { ...recipe, shots: [{ screen, duration: span, actions: own }], brand: { cta: false } });
   await page.evaluate(() => window.stageReady);
-  await page.evaluate(() => window.setTime(0.5));
 
-  const ids = Object.keys(mod.targets ?? {});
   /* A desktop screen is drawn in the browser-window frame and in its own
    * logical space, so both the element read and the numbers divided by have
    * to follow the screen rather than being assumed. */
   const box = viewportFor(mod);
   const vpId = deviceOf(mod) === 'desktop' ? 'desktop-viewport' : 'viewport';
 
-  const measured = await page.evaluate(({ wanted, vpId, box }) => {
-    const vp = document.getElementById(vpId).getBoundingClientRect();
-    /* The phone is scaled about its centre, so the viewport's own rect is
-       already in page pixels - dividing by its width recovers the 390-wide
-       space the targets are written in. */
-    const kx = box.width / vp.width;
-    const ky = box.height / vp.height;
-    const out = {};
-    for (const id of wanted) {
-      const el = document.getElementById(id);
-      if (!el) { out[id] = null; continue; }
-      const r = el.getBoundingClientRect();
-      out[id] = {
-        x: Math.round((r.left + r.width / 2 - vp.left) * kx),
-        y: Math.round((r.top + r.height / 2 - vp.top) * ky)
-      };
-    }
-    return out;
-  }, { wanted: ids, vpId, box });
+  /* Walked through the shot rather than read at one instant, keeping the first
+   * place each id is seen: an element that appears on one tap and goes on the
+   * next is on camera for part of the shot and nowhere for the rest. */
+  const measured = {};
+  for (let t = 0.25; t <= span; t += 0.25) {
+    await page.evaluate(at => window.setTime(at), Number(t.toFixed(2)));
+    const found = await measureOnce(page, Object.keys(mod.targets ?? {}), vpId, box);
+    for (const [id, at] of Object.entries(found)) if (at && !measured[id]) measured[id] = at;
+  }
+  for (const id of Object.keys(mod.targets ?? {})) if (!(id in measured)) measured[id] = null;
 
   console.log(`\n/* ${screen} - MEASURED */\nexport const targets = {`);
   const lines = [];
@@ -124,3 +118,23 @@ for (const screen of screens) {
 
 await browser.close();
 await new Promise(resolve => server.close(resolve));
+
+/* One pass of the page: where each wanted id is, in the screen's own pixels. */
+async function measureOnce(page, wanted, vpId, box) {
+  return page.evaluate(({ wanted, vpId, box }) => {
+    const vp = document.getElementById(vpId).getBoundingClientRect();
+    const kx = box.width / vp.width;
+    const ky = box.height / vp.height;
+    const out = {};
+    for (const id of wanted) {
+      const el = document.getElementById(id);
+      if (!el) { out[id] = null; continue; }
+      const r = el.getBoundingClientRect();
+      out[id] = {
+        x: Math.round((r.left + r.width / 2 - vp.left) * kx),
+        y: Math.round((r.top + r.height / 2 - vp.top) * ky)
+      };
+    }
+    return out;
+  }, { wanted, vpId, box });
+}

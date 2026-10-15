@@ -954,56 +954,88 @@
 .dk-field-s { margin-top: 2px; font-size: 9px; color: var(--dsk-muted); }
 .dk-go { margin-top: 4px; padding: 10px; border-radius: 8px; background: var(--dsk-blue); text-align: center; font-size: 11px; font-weight: 700; }
 
-/* ---------- myBillBook on a laptop ----------
- * SAMPLED from reference/frames/dsk-mbb-4.png and dsk-mbb-28.png. Shares the
- * dark --dsk-* ground with myCashFlo's desktop; what differs is the primary,
- * which is myBillBook's purple rather than myCashFlo's blue. */
-.mbscreen { background: var(--dsk-page); color: var(--dsk-ink); display: flex; font-size: 11px; }
+/* ---------- myBillBook on a laptop, rebuilt ----------
+ * SAMPLED from reference/frames/dmbb-7.png. The rail is NESTED: the open
+ * section shows its children, and the chosen child is the filled row. */
+.mbscreen { background: var(--dsk-page); color: var(--dsk-ink); display: flex; font-size: 10px; }
 
-.mb-side { flex: none; width: 142px; padding: 11px 9px; box-sizing: border-box; background: var(--dsk-sidebar); display: flex; flex-direction: column; gap: 2px; }
-.mb-biz { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
-.mb-avatar { flex: none; width: 19px; height: 19px; border-radius: 999px; background: var(--mbb-primary); color: var(--mbb-surface); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
-.mb-biz-nm { font-size: 9.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mb-create { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 7px 4px; margin-bottom: 10px; border-radius: 7px; background: var(--dsk-panel); font-size: 8.5px; font-weight: 600; white-space: nowrap; }
-.mb-head { margin: 9px 0 4px; padding-left: 7px; font-size: 7.5px; letter-spacing: 0.07em; color: var(--dsk-muted); }
-.mb-nav { display: flex; align-items: center; gap: 8px; padding: 6px 7px; border-radius: 6px; color: var(--dsk-muted); font-size: 9.5px; white-space: nowrap; }
-.mb-nav.on { background: var(--dsk-active); color: var(--dsk-ink); font-weight: 600; }
-.mb-new { margin-left: auto; padding: 1px 5px; border-radius: 999px; background: var(--dsk-new); color: var(--mbb-surface); font-size: 6.5px; font-weight: 700; }
-.mb-side-foot { margin-top: auto; display: flex; align-items: center; gap: 8px; padding: 6px 7px; color: var(--dsk-muted); font-size: 9.5px; }
+.mb-side { flex: none; width: 126px; padding: 9px 7px 7px; box-sizing: border-box; background: var(--dsk-sidebar); display: flex; flex-direction: column; }
+.mb-biz { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.mb-avatar { flex: none; width: 17px; height: 17px; border-radius: 999px; background: var(--mbb-primary); color: var(--mbb-surface); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; }
+.mb-biz-nm { font-size: 8.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mb-create { display: flex; align-items: center; gap: 4px; padding: 6px 8px; margin-bottom: 7px; border-radius: 6px; background: var(--dsk-panel); font-size: 8px; font-weight: 600; white-space: nowrap; }
+.mb-create .mb-chev { margin-left: auto; }
 
-.mb-main { flex: 1; min-width: 0; padding: 13px 15px; display: flex; flex-direction: column; gap: 11px; }
-.mb-top { display: flex; align-items: center; gap: 10px; }
-.mb-title { font-size: 16px; font-weight: 700; }
-.mb-actions { margin-left: auto; display: flex; gap: 8px; }
-.mb-abtn { display: flex; align-items: center; gap: 5px; padding: 6px 11px; border-radius: 7px; font-size: 9.5px; font-weight: 600; }
+.mb-scroll { flex: 1; min-height: 0; overflow: hidden; }
+.mb-head { margin: 7px 0 3px; padding-left: 6px; font-size: 6.5px; letter-spacing: .07em; color: var(--dsk-muted); }
+.mb-nav { display: flex; align-items: center; gap: 7px; padding: 5px 6px; border-radius: 5px; color: var(--dsk-muted); font-size: 8.5px; white-space: nowrap; }
+.mb-nav.open { color: var(--dsk-ink); }
+.mb-nav .mb-chev { margin-left: auto; }
+/* A child of the open section, indented under it. */
+.mb-sub { display: flex; align-items: center; gap: 6px; margin-left: 8px; padding: 5px 6px; border-radius: 5px; color: var(--dsk-muted); font-size: 8px; white-space: nowrap; }
+.mb-sub.on { background: var(--dsk-active); color: var(--dsk-ink); font-weight: 600; }
+.mb-new { margin-left: auto; padding: 1px 4px; border-radius: 999px; background: var(--dsk-new); color: var(--mbb-surface); font-size: 5.5px; font-weight: 700; }
+.mb-more { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 8px; padding: 4px; border-radius: 999px; background: var(--dsk-panel); color: var(--dsk-muted); font-size: 6.5px; }
+
+.mb-side-foot { flex: none; margin-top: 7px; }
+.mb-settings { display: flex; align-items: center; gap: 7px; padding: 5px 6px; color: var(--dsk-muted); font-size: 8.5px; }
+.mb-trust { display: flex; align-items: center; gap: 5px; padding: 5px 6px 0; font-size: 6px; color: var(--dsk-muted); }
+.mb-trust-sep { width: 1px; height: 7px; background: var(--dsk-rule); }
+
+.mb-main { flex: 1; min-width: 0; padding: 11px 13px; display: flex; flex-direction: column; gap: 9px; }
+.mb-top { display: flex; align-items: center; gap: 9px; }
+.mb-title { font-size: 15px; font-weight: 700; }
+.mb-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.mb-abtn { display: flex; align-items: center; gap: 4px; padding: 5px 9px; border-radius: 6px; font-size: 8.5px; font-weight: 600; white-space: nowrap; }
 .mb-abtn.ghost { border: 1px solid var(--dsk-rule); color: var(--dsk-ink); }
 .mb-abtn.primary { background: var(--dsk-purple); color: var(--mbb-surface); }
+.mb-icobtn { width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--dsk-rule); display: inline-flex; align-items: center; justify-content: center; color: var(--dsk-muted); }
+.mb-icobtn.square { flex: none; }
 
-/* The three figures across the top: the reason to film a laptop at all. */
-.mb-stats { display: flex; gap: 10px; }
-.mb-stat { flex: 1; padding: 10px 12px; border-radius: 9px; background: var(--dsk-card); border: 1px solid var(--dsk-rule); }
-.mb-stat.collect { border-color: var(--dsk-in); }
-.mb-stat.pay { border-color: var(--dsk-out); }
+/* The referral strip. First thing under the title in the recording. */
+.mb-promo { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 8px; background: var(--dsk-promo); }
+.mb-promo-ico { flex: none; width: 20px; height: 20px; border-radius: 6px; background: var(--dsk-promo-ico); color: var(--mbb-surface); display: flex; align-items: center; justify-content: center; }
+.mb-promo-txt { flex: 1; min-width: 0; }
+.mb-promo-ttl { font-size: 9px; font-weight: 700; }
+.mb-promo-sub { margin-top: 2px; font-size: 7px; color: var(--dsk-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mb-promo-x { color: var(--dsk-muted); }
+
+.mb-stats { display: flex; gap: 8px; }
+.mb-stat { flex: 1; padding: 9px 11px; border-radius: 8px; background: var(--dsk-card); border: 1px solid var(--dsk-rule); }
+.mb-stat.collect { background: var(--dsk-page); border-color: var(--dsk-in-edge); }
+.mb-stat.pay { background: var(--dsk-page); border-color: var(--dsk-out-edge); }
 .mb-stat.low.on { border-color: var(--dsk-purple); }
-.mb-stat-k { display: flex; align-items: center; gap: 5px; font-size: 9px; color: var(--dsk-muted); }
+.mb-stat-k { display: flex; align-items: center; gap: 5px; font-size: 8px; color: var(--dsk-muted); }
 .mb-stat.collect .mb-stat-k { color: var(--dsk-in); }
 .mb-stat.pay .mb-stat-k { color: var(--dsk-out); }
-.mb-stat-v { margin-top: 5px; font-size: 15px; font-weight: 700; }
+.mb-stat-v { margin-top: 4px; font-size: 14px; font-weight: 700; }
 
-.mb-bar { display: flex; align-items: center; gap: 8px; }
-.mb-search { flex: 1; display: flex; align-items: center; gap: 7px; padding: 6px 11px; border-radius: 7px; background: var(--dsk-panel); color: var(--dsk-muted); font-size: 9.5px; }
+.mb-bar { display: flex; align-items: center; gap: 7px; }
+.mb-select { display: flex; align-items: center; gap: 5px; padding: 6px 9px; border-radius: 6px; border: 1px solid var(--dsk-rule); color: var(--dsk-muted); font-size: 8.5px; white-space: nowrap; }
+/* Bulk Action and Create Party sit together on the right in the real
+ * toolbar (reference/frames/dmbb-7.png); only the search and the category
+ * picker are on the left. */
+.mb-bar .mb-abtn.ghost { margin-left: auto; }
+.mb-search { flex: 1; display: flex; align-items: center; gap: 6px; padding: 6px 9px; border-radius: 6px; background: var(--dsk-panel); color: var(--dsk-muted); font-size: 8.5px; }
 
-.mb-head-row, .mb-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; }
-.mb-head-row { background: var(--dsk-panel); border-radius: 7px 7px 0 0; color: var(--dsk-ink); font-size: 8.5px; font-weight: 600; }
-.mb-row { border-bottom: 1px solid var(--dsk-rule); font-size: 10px; }
-.mb-c.nm { flex: 1.5; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.mb-c.cat { width: 84px; flex: none; color: var(--dsk-muted); }
-.mb-c.kind { width: 84px; flex: none; }
-.mb-c.bal { width: 86px; flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-weight: 700; }
+.mb-head-row, .mb-row { display: flex; align-items: center; gap: 8px; padding: 7px 9px; }
+.mb-head-row { background: var(--dsk-panel); border-radius: 6px 6px 0 0; color: var(--dsk-ink); font-size: 8px; font-weight: 600; white-space: nowrap; }
+.mb-row { border-bottom: 1px solid var(--dsk-rule); font-size: 9px; }
+.mb-c.nm { flex: 1.4; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mb-c.cat { width: 52px; flex: none; color: var(--dsk-muted); }
+.mb-c.mob { width: 66px; flex: none; color: var(--dsk-muted); }
+.mb-c.kind { width: 54px; flex: none; }
+.mb-c.bal { width: 70px; flex: none; display: flex; align-items: center; justify-content: flex-end; gap: 3px; font-weight: 700; }
 .mb-c.bal.in { color: var(--dsk-in); }
 .mb-c.bal.out { color: var(--dsk-out); }
 .mb-c.bal.low { color: var(--dsk-late); }
-.mb-empty { padding: 22px 10px; text-align: center; color: var(--dsk-muted); font-size: 10px; }
+.mb-c.menu { width: 14px; flex: none; color: var(--dsk-muted); display: flex; justify-content: flex-end; }
+.mb-sort { opacity: .5; }
+.mb-empty { padding: 20px 9px; text-align: center; color: var(--dsk-muted); font-size: 9px; }
+
+/* The green pill over the bottom-right corner. */
+.mb-pending { position: absolute; right: 12px; bottom: 12px; display: flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 999px; background: var(--dsk-pending); color: var(--mbb-surface); font-size: 8.5px; font-weight: 600; }
+.mb-pending-n { width: 13px; height: 13px; border-radius: 999px; background: var(--dsk-new); display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; }
 
 /* ---------- myBillBook desktop: Create Sales Invoice ----------
  * The panel down the left is Mira AI reading a bill into the form. SAMPLED
@@ -1063,21 +1095,57 @@
 .mb-status { padding: 3px 9px; border-radius: 999px; background: var(--dsk-unpaid-bg); color: var(--dsk-out); font-size: 8.5px; font-weight: 700; }
 .mb-status.paid { background: var(--dsk-paid-bg); color: var(--dsk-in); }
 
-.mb-theme-strip { padding: 7px 11px; border-radius: 7px; background: var(--dsk-panel); color: var(--dsk-muted); font-size: 9px; }
+/* The strip above the invoice: the pitch, a button, and a way to dismiss it
+   (reference/frames/dsk-mbb-52.png). It was text alone, which read as a label
+   rather than as the advertisement it is. */
+.mb-theme-strip { display: flex; align-items: center; gap: 10px; padding: 7px 11px; border-radius: 7px; border: 1px solid var(--dsk-rule); color: var(--dsk-muted); font-size: 9px; }
+.mb-theme-txt { flex: 1; min-width: 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mb-theme-strip b { color: var(--dsk-ink); }
+.mb-theme-cta { flex: none; padding: 4px 10px; border-radius: 6px; background: var(--dsk-explore); color: var(--mbb-surface); font-size: 8.5px; font-weight: 700; }
+.mb-theme-x { flex: none; color: var(--dsk-muted); }
 
-.mb-vbar { display: flex; gap: 7px; }
-.mb-vbtn { display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 7px; border: 1px solid var(--dsk-rule); font-size: 9px; font-weight: 600; }
-.mb-vbtn.primary { margin-left: auto; border-color: var(--dsk-purple); background: var(--dsk-purple); color: var(--mbb-surface); }
+.mb-vbar { display: flex; gap: 5px; }
+/* Six buttons across a 720-wide window, where the real app has them across
+   1900. They are the app's own labels, so what gives is the type size - a
+   button whose text wraps, or whose last one falls off the edge, is worse than
+   one set a point smaller. */
+.mb-vbtn { display: flex; align-items: center; gap: 4px; padding: 6px 7px; border-radius: 6px; border: 1px solid var(--dsk-rule); font-size: 7.5px; font-weight: 600; white-space: nowrap; }
+.mb-vbtn .mb-chev { margin-left: 2px; opacity: .7; }
+/* The two e-document buttons are quieter than Record Payment In and louder
+   than the file ones: an outline in the app's blue, no fill. */
+.mb-vbtn.link { margin-left: auto; border-color: var(--dsk-link-edge); color: var(--dsk-link); }
+.mb-vbtn.link + .mb-vbtn.link { margin-left: 0; }
+.mb-vbtn.primary { border-color: var(--dsk-purple); background: var(--dsk-purple); color: var(--mbb-surface); }
 
 .mb-view-body { flex: 1; min-height: 0; display: flex; gap: 10px; }
 /* The bill is the phone's own markup at its own width, shrunk to fit the pane:
    drawn to any other width it would reflow and stop matching the phone. */
-.mb-paper { flex: 1; min-width: 0; border-radius: 8px; background: var(--mbb-surface); overflow: hidden; }
-.mb-paper-fit { width: 390px; transform: scale(0.78); transform-origin: top left; }
+/* The laptop draws the bill on the app's own dark page with a themed hairline
+   round it (reference/frames/dsk-mbb-40.png, dsk-mbb-52.png) - it is not the
+   white sheet the phone shows. The MARKUP is still the phone's, down to the
+   last cell: what changes here is only what the bill's own colour names point
+   at, so the two can differ in skin and never in content. */
+.mb-paper {
+  flex: 1; min-width: 0; border-radius: 8px; overflow: hidden;
+  background: var(--dsk-bill-back);
+  --mbb-surface: var(--dsk-bill-page);
+  --mbb-ink: var(--dsk-ink);
+  --mbb-ink-muted: var(--dsk-muted);
+  --mbb-border: var(--dsk-bill-edge);
+  --mbb-bill-band: var(--dsk-bill-band);
+  --mbb-bill-rule: var(--dsk-bill-rule);
+  --mbb-primary-deep: var(--dsk-bill-shop);
+  --mbb-pill-grey: var(--dsk-bill-back);
+}
+.mb-paper-fit { width: 390px; margin: 0 auto; transform: scale(0.7); transform-origin: top center; }
 
-.mb-payhist { flex: none; width: 176px; padding: 11px; border-radius: 8px; background: var(--dsk-card); border: 1px solid var(--dsk-rule); }
-.mb-payhist-k { font-size: 10.5px; font-weight: 700; margin-bottom: 9px; }
+.mb-payhist { flex: none; width: 176px; padding: 11px; border-radius: 8px; background: var(--dsk-card); border: 1px solid var(--dsk-rule); display: flex; flex-direction: column; }
+.mb-payhist-top { flex: 1; min-height: 0; }
+/* What is still owed sits at the foot of the panel, away from what the bill
+   was worth - the arrangement the real panel has. */
+.mb-payhist-foot { flex: none; border-top: 1px solid var(--dsk-rule); padding-top: 7px; }
+.mb-payhist-k { display: flex; align-items: center; justify-content: space-between; font-size: 10.5px; font-weight: 700; margin-bottom: 9px; }
+.mb-payhist-x { color: var(--dsk-muted); }
 .mb-pay-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 9.5px; color: var(--dsk-muted); }
 .mb-pay-row span:last-child { color: var(--dsk-ink); font-weight: 600; }
 .mb-pay-rule { height: 1px; margin: 7px 0; background: var(--dsk-rule); }
@@ -1141,6 +1209,9 @@
 .sl-amt { font-size: 13px; font-weight: 700; color: var(--mbb-ink); }
 .sl-bot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
 .sl-when { font-size: 10.5px; color: var(--mbb-ink-muted); }
+/* The overdue note the real list prints beside an unpaid bill's date. */
+.sl-dot { margin: 0 5px; color: var(--mbb-ink-muted); }
+.sl-late { color: var(--mbb-unpaid); }
 .sl-pill { padding: 4px 11px; border-radius: 7px; font-size: 10px; font-weight: 600; }
 .sl-pill.paid { border: 1px solid var(--mbb-paid-border); color: var(--mbb-paid-ink); }
 .sl-pill.unpaid { background: var(--mbb-unpaid); color: var(--mbb-surface); }
@@ -1178,3 +1249,208 @@
 .floatbtns .fb.dark { background: var(--mbb-ink); color: var(--mbb-surface); }
 .floatbtns .fb.round.green { width: 44px; padding: 0; border-radius: 999px; justify-content: center; background: var(--mbb-green); color: var(--mbb-surface); }
 .slscreen .floatbtns { bottom: 76px; gap: 9px; }
+
+/* ---------- Create Sales Invoice on a laptop, rebuilt ----------
+ * reference/frames/dsk-mbb-22.png and dsk-mbb-28.png. The flow a laptop video
+ * needs: the form, then the "Add Items to Bill" window over it, then the bill.
+ * The earlier version was Mira AI's panel and a stub of a form, which is one
+ * feature of this screen mistaken for the screen. */
+.mbscreen.form { flex-direction: column; }
+
+.mb-form-bar { flex: none; display: flex; align-items: center; gap: 7px; padding: 7px 10px; border-bottom: 1px solid var(--dsk-rule); }
+.mb-exit { font-size: 9px; color: var(--dsk-muted); margin-right: 4px; }
+.mb-mode { margin-left: auto; display: flex; gap: 3px; padding: 2px; border-radius: 6px; background: var(--dsk-panel); font-size: 8px; color: var(--dsk-muted); }
+.mb-mode span { padding: 3px 8px; border-radius: 5px; }
+.mb-mode .on { background: var(--dsk-card); color: var(--dsk-ink); font-weight: 600; }
+.mb-icobtn.sm { width: 17px; height: 17px; border-radius: 5px; }
+
+.mb-form-body { flex: 1; min-height: 0; display: flex; }
+/* Mira's panel beside a form is a column, not the left half of the window. */
+/* Beside a form the panel is a narrow column, so its own type has to come
+   down with it or every line in it wraps. */
+.mb-ai-panel.beside { width: 150px; padding: 9px; gap: 6px; }
+.mb-ai-panel.beside .mb-ai-ttl { font-size: 9px; }
+.mb-ai-panel.beside .mb-ai-sub, .mb-ai-panel.beside .mb-ai-stats { font-size: 7px; }
+.mb-ai-panel.beside .mb-drop { padding: 12px 8px; font-size: 8px; }
+.mb-ai-panel.beside .mb-drop-s { font-size: 6.5px; }
+.mb-ai-panel.beside .mb-proceed { padding: 6px; font-size: 8.5px; }
+.mb-ai-panel.beside .mb-how-k { font-size: 8px; }
+.mb-ai-panel.beside .mb-how-i { font-size: 7px; }
+.mb-ai-panel.beside .mb-how { margin-top: auto; }
+
+.mb-form-main { flex: 1; min-width: 0; padding: 9px 11px; display: flex; flex-direction: column; gap: 7px; }
+.mb-party-row { display: flex; gap: 8px; }
+.mb-party { flex: 1; min-width: 0; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--dsk-rule); }
+.mb-party-nm { margin-top: 2px; font-size: 9.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mb-party-sub { margin-top: 1px; font-size: 7px; color: var(--dsk-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mb-party-nos { flex: none; width: 150px; display: flex; flex-direction: column; gap: 5px; }
+.mb-party-nos .mb-field { padding: 4px 8px; }
+
+.mb-items-k { font-size: 10px; font-weight: 700; }
+.mb-ic.disc, .mb-ic.tax { width: 48px; flex: none; text-align: right; color: var(--dsk-muted); }
+.mb-additem-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.mb-additem-row .mb-additem { flex: 1; margin-top: 0; padding: 9px; }
+.mb-barcode { display: flex; align-items: center; gap: 5px; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--dsk-rule); font-size: 8.5px; color: var(--dsk-muted); white-space: nowrap; }
+.mb-subtotal { display: flex; justify-content: space-between; margin-top: auto; padding-top: 7px; border-top: 1px solid var(--dsk-rule); font-size: 10px; font-weight: 700; }
+
+.mb-form-money { flex: none; width: 158px; padding: 9px 10px; border-left: 1px solid var(--dsk-rule); display: flex; flex-direction: column; gap: 4px; }
+.mb-tot-link { display: flex; align-items: center; gap: 4px; font-size: 8px; color: var(--dsk-link); }
+.mb-tot-row { display: flex; justify-content: space-between; font-size: 9px; color: var(--dsk-muted); }
+.mb-tot-row span:last-child { color: var(--dsk-ink); font-weight: 600; }
+.mb-tot-row.big { font-size: 11px; font-weight: 700; color: var(--dsk-ink); }
+.mb-tot-row.due span:last-child { color: var(--dsk-out); font-weight: 700; }
+.mb-tot-rule { height: 1px; margin: 4px 0; background: var(--dsk-rule); }
+
+.mb-keys { flex: none; display: flex; align-items: center; gap: 12px; padding: 5px 11px; border-top: 1px solid var(--dsk-rule); font-size: 7.5px; color: var(--dsk-muted); }
+.mb-keys-k { font-weight: 700; }
+.mb-keys b { display: inline-block; margin-left: 3px; padding: 1px 4px; border-radius: 3px; background: var(--dsk-panel); color: var(--dsk-ink); font-weight: 600; }
+
+/* The item picker. The laptop's answer to the phone's item list: the same
+   beats - search, add, add, done - laid out as a table because there is room
+   for one. */
+.mb-scrim { position: absolute; inset: 0; background: var(--dsk-scrim); }
+.mb-picker { position: absolute; left: 96px; right: 96px; top: 38px; bottom: 22px; display: flex; flex-direction: column; border-radius: 10px; background: var(--dsk-modal); border: 1px solid var(--dsk-rule); overflow: hidden; }
+.mb-picker-top { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-bottom: 1px solid var(--dsk-rule); }
+.mb-picker-k { font-size: 11px; font-weight: 700; }
+.mb-picker-bar { display: flex; align-items: center; gap: 7px; padding: 9px 12px; }
+.mb-picker-bar .mb-search { flex: 1; }
+.mb-pick-head, .mb-pick-row { display: flex; align-items: center; gap: 8px; padding: 6px 12px; }
+.mb-pick-head { background: var(--dsk-panel); font-size: 8px; font-weight: 600; }
+.mb-pick-row { border-bottom: 1px solid var(--dsk-rule); font-size: 9px; }
+.mb-pc.nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mb-pc.code { width: 46px; flex: none; color: var(--dsk-muted); }
+.mb-pc.stock { width: 50px; flex: none; text-align: right; }
+.mb-pc.sale, .mb-pc.buy { width: 54px; flex: none; text-align: right; }
+.mb-pc.qty { width: 78px; flex: none; display: flex; justify-content: flex-end; }
+.mb-add { padding: 4px 14px; border-radius: 6px; background: var(--dsk-active); color: var(--dsk-ink); font-size: 8.5px; font-weight: 600; }
+.mb-step { display: flex; align-items: center; gap: 5px; padding: 2px 5px; border-radius: 6px; border: 1px solid var(--dsk-rule); font-size: 8.5px; }
+.mb-step-b { color: var(--dsk-muted); }
+.mb-step-q { min-width: 10px; text-align: center; font-weight: 700; }
+.mb-step-u { color: var(--dsk-muted); }
+.mb-pick-rows { flex: 1; min-height: 0; overflow: hidden; }
+.mb-pick-foot { display: flex; align-items: center; padding: 7px 12px; background: var(--dsk-panel); font-size: 9px; }
+.mb-pick-n { flex: 1; color: var(--dsk-link); }
+.mb-pick-sum { width: 90px; text-align: right; font-weight: 700; }
+.mb-pick-q { width: 78px; text-align: right; font-weight: 700; }
+.mb-pick-acts { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-top: 1px solid var(--dsk-rule); font-size: 7.5px; color: var(--dsk-muted); }
+.mb-pick-acts .mb-abtn.ghost { margin-left: auto; }
+.mb-pick-acts b { display: inline-block; margin-left: 3px; padding: 1px 4px; border-radius: 3px; background: var(--dsk-card); color: var(--dsk-ink); font-weight: 600; }
+
+/* The form's item table lives between Mira's panel and the money column, so it
+ * has about 390 of the window's 720 pixels. At the widths the full-width
+ * purchase table uses, the fixed columns added up to more than that and the
+ * ITEMS column - the one that says what is being sold - collapsed to nothing. */
+.mbscreen.form .mb-ihead, .mbscreen.form .mb-irow { gap: 6px; padding: 6px 7px; }
+.mbscreen.form .mb-ic.no { width: 14px; }
+.mbscreen.form .mb-ic.qty { width: 42px; }
+.mbscreen.form .mb-ic.rate { width: 54px; }
+.mbscreen.form .mb-ic.disc { width: 38px; }
+.mbscreen.form .mb-ic.tax { width: 28px; }
+.mbscreen.form .mb-ic.amt { width: 58px; }
+.mbscreen.form .mb-ihead { font-size: 7px; }
+.mbscreen.form .mb-irow { font-size: 9px; }
+
+/* ---------- The dashboard on a laptop ----------
+ * reference/frames/dmbb-115.png. The phone's home screen with room to breathe:
+ * the figures, the day's transactions and what collections is chasing, all on
+ * one screen instead of stacked. */
+.mb-main.dash { gap: 7px; }
+.dash-promos { display: flex; gap: 8px; }
+.dash-promo { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: var(--dsk-card); border: 1px solid var(--dsk-rule); }
+.dash-promo-txt { flex: 1; min-width: 0; }
+.dash-promo-k { font-size: 9px; font-weight: 700; }
+.dash-promo-s { margin-top: 2px; font-size: 7px; color: var(--dsk-muted); }
+.dash-promo-a { margin-top: 4px; font-size: 7.5px; font-weight: 700; color: var(--dsk-mira); }
+.dash-promo-ico { flex: none; color: var(--dsk-muted); }
+
+.dash-overview { display: flex; align-items: center; }
+.dash-overview-k { font-size: 10px; font-weight: 700; }
+.dash-stamp { margin-left: auto; padding: 3px 7px; border-radius: 5px; background: var(--dsk-panel); font-size: 7px; color: var(--dsk-muted); }
+
+.dash-figs { display: flex; gap: 8px; }
+.dash-fig { flex: 1; padding: 8px 10px; border-radius: 8px; background: var(--dsk-card); border: 1px solid var(--dsk-rule); }
+.dash-fig.in { border-color: var(--dsk-in-edge); }
+.dash-fig.out { border-color: var(--dsk-out-edge); }
+.dash-fig-k { display: flex; align-items: center; gap: 5px; font-size: 8px; color: var(--dsk-muted); }
+.dash-fig.in .dash-fig-k { color: var(--dsk-in); }
+.dash-fig.out .dash-fig-k { color: var(--dsk-out); }
+.dash-fig-v { margin-top: 3px; font-size: 13px; font-weight: 700; }
+
+.dash-body { flex: 1; min-height: 0; display: flex; gap: 8px; }
+.dash-txns { flex: 1; min-width: 0; padding: 8px 10px; border-radius: 8px; background: var(--dsk-card); border: 1px solid var(--dsk-rule); }
+.dash-panel-k { font-size: 9.5px; font-weight: 700; margin-bottom: 6px; }
+.dash-head, .dash-row { display: flex; gap: 7px; padding: 5px 4px; font-size: 8px; }
+.dash-head { background: var(--dsk-panel); border-radius: 5px; color: var(--dsk-muted); font-weight: 600; }
+.dash-row { border-bottom: 1px solid var(--dsk-rule); font-size: 8.5px; }
+.dash-c.date { width: 48px; flex: none; }
+.dash-c.type { width: 56px; flex: none; color: var(--dsk-muted); }
+.dash-c.no { width: 34px; flex: none; }
+.dash-c.party { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dash-c.amt { width: 54px; flex: none; text-align: right; font-weight: 600; }
+.dash-all { margin-top: 6px; text-align: center; font-size: 8px; color: var(--dsk-link); }
+
+.dash-mcf { flex: none; width: 196px; padding: 8px 10px; border-radius: 8px; background: var(--dsk-card); border: 1px solid var(--dsk-credit); display: flex; flex-direction: column; gap: 6px; }
+.dash-mcf-k { display: flex; align-items: center; gap: 5px; font-size: 9px; font-weight: 700; color: var(--dsk-credit); }
+.dash-mcf-k .mb-new { margin-left: auto; }
+.dash-risk { display: flex; gap: 8px; padding: 7px 8px; border-radius: 7px; background: var(--dsk-panel); }
+.dash-risk > div { flex: 1; }
+.dash-risk-k { font-size: 6.5px; color: var(--dsk-muted); letter-spacing: .05em; }
+.dash-risk-v { margin-top: 2px; font-size: 12px; font-weight: 700; }
+.dash-updates-k { font-size: 8px; font-weight: 700; }
+.dash-updates-k em { font-style: normal; font-weight: 400; color: var(--dsk-muted); }
+.dash-chase { position: relative; padding: 6px 7px; border-radius: 6px; background: var(--dsk-panel); }
+.dash-chase-nm { font-size: 8.5px; font-weight: 700; }
+.dash-chase-od { margin-left: 5px; padding: 1px 4px; border-radius: 3px; background: var(--dsk-unpaid-bg); color: var(--dsk-out); font-size: 6px; font-weight: 700; }
+.dash-chase-sub { margin-top: 2px; font-size: 7px; color: var(--dsk-muted); }
+.dash-chase-amt { position: absolute; right: 7px; top: 6px; font-size: 9px; font-weight: 700; }
+.dash-mcf-cta { margin-top: auto; padding: 7px; border-radius: 999px; background: var(--dsk-credit); color: var(--dsk-page); text-align: center; font-size: 8.5px; font-weight: 700; }
+
+/* The Sales Invoices table's own columns (reference/frames/dsk-mbb-14.png). */
+.mb-c.date { width: 58px; flex: none; }
+.mb-c.no { width: 58px; flex: none; }
+.mb-c.due { width: 32px; flex: none; color: var(--dsk-muted); }
+.mb-c.status { width: 48px; flex: none; }
+.mb-pill { padding: 2px 6px; border-radius: 4px; font-size: 7px; font-weight: 700; }
+.mb-pill.paid { background: var(--dsk-paid-bg); color: var(--dsk-in); }
+.mb-pill.unpaid { background: var(--dsk-unpaid-bg); color: var(--dsk-out); }
+
+/* Profit and Loss on a laptop: the report down the left, the one figure the
+ * video is about down the right. */
+.rep-body { flex: 1; min-height: 0; display: flex; gap: 10px; }
+.rep-table { flex: 1; min-width: 0; padding: 9px 11px; border-radius: 8px; background: var(--dsk-card); border: 1px solid var(--dsk-rule); }
+.rep-head { margin: 7px 0 4px; font-size: 8px; font-weight: 700; color: var(--dsk-muted); letter-spacing: .06em; text-transform: uppercase; }
+.rep-head:first-child { margin-top: 0; }
+.rep-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 9.5px; }
+.rep-row span:last-child { font-weight: 600; }
+.rep-row.strong { font-size: 11px; font-weight: 700; }
+.rep-rule { height: 1px; margin: 6px 0; background: var(--dsk-rule); }
+.rep-hero { flex: none; width: 196px; padding: 14px 12px; border-radius: 8px; background: var(--dsk-card); border: 1px solid var(--dsk-in-edge); display: flex; flex-direction: column; justify-content: center; }
+.rep-hero-k { font-size: 9px; color: var(--dsk-muted); }
+.rep-hero-v { margin-top: 5px; font-size: 24px; font-weight: 700; color: var(--dsk-in); }
+.rep-hero-s { margin-top: 5px; font-size: 7.5px; color: var(--dsk-muted); }
+
+/* Create Item on a laptop: a window over the Items page. */
+.ci-win { position: absolute; left: 150px; right: 150px; top: 44px; bottom: 36px; display: flex; flex-direction: column; border-radius: 10px; background: var(--dsk-modal); border: 1px solid var(--dsk-rule); overflow: hidden; }
+.ci-tabs { display: flex; gap: 14px; padding: 0 12px; border-bottom: 1px solid var(--dsk-rule); font-size: 8.5px; color: var(--dsk-muted); }
+.ci-tabs span { padding: 7px 0; }
+.ci-tabs .on { color: var(--dsk-ink); font-weight: 700; box-shadow: inset 0 -2px 0 var(--dsk-purple); }
+.ci-body { flex: 1; min-height: 0; padding: 10px 12px; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; }
+.ci-field { width: calc(50% - 4px); padding: 5px 8px; border-radius: 6px; border: 1px solid var(--dsk-rule); box-sizing: border-box; }
+.ci-field.wide { width: 100%; }
+.ci-switch { width: 100%; display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 6px; background: var(--dsk-panel); }
+.ci-switch > div { flex: 1; }
+.ci-switch-k { font-size: 9px; font-weight: 700; }
+.ci-switch-s { margin-top: 2px; font-size: 7px; color: var(--dsk-muted); }
+.ci-toggle { flex: none; width: 24px; height: 13px; border-radius: 999px; background: var(--dsk-dash); position: relative; }
+.ci-toggle.on { background: var(--dsk-credit); }
+.ci-knob { position: absolute; top: 2px; left: 2px; width: 9px; height: 9px; border-radius: 999px; background: var(--mbb-surface); }
+.ci-toggle.on .ci-knob { left: 13px; }
+.ci-batch { width: 100%; display: flex; gap: 8px; }
+.ci-batch .ci-field { width: calc(33.33% - 6px); }
+.ci-foot { flex: none; display: flex; justify-content: flex-end; gap: 7px; padding: 8px 12px; border-top: 1px solid var(--dsk-rule); }
+
+/* The Share menu on a laptop invoice: the phone's share sheet as a menu. */
+.mb-sharemenu { position: absolute; left: 300px; top: 104px; width: 132px; padding: 8px; border-radius: 8px; background: var(--dsk-modal); border: 1px solid var(--dsk-rule); }
+.mb-share-k { font-size: 8px; color: var(--dsk-muted); margin-bottom: 5px; }
+.mb-share-i { display: flex; align-items: center; gap: 7px; padding: 6px 7px; border-radius: 6px; font-size: 9px; font-weight: 600; }
+.mb-share-i:first-of-type { background: var(--dsk-panel); }

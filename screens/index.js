@@ -24,6 +24,10 @@ import * as tallyReceivables from './tally-receivables.js';
 import * as mcfNewAutomation from './mcf-new-automation.js';
 import * as mcfAiRinging from './mcf-ai-ringing.js';
 import * as mcfDesktop from './mcf-desktop.js';
+import * as mbbDesktopDashboard from './mbb-desktop-dashboard.js';
+import * as mbbDesktopSalesList from './mbb-desktop-sales-list.js';
+import * as mbbDesktopReports from './mbb-desktop-reports.js';
+import * as mbbDesktopCreateItem from './mbb-desktop-create-item.js';
 import * as mbbDesktopParties from './mbb-desktop-parties.js';
 import * as mbbDesktopItems from './mbb-desktop-items.js';
 import * as mbbDesktopCreateInvoice from './mbb-desktop-create-invoice.js';
@@ -59,6 +63,10 @@ export const SCREENS = {
   [mcfNewAutomation.name]: mcfNewAutomation,
   [mcfAiRinging.name]: mcfAiRinging,
   [mcfDesktop.name]: mcfDesktop,
+  [mbbDesktopDashboard.name]: mbbDesktopDashboard,
+  [mbbDesktopSalesList.name]: mbbDesktopSalesList,
+  [mbbDesktopReports.name]: mbbDesktopReports,
+  [mbbDesktopCreateItem.name]: mbbDesktopCreateItem,
   [mbbDesktopParties.name]: mbbDesktopParties,
   [mbbDesktopItems.name]: mbbDesktopItems,
   [mbbDesktopCreateInvoice.name]: mbbDesktopCreateInvoice,

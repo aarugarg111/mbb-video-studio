@@ -10,6 +10,10 @@ const base: Recipe = {
   party: { name: 'Ravi', phone: '' },
   invoice: { number: 1, date: '2026-01-01', theme: 'none' },
   items: [],
+  /* Nothing the script settled: every tile is worked out from the rest of the
+     recipe, and the studio's own stand-in parties stay in the book. */
+  dashboard: { toCollect: null, toPay: null, weekSale: null },
+  cashflo: { parties: [] },
   brand: { endCard: null },
   unsupported: ['sharing the invoice on WhatsApp', 'batch-wise stock records'],
   shots: []

@@ -38,16 +38,22 @@ const NAV = [
 ];
 
 /* A day of trading. Fixed rather than read off a clock, so two renders of one
- * recipe are the same file. Quantities vary the way a real day does. */
+ * recipe are the same file. Quantities vary the way a real day does.
+ *
+ * The real list prints a DATE under each bill, not a clock time
+ * (reference/frames/rep-8.png, rep-11.png), and an unpaid bill carries
+ * "N day(s) overdue" beside that date. An earlier version printed times, which
+ * no myBillBook screen does.
+ */
 const DAY = [
-  { qty: 5, paid: true, when: '7:35 PM' },
-  { qty: 3, paid: true, when: '6:20 PM' },
-  { qty: 6, paid: false, when: '5:45 PM' },
-  { qty: 2, paid: true, when: '4:10 PM' },
-  { qty: 4, paid: true, when: '2:30 PM' },
-  { qty: 1, paid: true, when: '1:05 PM' },
-  { qty: 3, paid: true, when: '12:15 PM' },
-  { qty: 2, paid: true, when: '11:40 AM' }
+  { qty: 5, paid: true, when: '13 Oct' },
+  { qty: 3, paid: true, when: '13 Oct' },
+  { qty: 6, paid: false, when: '12 Oct', overdue: 1 },
+  { qty: 2, paid: true, when: '12 Oct' },
+  { qty: 4, paid: true, when: '11 Oct' },
+  { qty: 1, paid: true, when: '11 Oct' },
+  { qty: 3, paid: true, when: '10 Oct' },
+  { qty: 2, paid: true, when: '10 Oct' }
 ];
 
 /* What the shop sells, and therefore what every bill on this list is for. */
@@ -90,7 +96,7 @@ export function render(data, state) {
         <div class="sl-amt">${formatINR(b.amount)}</div>
       </div>
       <div class="sl-bot">
-        <div class="sl-when">${esc(b.when)}</div>
+        <div class="sl-when">${esc(b.when)}${b.overdue ? `<span class="sl-dot">&#183;</span><span class="sl-late">${b.overdue} day(s) overdue</span>` : ''}</div>
         <span class="sl-pill ${b.paid ? 'paid' : 'unpaid'}">${b.paid ? 'Paid' : 'Unpaid'}</span>
       </div>
       ${b.paid ? '' : `

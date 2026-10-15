@@ -2,46 +2,72 @@ import { esc } from '../src/esc.js';
 import { icons } from '../src/icons.js';
 import { formatINR } from '../src/money.js';
 import { ledger } from './mcf-data.js';
-import { sidebar, topActions } from './mbb-desktop-chrome.js';
+import { sidebar, topActions, referralStrip, pendingActions } from './mbb-desktop-chrome.js';
 
 export const name = 'mbb-desktop-parties';
 
-/* myBillBook's Parties on a laptop (reference/frames/dsk-mbb-4.png): everyone
- * you deal with in one table, with what they owe and what you owe them.
+/* myBillBook's Parties on a laptop (reference/frames/dmbb-7.png).
  *
- * The phone's Parties screen shows a card per party and fits five. This shows
- * the counts across the top and a table under them, which is the reason to
- * film a laptop at all.
+ * Rebuilt. The first version was drawn from one frame and read it loosely: it
+ * missed the referral strip under the title, the Mobile Number column, the
+ * per-row menu, the sort arrows on the two sortable columns, and the Pending
+ * Actions pill. The toolbar was wrong too - the real one is a small search
+ * button and a category dropdown, not a wide search field.
  *
- * The book comes from the same ledger myCashFlo reads, so a script that moves
- * between the two products does not change its own figures halfway.
+ * No real number appears in the Mobile column. Most rows in the recording show
+ * a dash, and the ones that do carry a number carry a real one.
  */
 export const device = 'desktop';
+
+/* Where the camera rests. A 16:9 window inside a 9:16 video has to be pushed
+ * in on to fill the picture, and what goes out of frame when it is should be
+ * chrome rather than content - so the camera sits right of the rail. */
+export const focus = { x: 423, y: 203 };
 export const url = 'mybillbook.in/app/home/parties';
 
 /* Coordinates are in the desktop's 720x540 space and are MEASURED. */
 export const targets = {
-  'create-party': { x: 665, y: 133 },
-  'to-collect': { x: 431, y: 80 },
-  'party-row-0': { x: 431, y: 210 },
-  'reports': { x: 667, y: 26 }
+  /* The rail's own button, where a laptop bill starts. */
+  'create-sales-invoice': { x: 63, y: 46 },
+  'create-party': { x: 672, y: 166 },
+  'to-collect': { x: 423, y: 118 },
+  'party-row-0': { x: 423, y: 234 },
+  'reports': { x: 607, y: 23 }
 };
+
+/* What fits above the floating Pending Actions pill in a 16:9 window. The
+ * real table runs off the bottom of the page, so stopping short of the edge is
+ * what it looks like; running under the pill is not. */
+const ROWS = 6;
 
 export function render(data, state) {
   const book = ledger(data);
   const business = data?.business?.name;
   /* A customer owes you; a supplier is owed. Alternating down the list is what
    * the real table looks like and keeps both columns meaningful. */
-  const rows = book.parties.slice(0, 7).map((p, i) => ({
+  /* The real table runs off the bottom of the window. Six rows left the pane
+   * half empty. These stand-ins are invented - no name from the recording. */
+  const FILL = [
+    { name: 'Nagpal Provision Store', balance: 13298 },
+    { name: 'Shanti Agencies', balance: 6652 },
+    { name: 'Deepak Kirana', balance: 3652 },
+    { name: 'M/S Barsainya & Sons', balance: 0 }
+  ];
+  /* The whole book, then as much of it as the window shows. The figures across
+   * the top and the count beside "All Parties" are the book's, not the
+   * window's: the real screen says 38 parties while showing eleven of them,
+   * and a count that changed with the size of the window would be wrong. */
+  const all = [...book.parties, ...FILL].map((p, i) => ({
     ...p,
     kind: i % 3 === 1 ? 'Supplier' : 'Customer'
   }));
+  const rows = all.slice(0, ROWS);
 
-  const toCollect = rows.filter(p => p.kind === 'Customer').reduce((t, p) => t + p.balance, 0);
-  const toPay = rows.filter(p => p.kind === 'Supplier').reduce((t, p) => t + p.balance, 0);
+  const toCollect = all.filter(p => p.kind === 'Customer').reduce((t, p) => t + p.balance, 0);
+  const toPay = all.filter(p => p.kind === 'Supplier').reduce((t, p) => t + p.balance, 0);
 
-  const card = (label, value, icon, kind) => `
-    <div class="mb-stat ${kind}" ${kind === 'collect' ? 'id="to-collect"' : ''}>
+  const card = (label, value, icon, kind, id) => `
+    <div class="mb-stat ${kind}" ${id ? `id="${id}"` : ''}>
       <div class="mb-stat-k"><span class="ico">${icons[icon](11)}</span>${esc(label)}</div>
       <div class="mb-stat-v">${esc(value)}</div>
     </div>`;
@@ -49,45 +75,56 @@ export function render(data, state) {
   const row = (p, i) => `
     <div class="mb-row" ${i === 0 ? 'id="party-row-0"' : ''}>
       <div class="mb-c nm">${esc(p.name)}</div>
-      <div class="mb-c cat">&#8212;</div>
+      <div class="mb-c cat">-</div>
+      <div class="mb-c mob">-</div>
       <div class="mb-c kind">${esc(p.kind)}</div>
       <div class="mb-c bal ${p.kind === 'Customer' ? 'in' : 'out'}">
         <span class="ico">${p.kind === 'Customer' ? icons.arrowDown(10) : icons.arrowUp(10)}</span>${formatINR(p.balance)}
       </div>
+      <div class="mb-c menu"><span class="ico">${icons.more(11)}</span></div>
     </div>`;
+
+  const sortable = label => `${esc(label)} <span class="ico mb-sort">${icons.sliders(8)}</span>`;
 
   return `
 <div class="screen mbscreen">
-  ${sidebar(business, 'Parties')}
+  ${sidebar(business, 'Parties', 'All Parties')}
 
   <div class="mb-main">
     <div class="mb-top">
       <div class="mb-title">Parties</div>
       ${topActions([
         { label: 'SharedLedger Portal', icon: 'linkChain', kind: 'ghost' },
-        { label: 'Reports', icon: 'ledger', kind: 'ghost', id: 'reports' }
+        { label: 'Reports', icon: 'ledger', kind: 'ghost', id: 'reports', menu: true }
       ])}
     </div>
 
+    ${referralStrip()}
+
     <div class="mb-stats">
-      ${card('All Parties', String(rows.length), 'group', 'all')}
-      ${card('To Collect', formatINR(toCollect), 'rupeeCircle', 'collect')}
+      ${card('All Parties', String(all.length), 'group', 'all')}
+      ${card('To Collect', formatINR(toCollect), 'rupeeCircle', 'collect', 'to-collect')}
       ${card('To Pay', formatINR(toPay), 'rupeeCircle', 'pay')}
     </div>
 
     <div class="mb-bar">
-      <div class="mb-search"><span class="ico">${icons.search(11)}</span>Search Categories</div>
-      <div class="mb-abtn ghost"><span class="ico">${icons.sliders(11)}</span>Bulk Action</div>
+      <span class="mb-icobtn square">${icons.search(11)}</span>
+      <div class="mb-select">Search Categories <span class="ico mb-chev">${icons.chevDown(9)}</span></div>
+      <div class="mb-abtn ghost"><span class="ico">${icons.sliders(10)}</span>Bulk Action <span class="ico mb-chev">${icons.chevDown(9)}</span></div>
       <div class="mb-abtn primary" id="create-party">Create Party</div>
     </div>
 
     <div class="mb-head-row">
-      <div class="mb-c nm">Party Name</div>
+      <div class="mb-c nm">${sortable('Party Name')}</div>
       <div class="mb-c cat">Category</div>
+      <div class="mb-c mob">Mobile Number</div>
       <div class="mb-c kind">Party type</div>
-      <div class="mb-c bal">Balance</div>
+      <div class="mb-c bal">${sortable('Balance')}</div>
+      <div class="mb-c menu"></div>
     </div>
     <div class="mb-rows">${rows.map(row).join('')}</div>
   </div>
+
+  ${pendingActions()}
 </div>`;
 }

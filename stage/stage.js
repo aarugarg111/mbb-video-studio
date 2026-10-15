@@ -1,6 +1,7 @@
 import { SCREENS } from '../screens/index.js';
 import { stateAt, totalDuration } from '../src/timeline.js';
-import { deviceOf, urlFor, viewportFor } from '../src/device.js';
+import { deviceOf, urlFor } from '../src/device.js';
+import { innerTransform, windowTransform } from '../src/camera.js';
 
 const viewport = document.getElementById('viewport');
 const phoneFrame = document.getElementById('phone');
@@ -32,7 +33,9 @@ window.setTime = function setTime(t) {
        the keys they hand over by hand, so a key added to a recipe reaches a
        screen only once it is listed HERE TOO - in both files, which must stay
        in step or the browser and CLI renders stop matching. */
-    cashflo: recipe.cashflo
+    cashflo: recipe.cashflo,
+    /* The dashboard tiles a recipe states outright. */
+    dashboard: recipe.dashboard
   };
 
   const layers = [];
@@ -75,22 +78,15 @@ window.setTime = function setTime(t) {
   if (onDesktop) desktopUrl.textContent = urlFor(screen);
 
   const stack = onDesktop ? desktopViewport : viewport;
-  /* The camera push, if the shot asks for one. It goes on a layer INSIDE the
-     viewport: putting it on the viewport scales its own clipping box, and the
-     picture grows out past the phone. */
-const z = frame.zoom;
-  let camera = '<div class="camera">';
-  if (z) {
-    const box = viewportFor(screen);
-    /* Clamped to the screen's edges, the way a map pan is: without this a
-       zoom near an edge slides blank space into frame. */
-    const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-    const dx = clamp(box.width / 2 - z.x * z.scale, box.width * (1 - z.scale), 0).toFixed(2);
-    const dy = clamp(box.height / 2 - z.y * z.scale, box.height * (1 - z.scale), 0).toFixed(2);
-    camera =
-      '<div class="camera" style="transform-origin: 0 0; transform: translate(' +
-      dx + 'px, ' + dy + 'px) scale(' + z.scale.toFixed(4) + ')">';
-  }
+  /* Where the camera is. On a phone it moves the layers inside the viewport;
+     on a laptop it moves the window itself. Both are worked out in
+     src/camera.js, which the browser renderer calls too. */
+  const inner = innerTransform(screen, frame.zoom);
+  const outer = windowTransform(screen, frame.zoom, frame.taps);
+  const camera = inner
+    ? '<div class="camera" style="transform-origin: 0 0; transform: ' + inner + '">'
+    : '<div class="camera">';
+  desktopFrame.style.transform = outer || '';
   stack.innerHTML = camera + layers.join('') + '</div>';
 
 

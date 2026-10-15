@@ -185,4 +185,40 @@ test('both renderers hand screens the same data', async () => {
 
   assert.deepEqual(await keysIn('stage/stage.js'), await keysIn('web/lib/render.ts'));
   assert.ok((await keysIn('stage/stage.js')).includes('cashflo'));
+  assert.ok((await keysIn('stage/stage.js')).includes('dashboard'));
+});
+
+test('a figure the recipe states reaches the dashboard through the validator', async () => {
+  /* Same failure as the book above, on the myBillBook side: the tiles were the
+     reference recording's figures, written into the screen, so a script that
+     asked for its own numbers got the recording's on every video. */
+  const { parse } = await import('../src/recipe.js');
+  const yamlText = [
+    'video: tile-test',
+    'dashboard: { toCollect: 400000, weekSale: null }',
+    'shots:',
+    '  - { screen: home, duration: 2 }'
+  ].join('\n');
+
+  const { recipe, errors } = parse(yamlText, catalogue(), {});
+  assert.equal(errors, undefined);
+  assert.equal(recipe.dashboard.toCollect, 400000);
+  assert.ok(!('weekSale' in recipe.dashboard), 'null means work it out, not render nothing');
+
+  const html = SCREENS.home.render(recipe, {});
+  assert.ok(html.includes('4,00,000'), 'and the figure reaches the tile');
+});
+
+test('a tile that does not exist is refused rather than silently ignored', async () => {
+  const { parse } = await import('../src/recipe.js');
+  const bad = [
+    'video: bad-tile',
+    'dashboard: { toColect: 400000 }',
+    'shots:',
+    '  - { screen: home, duration: 2 }'
+  ].join('\n');
+
+  const { errors } = parse(bad, catalogue(), {});
+  assert.ok(errors, 'a misspelt tile is an error');
+  assert.ok(errors.some(e => e.includes('dashboard.toColect')), errors.join('; '));
 });

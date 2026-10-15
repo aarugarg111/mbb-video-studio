@@ -5,6 +5,12 @@ import type { Recipe } from './schema';
 import { TEAM_MODE, proxyBaseUrl } from './team';
 import { RecipeSchema, SCREENS, ACTIONS, THEMES } from './schema';
 import { explain } from './errors';
+/* Shared with the command line, so the two cannot disagree about which laptop
+   screen stands in for which phone screen. */
+import { recastShape } from '../../src/shape.js';
+import { catalogue } from '../../screens/index.js';
+
+const CATALOGUE = catalogue() as Record<string, string[]>;
 
 /* The prompt is carried over verbatim from the server route. It has been
  * corrected several times against real scripts; rewriting it loses that. */
@@ -64,6 +70,7 @@ Rules you must follow:
 - Most clips land between 8 and 20 seconds. If the script has far more beats than that, cover the ones that matter rather than rushing all of them.
 - Item prices are TAX-INCLUSIVE and gst is the slab percentage, usually 5, 12 or 18.
 - "video" must be a short name of letters, digits, hyphens and underscores only.
+- WHEN THE SCRIPT SAYS A FIGURE OUT LOUD, PUT IT IN THE RECIPE. "Mera 4 lakh collect karna hai" is dashboard.toCollect: 400000. "Market mein 52 lakh atka hai" is a cashflo.parties list that adds up to 5200000. A figure the voiceover says and the screen does not show makes the video contradict itself. Write null for any dashboard tile the script leaves alone, and an empty cashflo.parties list when it names nobody - the studio works those out from the rest of the recipe.
 - Details supplied alongside the script are OVERRIDES. Where one is given it wins over what the script says; where it is blank, take the value from the script.
 - If the script describes something the renderer has no screen for, cover what you can with the screens above and keep the video short rather than inventing a screen.
 - Put in "unsupported" every feature the script asks for that none of the available screens can show. Name the feature as the script describes it, briefly: "batch-wise stock records", "GST reports". Use an empty array when the screens cover the whole script.
@@ -72,9 +79,20 @@ Rules you must follow:
 /* Split the model's output into the recipe YAML and the unsupported list.
  * src/recipe.js knows nothing about "unsupported", so it must never reach the
  * YAML. */
-export function splitRecipe(parsed: Recipe): { recipe: string; unsupported: string[] } {
+export function splitRecipe(
+  parsed: Recipe,
+  shape?: string
+): { recipe: string; unsupported: string[] } {
   const { unsupported, ...rest } = parsed;
-  return { recipe: yaml.dump(rest), unsupported: unsupported ?? [] };
+  /* The shape the studio was asked for is applied here rather than left to the
+   * prompt. Asking the model is a request; a shot list came back on phone
+   * screens whatever the picker said, because the script's own UI markers name
+   * phone screens. Swapping them afterwards is the part that cannot be
+   * ignored. A tap with no equivalent on the other shape is reported, not
+   * quietly dropped. */
+  const { recipe, dropped } = recastShape(rest, shape, CATALOGUE);
+  const notes = dropped.map(d => `${d} - no equivalent on a ${shape}, so that tap is left out`);
+  return { recipe: yaml.dump(recipe), unsupported: [...(unsupported ?? []), ...notes] };
 }
 
 export async function proposeRecipe(
@@ -121,5 +139,5 @@ export async function proposeRecipe(
     throw new Error('The model did not return a usable shot list. Try again.');
   }
 
-  return splitRecipe(response.parsed_output);
+  return splitRecipe(response.parsed_output, (details as { shape?: string })?.shape);
 }

@@ -1,4 +1,10 @@
-# myBillBook on a laptop: the whole book and the whole catalogue on one screen.
+# Making a bill on a laptop. The SAME flow as the phone - open the form, add
+# items, save, take the payment - drawn in the laptop's interface.
+#
+# The earlier version of this recipe was a tour: Parties, then Items, then Mira
+# AI reading a document. It never made a bill, which is the one thing a billing
+# video has to show.
+#
 # Every name and figure is invented.
 video: desktop-billing
 
@@ -7,6 +13,7 @@ business:
 
 party:
   name: ASHOK TRADING CO
+  address: Sadar Bazaar, Agra
   balance: 21846
 
 invoice:
@@ -18,18 +25,33 @@ items:
   - { name: TATA SALT 1KG, rate: 28, qty: 6, gst: 5, unit: PKT, purchase: 24, stock: 8 }
 
 shots:
-  - screen: mbb-desktop-parties
-    duration: 3.4
+  # It starts where the phone's own billing clip starts - on the dashboard -
+  # and goes through the day's bills to the button that makes the next one.
+  - screen: mbb-desktop-dashboard
+    duration: 2.6
     actions:
-      - { at: 1.6, do: tap, target: party-row-0 }
+      - { at: 1.3, do: tap, target: transactions }
 
-  - screen: mbb-desktop-items
-    duration: 3.6
+  - screen: mbb-desktop-sales-list
+    duration: 2.8
     actions:
-      - { at: 1.8, do: tap, target: low-stock }
+      - { at: 1.4, do: tap, target: new-bill }
 
-  # The bill dropped in, and Mira AI filling the form from it.
+  # One unbroken take of the form: open the picker, search, add, add, put them
+  # on the bill, save. Cutting between these would hide the thing the clip is
+  # about, which is that it is one flow.
   - screen: mbb-desktop-create-invoice
-    duration: 4.2
+    duration: 11.0
     actions:
-      - { at: 1.8, do: tap, target: upload }
+      - { at: 1.0, do: tap, target: add-item }
+      - { at: 2.0, do: type, target: item-search, text: S, duration: 0.5 }
+      - { at: 3.2, do: addItem, index: 0 }
+      - { at: 4.6, do: addItem, index: 1 }
+      - { at: 6.2, do: tap, target: add-to-bill }
+      - { at: 8.4, do: tap, target: save }
+
+  # The bill as it is kept, and the payment recorded against it.
+  - screen: mbb-desktop-invoice
+    duration: 4.0
+    actions:
+      - { at: 1.8, do: tap, target: record-payment }

@@ -75,8 +75,11 @@ video { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 20px; di
 /* The offscreen stage. Mirrors stage/index.html; if one changes the other
    must, or a browser render stops matching a CLI render. .logo-band and
    .endcard come from kit.css. */
+/* Clipped: a laptop window pushed in on grows past the sides of the picture,
+   and without this it would also grow up into the logo band. */
 .stage-area {
   flex: 1;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -123,7 +126,7 @@ video { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 20px; di
 #stage-desktop-viewport {
   position: relative;
   width: 720px;
-  height: 540px;
+  height: 405px;
   margin: 0 8px;
   border-radius: 6px;
   overflow: hidden;

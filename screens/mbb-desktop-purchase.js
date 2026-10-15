@@ -1,7 +1,7 @@
 import { esc } from '../src/esc.js';
 import { icons } from '../src/icons.js';
 import { formatINR, summarise } from '../src/money.js';
-import { miraPanel } from './mbb-desktop-chrome.js';
+import { miraPanel, itemPicker } from './mbb-desktop-chrome.js';
 
 export const name = 'mbb-desktop-purchase';
 
@@ -18,26 +18,47 @@ export const name = 'mbb-desktop-purchase';
  * report: legible beats complete.
  */
 export const device = 'desktop';
+
+/* These two are a full-width form with Mira AI's panel down the left, and
+ * both edges carry something the video is about: the panel on one side, the
+ * bill's total on the other. So the camera sits back far enough to hold the
+ * whole window - a crop here would push the Upload button, which the clip
+ * taps, out of frame. */
+export const focus = { x: 360, y: 203, scale: 1 };
 export const url = 'mybillbook.in/app/home/vouchers/purchase_record/create';
 
 /* Coordinates are in the desktop's 720x540 space and are MEASURED. */
 export const targets = {
-  'upload': { x: 85, y: 113 },
-  'proceed': { x: 85, y: 181 },
-  'save': { x: 674, y: 25 },
-  'add-party': { x: 300, y: 85 }
+  'add-item': { x: 396, y: 157 },
+  'item-search': { x: 261, y: 94 },
+  'add-item-0': { x: 585, y: 163 },
+  'add-item-1': { x: 585, y: 195 },
+  'add-to-bill': { x: 572, y: 363 },
+  'upload': { x: 85, y: 114 },
+  'proceed': { x: 85, y: 183 },
+  'save': { x: 514, y: 24 },
+  'add-party': { x: 268, y: 68 }
 };
 
+/* The same two ways of filling a purchase entry as a sales one: item by item
+ * out of the catalogue, or all at once by Mira reading the supplier's bill. */
 export const tapEffects = {
-  'upload': { filled: 1 },
-  'proceed': { filled: 1 }
+  'add-item': { picker: 1 },
+  'add-to-bill': { picker: 0 },
+  'upload': { filled: 1, picker: 0 },
+  'proceed': { filled: 1, picker: 0 }
 };
 
 export function render(data, state) {
   const filled = Number(state?.filled ?? 0) > 0;
+  const picker = Number(state?.picker ?? 0) > 0;
+  const typed = state?.typed ?? '';
   const supplier = data?.party?.name || '';
-  const items = Array.isArray(data?.items) ? data.items.slice(0, 4) : [];
-  const sums = summarise(filled ? items : []);
+  const all = Array.isArray(data?.items) ? data.items.slice(0, 6) : [];
+  const progress = state?.items ?? [];
+  const onBill = i => filled || (progress[i] ?? 0) > 0.001;
+  const items = all.filter((_, i) => onBill(i));
+  const sums = summarise(items);
 
   const line = (item, i) => `
     <div class="mb-irow">
@@ -84,9 +105,11 @@ export function render(data, state) {
     </div>
 
     <div class="mb-ilist">
-      ${filled && items.length
-        ? items.map(line).join('')
-        : '<div class="mb-additem">+ Add Item</div>'}
+      ${items.map(line).join('')}
+      <div class="mb-additem-row">
+        <span class="mb-additem" id="add-item">+ Add Item</span>
+        <span class="mb-barcode"><span class="ico">${icons.scan(9)}</span>Scan Barcode</span>
+      </div>
     </div>
 
     <div class="mb-totals">
@@ -95,5 +118,7 @@ export function render(data, state) {
       <div class="mb-trow big"><span>Total Amount</span><span>${formatINR(sums.total)}</span></div>
     </div>
   </div>
+
+  ${picker ? itemPicker({ items: all, onBill, typed, chosen: items, total: sums.total, heading: 'Add Items to Purchase' }) : ''}
 </div>`;
 }
