@@ -112,3 +112,34 @@ test('headers given as a plain object are read too', () => {
   const err = Object.assign(new Error('403'), { status: 403, headers: { 'x-mvs-stage': 'worker' } });
   assert.match(explain(err, true).detail, /answered by: worker/);
 });
+
+test('a 403 from the edge is not reported as a key problem', () => {
+  /* The real one, from the first report: refused by Cloudflare in front of
+     Anthropic, at their Hong Kong edge. It carries a ray and NO request id,
+     which is how you know it never reached Claude.
+
+     The old message said "that is usually the key being turned off", which is
+     exactly wrong here - the key was fine, and the person who hit it went and
+     checked a key that was never the problem. */
+  const edgeBlock = {
+    status: 403,
+    message: '403 {"error":{"type":"forbidden","message":"Request not allowed"}}',
+    headers: new Headers({ 'x-mvs-stage': 'anthropic', 'cf-ray': 'a4adccce5f5e20f3-HKG' })
+  };
+  const said = explain(edgeBlock, true);
+  assert.match(said.message, /stopped before it reached Claude/);
+  assert.match(said.message, /country Claude does not serve/);
+  assert.doesNotMatch(said.message, /key being turned off/);
+  assert.doesNotMatch(said.message, /out of credit/);
+});
+
+test('a 403 that DID reach Claude is still reported as a key problem', () => {
+  /* The other 403: it has a request id, so Anthropic itself answered - and
+     then the key, the credit or the model really are the things to check. */
+  const fromClaude = {
+    status: 403,
+    message: '403 {"error":{"type":"permission_error","message":"not allowed"}}',
+    headers: new Headers({ 'x-mvs-stage': 'anthropic', 'request-id': 'req_123', 'cf-ray': 'abc-BOM' })
+  };
+  assert.match(explain(fromClaude, true).message, /key being turned off|out of credit/);
+});

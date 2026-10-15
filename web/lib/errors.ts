@@ -92,6 +92,25 @@ export function explain(error: unknown, teamMode: boolean): Explained {
     };
   }
 
+  /* A 403 that carries a Cloudflare ray and NO request id never reached
+   * Claude: it was refused by the edge sitting in front of Anthropic. The
+   * commonest reason is where the request happened to come FROM - Anthropic
+   * does not serve every country - and the key is fine.
+   *
+   * This has to come before the general 403 below, which says the opposite
+   * and is what sent the first person who hit this to check a key that was
+   * never the problem. */
+  if (status === 403 && /cloudflare ray:/.test(detail) && !/request id:/.test(detail)) {
+    return {
+      message:
+        'The request was stopped before it reached Claude - by the network in front of Claude, ' +
+        'not by Claude and not by the key. This usually means it was sent from a country Claude ' +
+        'does not serve. Nothing is wrong with your script or your sign-in. Send this to Aryan: ' +
+        'it is fixed in the studio settings, not from here.',
+      detail
+    };
+  }
+
   if (status === 403 || text.includes('forbidden') || text.includes('permission_error')) {
     return {
       message:
