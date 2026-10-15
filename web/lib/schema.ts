@@ -43,6 +43,11 @@ export const SCREENS = {
   'mcf-ai-ringing': ['accept', 'decline'],
   /* The first screen drawn as a laptop rather than a phone. */
   'mcf-desktop': ['ask-ai', 'setup-automation', 'party-row-0', 'continue'],
+  /* The rest of myCashFlo on a laptop. Without these a laptop collections clip
+     had to start on the parties table and stop before anything was set up -
+     half the process, which is the half that does not sell it. */
+  'mcf-desktop-dashboard': ['call-personally', 'setup-followups', 'add-contact', 'outstanding', 'nav-parties', 'nav-automations', 'ask-ai'],
+  'mcf-desktop-automations': ['new-automation', 'automation-0', 'automation-1', 'automation-2', 'edit-automation', 'edit-parties', 'nav-parties', 'nav-dashboard'],
   /* The laptop counterparts of the phone's dashboard and sales list. Same
      flow, wider interface - a laptop clip starts where a phone clip starts. */
   'mbb-desktop-dashboard': ['create-sales-invoice', 'to-collect', 'to-pay', 'transactions', 'collections'],

@@ -30,7 +30,8 @@ test('every screen built before this one is unchanged', () => {
       'mbb-desktop-create-invoice', 'mbb-desktop-create-item', 'mbb-desktop-dashboard', 'mbb-desktop-invoice',
       'mbb-desktop-items', 'mbb-desktop-parties', 'mbb-desktop-purchase',
       'mbb-desktop-reports', 'mbb-desktop-sales-list',
-      'mbb-desktop-scan', 'mbb-desktop-scan-done', 'mbb-desktop-scan-reading', 'mcf-desktop',
+      'mbb-desktop-scan', 'mbb-desktop-scan-done', 'mbb-desktop-scan-reading',
+      'mcf-desktop', 'mcf-desktop-automations', 'mcf-desktop-dashboard',
       'tally-receivables'
     ],
     'only the screens that asked for it are desktop screens'

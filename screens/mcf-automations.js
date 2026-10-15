@@ -19,9 +19,12 @@ export const targets = {
  * window chased twice, once by call and once on WhatsApp, and a long-overdue
  * bucket. The party counts come from the book so they are not three numbers
  * pulled out of the air. */
-const RULES = [
+/* Exported so the laptop's automations page lists the SAME automations. Two
+ * copies would drift, and one business would be running two different sets of
+ * reminders depending on which shape the reel was cut in. */
+export const AUTOMATIONS = [
   { window: 'Overdue 1 day to 1 month', via: 'phone', tone: 'Friendly', when: 'Daily' },
-  { window: 'Overdue 1 day to 1 month', via: 'whatsapp', tone: 'Friendly', when: 'Daily' },
+  { window: 'Overdue 3 to 6 months', via: 'phone', tone: 'Friendly', when: 'Alternate days' },
   { window: 'Overdue 6m+', via: 'whatsapp', tone: 'Friendly', when: 'Daily' }
 ];
 
@@ -63,8 +66,8 @@ export function render(data, state) {
     <div class="mcf-btn wide" id="new-automation"><span class="ico">${icons.plus(15)}</span>New Automation</div>
 
     <div class="mcf-card">
-      <div class="mcf-label">ACTIVE AUTOMATIONS (${RULES.length})</div>
-      <div class="mcf-autolist">${RULES.map(row).join('')}</div>
+      <div class="mcf-label">ACTIVE AUTOMATIONS (${AUTOMATIONS.length})</div>
+      <div class="mcf-autolist">${AUTOMATIONS.map(row).join('')}</div>
     </div>
   </div>
 

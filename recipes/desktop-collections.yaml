@@ -1,7 +1,13 @@
-# myCashFlo on a laptop: the whole book on one screen, the AI told what to do
-# in plain Hinglish, and a follow-up set up from the desk.
+# myCashFlo on a laptop, end to end. The same process the phone clip shows -
+# what is stuck, who is worst, the automation set up, and the thing still
+# running afterwards - in the interface a desk gives you.
 #
-# The first clip that is NOT a phone. Every name is invented.
+# It used to be two shots of one screen: the book, and a follow-up sheet. That
+# showed the app but not what it does, and stopped before anything had been
+# set up. A collections clip has to end on the reminder that keeps going after
+# the owner shuts the laptop.
+#
+# Every name and figure is invented.
 video: desktop-collections
 
 business:
@@ -22,7 +28,14 @@ cashflo:
     - { name: Sunil Traders, balance: 370000, overdueDays: 9, standby: 1 }
 
 shots:
-  # The book, and the AI bar across the top.
+  # What is stuck, and who needs what doing about them. The laptop opens on the
+  # dashboard the way the phone does - this is the question the clip answers.
+  - screen: mcf-desktop-dashboard
+    duration: 4.0
+    actions:
+      - { at: 2.0, do: tap, target: setup-followups }
+
+  # The whole book, worst first, with what is being done about each one.
   - screen: mcf-desktop
     duration: 3.6
     actions:
@@ -33,3 +46,11 @@ shots:
     duration: 3.4
     actions:
       - { at: 1.6, do: tap, target: continue }
+
+  # And what is left running: the automations, with the parties each one is
+  # chasing. This is the beat the clip never had.
+  - screen: mcf-desktop-automations
+    duration: 4.2
+    actions:
+      - { at: 1.6, do: tap, target: automation-0 }
+      - { at: 3.0, do: tap, target: automation-2 }

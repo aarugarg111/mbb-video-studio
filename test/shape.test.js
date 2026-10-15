@@ -178,7 +178,7 @@ test('every phone screen a laptop can show has a laptop screen to show it on', (
   const PHONE_ONLY = [
     'scan-bills', 'scan-camera', 'scan-reading', 'scan-done',
     'wa-attach', 'wa-chat', 'create-bill', 'theme-store',
-    'mcf-dashboard', 'mcf-party', 'mcf-automations', 'mcf-new-automation',
+    'mcf-party', 'mcf-new-automation',
     'mcf-tally', 'mcf-ai-call', 'mcf-ai-ringing',
     'create-purchase', 'invoice-created', 'create-invoice'
   ];
@@ -199,4 +199,19 @@ test('Tally stays a desktop window whichever shape the reel is', () => {
      counterpart that cannot exist. */
   assert.equal(screenOnShape('tally-receivables', 'phone'), 'tally-receivables');
   assert.equal(screenOnShape('tally-receivables', 'laptop'), 'tally-receivables');
+});
+
+test('the myCashFlo process exists in both shapes', () => {
+  /* A collections clip is a process, not a screen: what is stuck, who is
+     worst, the automation set up, and the thing still running afterwards. The
+     laptop had only the parties table, so a laptop clip had to start half way
+     through its own story and stop before anything had been set up. */
+  assert.equal(screenOnShape('mcf-dashboard', 'laptop'), 'mcf-desktop-dashboard');
+  assert.equal(screenOnShape('mcf-parties', 'laptop'), 'mcf-desktop');
+  assert.equal(screenOnShape('mcf-automations', 'laptop'), 'mcf-desktop-automations');
+
+  /* and back the other way, so a laptop script recast to a phone lands on the
+     page that matches rather than on the parties table every time */
+  assert.equal(screenOnShape('mcf-desktop-dashboard', 'phone'), 'mcf-dashboard');
+  assert.equal(screenOnShape('mcf-desktop-automations', 'phone'), 'mcf-automations');
 });

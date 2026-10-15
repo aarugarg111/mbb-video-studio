@@ -1537,3 +1537,70 @@
 /* Scanned bills are Completed or Incomplete, not paid or unpaid. */
 .mb-pill.done { background: var(--dsk-paid-bg); color: var(--dsk-in); }
 .mb-pill.open { background: var(--dsk-unpaid-bg); color: var(--dsk-out); }
+
+/* ---- myCashFlo dashboard on a laptop ---------------------------------- */
+.dkd-body { display: flex; gap: 10px; padding: 8px 26px 0 12px; align-items: flex-start; }
+.dkd-attn { flex: 1; min-width: 0; padding: 10px; border-radius: 9px; background: var(--dsk-card); }
+.dkd-k { font-size: 7px; font-weight: 700; letter-spacing: .06em; color: var(--dsk-muted); text-transform: uppercase; }
+.dkd-cards { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
+.dkd-card { flex: 1 1 calc(50% - 4px); min-width: 0; box-sizing: border-box; padding: 9px; border-radius: 8px; border: 1px solid var(--dsk-rule); background: var(--dsk-panel); }
+.dkd-line { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
+.dkd-line > :first-child { min-width: 0; }
+.dkd-nm { font-size: 9px; font-weight: 700; color: var(--dsk-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dkd-tag { display: inline-block; margin-top: 3px; padding: 1px 5px; border-radius: 4px; font-size: 6.5px; font-weight: 700; color: var(--dsk-late); background: var(--dsk-breach-bg); }
+.dkd-amt { flex: none; font-size: 9px; font-weight: 700; color: var(--dsk-ink); }
+.dkd-more { margin: 2px 0 7px; font-size: 7.5px; color: var(--dsk-blue); }
+.dkd-cta { padding: 6px; border-radius: 6px; text-align: center; font-size: 8.5px; font-weight: 700; color: var(--mbb-surface); background: var(--mcf-navy); }
+
+.dkd-side { flex: none; width: 170px; display: flex; flex-direction: column; gap: 8px; }
+.dkd-panel { padding: 10px; border-radius: 9px; background: var(--dsk-card); }
+.dkd-panel-top { display: flex; align-items: center; justify-content: space-between; }
+.dkd-big { margin-top: 4px; font-size: 19px; font-weight: 700; color: var(--dsk-ink); }
+.dkd-split { margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--dsk-rule); display: flex; gap: 12px; }
+.dkd-sk { display: flex; align-items: center; gap: 4px; font-size: 6.5px; font-weight: 700; letter-spacing: .05em; }
+.dkd-sk.late { color: var(--dsk-late); }
+.dkd-sk.soon { color: var(--dsk-pending); }
+.dkd-sv { margin-top: 3px; font-size: 11px; font-weight: 700; color: var(--dsk-ink); }
+.dkd-toggle { display: flex; border-radius: 999px; overflow: hidden; background: var(--dsk-panel); }
+.dkd-toggle span { padding: 2px 7px; font-size: 7px; color: var(--dsk-muted); }
+.dkd-toggle span.on { background: var(--dsk-rule); color: var(--dsk-ink); font-weight: 700; }
+.dkd-empty { margin-top: 12px; text-align: center; color: var(--dsk-muted); }
+.dkd-empty .ico { display: flex; justify-content: center; color: var(--dsk-blue); margin-bottom: 6px; }
+.dkd-empty-k { font-size: 10px; font-weight: 700; color: var(--dsk-ink); }
+.dkd-empty-s { margin-top: 3px; font-size: 7.5px; line-height: 1.45; }
+
+/* ---- myCashFlo automations on a laptop -------------------------------- */
+.dka-body { display: flex; gap: 10px; padding: 8px 26px 0 12px; align-items: flex-start; }
+.dka-list { flex: none; width: 150px; padding: 10px; border-radius: 9px; background: var(--dsk-card); }
+.dka-k { font-size: 7px; font-weight: 700; letter-spacing: .06em; color: var(--dsk-muted); text-transform: uppercase; }
+.dka-item { margin-top: 8px; display: flex; align-items: center; gap: 7px; padding: 7px; border-radius: 7px; }
+.dka-item.on { background: var(--dsk-panel); box-shadow: inset 2px 0 0 var(--dsk-purple); }
+.dka-ico { flex: none; width: 20px; height: 20px; border-radius: 999px; display: grid; place-items: center; }
+.dka-ico.big { width: 26px; height: 26px; }
+.dka-ico.call { background: var(--dsk-ai-edge); color: var(--dsk-purple); }
+.dka-ico.wa { background: var(--mbb-success-tint); color: var(--mcf-wallet); }
+.dka-item-txt { flex: 1; min-width: 0; }
+.dka-item-k { font-size: 9px; font-weight: 700; color: var(--dsk-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dka-item.on .dka-item-k { color: var(--dsk-purple); }
+.dka-item-s { margin-top: 2px; font-size: 7.5px; color: var(--dsk-muted); }
+.dka-count { flex: none; display: flex; align-items: center; gap: 3px; font-size: 7.5px; color: var(--dsk-muted); }
+
+.dka-detail { flex: 1; min-width: 0; border-radius: 9px; background: var(--dsk-card); overflow: hidden; }
+.dka-detail-top { display: flex; align-items: center; gap: 9px; padding: 10px; background: var(--dsk-panel); }
+.dka-detail-txt { flex: 1; min-width: 0; overflow: hidden; }
+.dka-detail-k { font-size: 12px; font-weight: 700; color: var(--dsk-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dka-detail-s { margin-top: 2px; font-size: 8px; color: var(--dsk-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dka-act { flex: none; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--dsk-rule); font-size: 7.5px; font-weight: 600; color: var(--dsk-ink); }
+.dka-table { padding: 0 10px 10px; }
+.dka-row { display: flex; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--dsk-rule); }
+.dka-row:last-child { border-bottom: none; }
+.dka-row.head { font-size: 7px; font-weight: 700; letter-spacing: .05em; color: var(--dsk-muted); text-transform: uppercase; }
+.dka-c { font-size: 8.5px; color: var(--dsk-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dka-c.who { flex: 1; min-width: 72px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.dka-nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dka-acts { display: flex; justify-content: flex-end; gap: 6px; padding: 0 10px 8px; background: var(--dsk-panel); }
+.dka-row.head .dka-c.who { font-weight: 700; }
+.dka-c.amt { width: 62px; flex: none; text-align: right; font-weight: 700; }
+.dka-c.late { width: 74px; flex: none; text-align: right; color: var(--dsk-late); }
+.dka-row.head .dka-c.late { color: var(--dsk-muted); }
+.dka-live { display: inline-flex; align-items: center; gap: 3px; padding: 1px 5px; border-radius: 4px; font-size: 6.5px; font-weight: 700; color: var(--mcf-wallet); background: var(--mbb-success-tint); }
