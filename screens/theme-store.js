@@ -34,7 +34,11 @@ export const tapEffects = {
   'variant-1': { variant: 1 },
   'variant-2': { variant: 2 }
 };
-export const persists = ['theme'];
+/* The variant travels with the theme. It did not, and the moment the two
+ * chips started choosing different pictures that became a real difference:
+ * a clip that picked Diwali 2 and cut to the bill got Diwali 1, because only
+ * the theme survived the shot it was chosen in. */
+export const persists = ['theme', 'variant'];
 export const closes = ['close'];
 
 const COLUMNS = 4;

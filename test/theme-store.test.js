@@ -134,3 +134,16 @@ test('no screen emits a raw hex or rgb colour', () => {
     assert.doesNotMatch(html, /(?<!&)#[0-9a-fA-F]{6}\b|(?<!&)#[0-9a-fA-F]{3}\b|rgba?\(/, `${key} has a hard-coded colour`);
   }
 });
+
+test('the chosen variant survives the cut, like the theme does', () => {
+  /* The Theme Store sets both and then the clip cuts away to the bill. Only
+     the theme used to survive that cut, which did not matter while the two
+     chips chose between two labels and the same picture. The moment they
+     chose different pictures it did: a clip that picked Diwali 2 and cut to
+     the bill showed Diwali 1. */
+  for (const name of ['theme-store', 'mbb-desktop-theme-store']) {
+    const keeps = SCREENS[name].persists ?? [];
+    assert.ok(keeps.includes('theme'), `${name} loses the theme between shots`);
+    assert.ok(keeps.includes('variant'), `${name} loses the chosen variant between shots`);
+  }
+});
