@@ -22,3 +22,12 @@ cf/node_modules/
 
 # Throwaway edit helpers
 *.cjs
+
+# FloBiz's own design assets: the festive theme illustrations and the download
+# CTA. They are supplied separately and live only on the machine that renders,
+# because THIS REPO IS PUBLIC - committing them would publish company artwork.
+# The README in each folder says what the files are called. Without them the
+# studio still runs: a theme with no art draws as a tinted card, and the clip
+# closes on the plain logo instead of the CTA.
+kit/themes/*.png
+kit/cta/*.png
