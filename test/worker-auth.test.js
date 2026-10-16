@@ -66,3 +66,33 @@ test('the session cookie is not readable by scripts and not sent cross-site', ()
 test('clearing the cookie expires it immediately', () => {
   assert.match(clearCookie(), /Max-Age=0/);
 });
+
+test('a cookie that cannot be decoded signs you out instead of throwing', async () => {
+  /* decodeURIComponent throws URIError - "URI malformed" - on a stray "%",
+     and readCookie runs on EVERY request, including the one that draws the
+     page. So a single unreadable cookie did not just break signing in: it
+     broke the whole studio, with a message that named nothing anybody could
+     act on, and the only cure was clearing cookies, which nobody would guess.
+
+     Unreadable now means signed out. You sign in again, and signing in
+     overwrites the bad value. */
+  const mk = value => ({ headers: { get: () => value } });
+
+  for (const bad of ['mvs_session=ok.1%.abc', 'mvs_session=%', 'mvs_session=%zz', 'mvs_session=100%']) {
+    assert.doesNotThrow(() => readCookie(mk(bad)), `threw on ${bad}`);
+    assert.equal(readCookie(mk(bad)), null, `${bad} should read as no cookie`);
+  }
+
+  /* And a real one still reads. Base64 carries "+" and "/", which decode to
+     themselves - a guard that quietly broke those would sign everybody out. */
+  const real = await signSession(SECRET);
+  assert.equal(readCookie(mk(`mvs_session=${real}`)), real);
+  assert.equal(await verifySession(readCookie(mk(`mvs_session=${real}`)), SECRET), true);
+  assert.equal(readCookie(mk('mvs_session=ok.123.si+g/h')), 'ok.123.si+g/h');
+});
+
+test('an unreadable cookie is refused rather than accepted', async () => {
+  /* The guard must not turn a bad cookie into a valid session - failing open
+     would be a far worse bug than the one it fixes. */
+  assert.equal(await verifySession(null, SECRET), false);
+});

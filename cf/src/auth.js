@@ -48,5 +48,20 @@ export function clearCookie() {
 export function readCookie(request) {
   const c = request.headers.get('Cookie') || '';
   const m = c.match(/(?:^|;\s*)mvs_session=([^;]+)/);
-  return m ? decodeURIComponent(m[1]) : null;
+  if (!m) return null;
+  /* A cookie is whatever the browser sends, which is not necessarily anything
+   * this Worker ever wrote. decodeURIComponent throws URIError on a stray "%"
+   * - "URI malformed" - and this runs on EVERY request, including the one that
+   * draws the page, so a single bad cookie took the whole studio down with an
+   * error naming nothing anybody could act on. Clearing cookies fixed it,
+   * which is not something a person can be expected to guess.
+   *
+   * A cookie that cannot be read is treated as no cookie at all: you are
+   * signed out, you sign in again, and signing in overwrites the bad value.
+   * That is the worst this should ever cost. */
+  try {
+    return decodeURIComponent(m[1]);
+  } catch {
+    return null;
+  }
 }
