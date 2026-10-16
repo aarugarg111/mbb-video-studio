@@ -1720,3 +1720,80 @@
 .dkh-row.won .dkh-pill { background: var(--dsk-paid-bg); color: var(--dsk-in); }
 .dkh-row.head .dkh-pill { background: none; padding: 0; color: var(--dsk-muted); }
 .dkh-done { display: flex; align-items: center; gap: 6px; margin-top: 9px; padding: 7px 10px; border-radius: 7px; background: var(--dsk-in-edge); color: var(--dsk-in); font-size: 8px; font-weight: 600; }
+
+/* ---- The Luxury bill ----------------------------------------------------
+ * A skin over the same bill markup, not a second bill: every figure, row and
+ * label is the one the plain bill already draws, so the two cannot drift and
+ * a theme behind either one behaves the same way.
+ *
+ * DISCLOSED: the corner ornaments are a simple geometric stand-in for the
+ * filigree on the real template, and the shop name is DM Sans rather than the
+ * serif the template uses - that is the only font embedded in the renderer,
+ * and an unembedded family would come out as whatever the machine had, or as
+ * nothing at all in the rasteriser. Both want the real asset to be exact. */
+.bill.luxury .bill-body {
+  position: relative;
+  margin: 7px;
+  padding: 15px 14px 14px;
+  border: 1.5px solid var(--lux-gold);
+  outline: 3px solid var(--lux-paper);
+  outline-offset: -5px;
+  box-shadow: inset 0 0 0 4.5px var(--lux-paper), inset 0 0 0 5.5px var(--lux-gold-soft);
+}
+
+/* The four corner motifs. A diamond on a short pair of rules - the shape the
+   template's filigree reduces to at the size a phone actually shows it. */
+.bill.luxury .bill-body::before,
+.bill.luxury .bill-body::after {
+  content: '';
+  position: absolute;
+  width: 13px; height: 13px;
+  border: 1.5px solid var(--lux-gold);
+  transform: rotate(45deg);
+  background: var(--lux-paper);
+}
+.bill.luxury .bill-body::before { left: -7px; top: -7px; }
+.bill.luxury .bill-body::after { right: -7px; bottom: -7px; }
+.bill.luxury .bh::before,
+.bill.luxury .bh::after {
+  content: '';
+  position: absolute;
+  width: 13px; height: 13px;
+  border: 1.5px solid var(--lux-gold);
+  transform: rotate(45deg);
+  background: var(--lux-paper);
+}
+.bill.luxury .bh { position: static; }
+.bill.luxury .bh::before { right: 0px; top: 0px; }
+.bill.luxury .bh::after { left: 0px; bottom: 0px; }
+
+.bill.luxury .shop {
+  color: var(--lux-navy);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .055em;
+}
+.bill.luxury .bos { color: var(--lux-navy); font-weight: 700; letter-spacing: .02em; }
+.bill.luxury .bos .badge { color: var(--lux-muted); border-color: var(--lux-rule); letter-spacing: .04em; }
+.bill.luxury .addr { color: var(--lux-muted); }
+
+/* The template rules off each block in gold rather than grey. */
+.bill.luxury .cols.two { border-top: 1px solid var(--lux-gold-soft); padding-top: 8px; }
+.bill.luxury .cols.two b { color: var(--lux-navy); }
+.bill.luxury .cols.two div { color: var(--lux-ink); }
+.bill.luxury .cols.two .sm { color: var(--lux-muted); }
+
+.bill.luxury .tbl thead th { background: var(--lux-band); color: var(--lux-navy); border: none; }
+.bill.luxury .tbl tbody td { color: var(--lux-ink); border-bottom: 1px solid var(--lux-rule); }
+.bill.luxury .sub-row { background: var(--lux-band); color: var(--lux-navy); font-weight: 700; }
+
+.bill.luxury .terms b { color: var(--lux-navy); }
+.bill.luxury .terms div { color: var(--lux-muted); }
+.bill.luxury .sums { border-top: 1.5px solid var(--lux-gold); padding-top: 6px; }
+.bill.luxury .sums .r.strong { color: var(--lux-navy); }
+.bill.luxury .sums .r { color: var(--lux-ink); }
+.bill.luxury .words b { color: var(--lux-navy); }
+.bill.luxury .words div { color: var(--lux-muted); }
+.bill.luxury .sigbox { border: 1px solid var(--lux-gold-soft); }
+.bill.luxury .sig b { color: var(--lux-navy); }
+.bill.luxury .sig div { color: var(--lux-muted); }

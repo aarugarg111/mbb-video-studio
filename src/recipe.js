@@ -123,6 +123,32 @@ export function parse(text, catalogue, options = {}) {
           recipe.invoice.theme = 'none';
         }
       }
+      /* Which bill template. "luxury" is the decorated one and the default,
+       * because it is what the ads are meant to show; "plain" is the
+       * undecorated bill this studio started with. */
+      if (inv.skin != null) {
+        if (inv.skin === 'luxury' || inv.skin === 'plain') {
+          recipe.invoice.skin = inv.skin;
+        } else {
+          warnings.push(
+            `invoice.skin ${JSON.stringify(inv.skin)} is not a bill template, so the Luxury one is used. ` +
+            'Known: luxury, plain.'
+          );
+        }
+      }
+      /* How strongly the festival art shows through, 0 to 1. Left out, each
+       * festival uses the strength chosen for it. A clip whose art fights the
+       * figures can turn it down without changing every other clip. */
+      if (inv.themeStrength != null) {
+        const n = Number(inv.themeStrength);
+        if (Number.isFinite(n) && n >= 0 && n <= 1) {
+          recipe.invoice.themeStrength = n;
+        } else {
+          errors.push(
+            `invoice.themeStrength must be a number between 0 and 1, got ${JSON.stringify(inv.themeStrength)}.`
+          );
+        }
+      }
     }
   }
 

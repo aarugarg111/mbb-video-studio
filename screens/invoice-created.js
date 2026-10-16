@@ -3,7 +3,7 @@ import { amountInWords } from '../src/words.js';
 import { invoiceOf } from '../src/invoice.js';
 import { esc } from '../src/esc.js';
 import { icons } from '../src/icons.js';
-import { themeArtUrl } from '../src/themes.js';
+import { themeArtUrl, themeStrength } from '../src/themes.js';
 
 export const name = 'invoice-created';
 
@@ -21,15 +21,19 @@ const DEFAULT_TERMS = [
 /* A theme name becomes a class or a file path, so only plain names get through. */
 const THEME_NAME = /^[A-Za-z0-9_-]+$/;
 
-function themeLayer(theme, variant) {
+function themeLayer(theme, variant, strength) {
   if (!theme || theme === 'none' || !THEME_NAME.test(theme)) return '';
   if (theme === 'warm') return '<div class="bill-theme warm"></div>';
   /* The art sits over a tint of the theme's own colour, so a theme whose
    * picture has not been supplied yet still visibly changes the bill instead
    * of vanishing. themeArtUrl names both variants and both extensions. */
   const tint = 'var(--mbb-theme-' + theme + ', var(--mbb-surface))';
-  return '<div class="bill-theme" style="background-image: ' + themeArtUrl(theme, variant)
-    + ', linear-gradient(' + tint + ', ' + tint + ')"></div>';
+  /* How strongly this one shows, set here rather than in the stylesheet
+   * because it differs per festival: the bill has to stay readable over a
+   * crowded night scene as well as over a pale wash. */
+  const fade = themeStrength(theme, strength).toFixed(3);
+  return '<div class="bill-theme" style="opacity: ' + fade + '; background-image: '
+    + themeArtUrl(theme, variant) + ', linear-gradient(' + tint + ', ' + tint + ')"></div>';
 }
 
 /* One CGST and SGST pair per GST slab on the bill, each with its own share of
@@ -107,13 +111,17 @@ export function billMarkup(data, state) {
   const appear = state?.appear ?? 1;
   const terms = inv.terms ?? DEFAULT_TERMS;
   const received = sum.total;
+  /* "plain" is the undecorated bill this studio started with; anything else,
+   * including nothing at all, is the decorated template the ads are meant to
+   * show. */
+  const skin = inv.skin === 'plain' ? '' : ' luxury';
   const qtyTotal = items.reduce((n, i) => n + (Number(i.qty) || 0), 0);
   const row = (item, i) => `<tr><td>${i + 1}</td><td class="nm">${esc(item.name)}</td><td>${esc(item.hsn ?? '-')}</td>` +
     `<td>${esc(item.qty)} ${esc(item.unit ?? 'PCS')}</td><td>${formatINR(item.rate)}</td>` +
     `<td>${formatINR(item.rate * item.qty)}</td></tr>`;
 
-  return `<div class="bill" style="opacity: ${appear.toFixed(3)}; transform: scale(${(0.97 + 0.03 * appear).toFixed(3)})">
-    ${themeLayer(state?.theme ?? inv.theme, state?.variant)}
+  return `<div class="bill${skin}" style="opacity: ${appear.toFixed(3)}; transform: scale(${(0.97 + 0.03 * appear).toFixed(3)})">
+    ${themeLayer(state?.theme ?? inv.theme, state?.variant, inv.themeStrength)}
     <div class="bill-body">
       <div class="bh">
         <div class="shop">${shop}</div>

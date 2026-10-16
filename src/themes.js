@@ -88,3 +88,31 @@ export function themesUsedBy(recipe) {
   }
   return out;
 }
+
+/* How strongly a festival's picture shows through the bill.
+ *
+ * One number for all sixteen was never going to work: a pale Navaratri wash
+ * and a crowded Diwali night scene at the same strength give you one bill you
+ * can read and one you cannot. The bill has to stay legible over every single
+ * one of them - it is the thing the video is about.
+ *
+ * So: a default that suits most, a per-festival override for the ones that
+ * need to sit back, and a recipe field for when a particular clip wants
+ * something else. The recipe wins, then the festival, then the default. */
+export const THEME_STRENGTH_DEFAULT = 0.22;
+
+const THEME_STRENGTH = {
+  /* Busy, dark or high-contrast art: pushed back so the figures stay crisp. */
+  diwali: 0.16,
+  'durga-puja': 0.18,
+  dussehra: 0.18,
+  /* Pale washes that disappear if you take them much lower. */
+  navaratri: 0.28,
+  dhanteras: 0.26
+};
+
+export function themeStrength(slug, override) {
+  const asked = Number(override);
+  if (Number.isFinite(asked) && asked >= 0 && asked <= 1) return asked;
+  return THEME_STRENGTH[slug] ?? THEME_STRENGTH_DEFAULT;
+}

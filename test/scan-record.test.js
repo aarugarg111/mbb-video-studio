@@ -29,7 +29,10 @@ test('the camera films the recipe’s own bill, not a drawing of one', () => {
   /* It shares the markup with Sales Invoice Created; a second copy would let
    * the two drift and the video would contradict itself. */
   const html = SCREENS['scan-camera'].render(DATA, {});
-  assert.match(html, /class="bill"/);
+  /* The class carries the bill's template now - "bill luxury", or plain
+     "bill" for the undecorated one - so this asks for the bill rather than
+     for one exact spelling of it. */
+  assert.match(html, /class="bill(?: \w+)?"/);
   assert.match(html, /Suresh Traders/);
   assert.match(html, /CEMENT OPC 50KG/);
 });

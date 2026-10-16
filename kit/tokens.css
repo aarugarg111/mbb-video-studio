@@ -424,3 +424,22 @@
   --dsk-in-edge:   #2A5B3F;
   --dsk-out-edge:  #5E2B2B;
 }
+
+/* ---- The Luxury bill ---------------------------------------------------
+ * The decorated invoice template: a gold frame with ornamented corners, the
+ * shop name set large, and beige bands behind the table head and subtotal.
+ *
+ * DISCLOSED: these are read off the sample bill by eye, not sampled from
+ * pixels - there is no PDF rasteriser on this machine. They are close; they
+ * are not certified. Correct them against the real template before anyone
+ * calls this the Luxury design in public. */
+:root {
+  --lux-gold:        #BE9A4A;  /* the frame, the rules, the corner motifs   */
+  --lux-gold-soft:   #E3D4AC;  /* hairlines inside the frame                */
+  --lux-navy:        #22386A;  /* the shop name, labels and the totals      */
+  --lux-ink:         #3C4654;  /* ordinary values                           */
+  --lux-muted:       #8A8F99;  /* the terms, and the chip's text            */
+  --lux-band:        #F7F1E3;  /* table head and the subtotal band          */
+  --lux-paper:       #FFFFFF;  /* the bill itself, behind the festival art  */
+  --lux-rule:        #ECE7DC;  /* the line between item rows                */
+}
