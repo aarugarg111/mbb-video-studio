@@ -87,3 +87,38 @@ export function loadAssets(): Promise<Assets> {
 
   return cached;
 }
+
+/* The theme art, embedded, for the themes a given clip can actually show.
+ *
+ * The rasterised SVG is a separate document with no access to this page's
+ * network, so a background-image pointing at a file loads nothing and says
+ * nothing about it - the art would be perfect on screen and absent from the
+ * video. Everything else here is embedded for exactly that reason; this is
+ * the same move for the one asset that varies per recipe.
+ *
+ * Only what the recipe can reach: the art is inlined into every frame, so
+ * carrying all sixteen festivals would mean about a megabyte and a half
+ * repeated several hundred times.
+ *
+ * A festival with no art supplied yet simply gets no variable, and the tinted
+ * card behind it shows through - which is what happens on screen too. */
+export async function themeArtCss(used: { slug: string; variant: number }[]): Promise<string> {
+  const rules = await Promise.all(used.map(async ({ slug, variant }) => {
+    const base = variant === 2 ? `${slug}-2` : slug;
+    /* .jpg first, then .png, then the festival's own art if the variant has
+       none - the same order the stylesheet falls back in. */
+    for (const name of [`${base}.jpg`, `${base}.png`, `${slug}.jpg`, `${slug}.png`]) {
+      const type = name.endsWith('.png') ? 'image/png' : 'image/jpeg';
+      try {
+        const data = await fetchBase64(asset(`/kit/themes/${name}`));
+        return `--theme-art-${slug}-${variant}:url(data:${type};base64,${data});`;
+      } catch {
+        /* not supplied - try the next name */
+      }
+    }
+    return '';
+  }));
+
+  const body = rules.filter(Boolean).join('');
+  return body ? `:root{${body}}` : '';
+}

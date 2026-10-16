@@ -49,3 +49,36 @@ it up. A theme with no file shows a plain card tinted with its colour.
 | Shubh Ekadashi | `shubh-ekadashi.png` |
 | Jain theme | `jain-theme.png` |
 | Industrial | `industrial.png` |
+
+## JPEG or PNG
+
+Either works. `<slug>.jpg` is used where it exists, `<slug>.png` where it does
+not, and a festival with neither shows a card tinted with its own colour.
+
+Prefer JPEG. This art is photographic, and a JPEG of one of these
+illustrations is about a tenth the size of the same picture as a PNG - which
+matters because the Theme Store loads the whole grid at once, and because the
+art is embedded into every frame of the video that uses it.
+
+## Two pictures for one festival
+
+The Theme Store offers two variants of whichever theme is chosen. Name the
+second one `<slug>-2.jpg`:
+
+```
+diwali.jpg      Diwali 1
+diwali-2.jpg    Diwali 2
+```
+
+A festival with only one picture shows that one for both chips rather than
+going blank on the second, so a half-delivered set still looks deliberate.
+
+## How strongly it shows
+
+The art sits at 25% behind the bill, because the bill has to stay readable
+over it. The pictures themselves are supplied at full strength.
+
+## These files are not committed
+
+`.gitignore` keeps every image in this folder out of the repository, which is
+public. They live on the machine that renders and go out with the deploy.

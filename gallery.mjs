@@ -20,8 +20,8 @@ const ROOT = dirname(fileURLToPath(import.meta.url));
 const OUT = join(ROOT, 'out', 'gallery');
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2', '.png': 'image/png',
-  '.webp': 'image/webp'
+  '.css': 'text/css; charset=utf-8', '.woff2': 'font/woff2',
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp'
 };
 
 /* A shop, a customer and a day's trade - enough for every screen to have

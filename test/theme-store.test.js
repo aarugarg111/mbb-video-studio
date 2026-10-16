@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { themeArtUrl } from '../src/themes.js';
 import assert from 'node:assert/strict';
 import { SCREENS, catalogue } from '../screens/index.js';
 import { FESTIVE_THEMES } from '../src/themes.js';
@@ -50,11 +51,30 @@ test('with nothing chosen there is no selection and no chips; recipe theme is th
   assert.match(recipe, /Onam 1</);
 });
 
-test('a theme with a PNG uses it; one without falls back to a tinted card', () => {
+test('a theme with art uses it; one without falls back to a tinted card', () => {
   const html = screen.render({ ...DATA, themeArt: ['diwali'] }, {});
-  assert.match(html, /th art" style="background-image: url\(..\/kit\/themes\/diwali\.png\)"/);
+  /* Both extensions are named: this art is photographic and FloBiz supplies
+     JPEGs, but kit/themes/README.md has always asked for PNG, so a set
+     delivered either way has to work. */
+  assert.match(html, /th art" style="background-image: [^"]*themes\/diwali\.jpg/);
+  assert.match(html, /th art" style="background-image: [^"]*themes\/diwali\.png/);
   assert.match(html, /th noart" style="background-image: linear-gradient\(var\(--mbb-theme-rakhi\)/);
-  assert.doesNotMatch(html, /themes\/rakhi\.png/);
+  assert.doesNotMatch(html, /themes\/rakhi\./);
+});
+
+test('the second chip asks for the second picture, behind the first', () => {
+  /* A festival can have two artworks, which is what the Theme Store's two
+     chips choose between. One with only a single picture must show that on
+     both chips rather than going blank on the second - so the festival's own
+     art is always named as the layer behind the variant. */
+  const second = themeArtUrl('diwali', 2);
+  assert.match(second, /themes\/diwali-2\.jpg/);
+  assert.ok(
+    second.indexOf('diwali-2.jpg') < second.indexOf('diwali.jpg'),
+    'the variant has to be painted in front of the one it falls back to'
+  );
+  assert.match(second, /themes\/diwali\.jpg/);
+  assert.equal(themeArtUrl('onam', 1).includes('onam-2'), false);
 });
 
 test('the bill behind the sheet wears the chosen theme', () => {

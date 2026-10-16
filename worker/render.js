@@ -24,7 +24,15 @@ const TYPES = {
   '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
-  '.woff2': 'font/woff2'
+  '.woff2': 'font/woff2',
+  /* Theme art and the download CTA. This map carried no image type at all, so
+     a picture was served as a stream of bytes with no type - not something a
+     background-image can use. It went unnoticed because until now there were
+     no images in kit/ to serve. */
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp'
 };
 
 /* The stage page loads native ES modules. Chrome gives a file:// page an opaque

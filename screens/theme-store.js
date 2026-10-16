@@ -1,5 +1,5 @@
 import * as invoiceCreated from './invoice-created.js';
-import { FESTIVE_THEMES } from '../src/themes.js';
+import { FESTIVE_THEMES, themeArtUrl } from '../src/themes.js';
 import { invoiceOf } from '../src/invoice.js';
 import { esc } from '../src/esc.js';
 import { icons } from '../src/icons.js';
@@ -39,18 +39,18 @@ export const closes = ['close'];
 
 const COLUMNS = 4;
 
-/* data.themeArt, when the renderer supplies it, lists the slugs that have a
- * PNG in kit/themes. Without it every card tries its PNG and the tint behind
- * shows through wherever the file is missing. */
-export function themeThumb(slug, themeArt) {
+/* data.themeArt, when the renderer supplies it, lists the slugs that have art
+ * in kit/themes. Without it every card tries its own and the tint behind shows
+ * through wherever the file is missing. */
+export function themeThumb(slug, themeArt, variant = 1) {
   const tint = `linear-gradient(var(--mbb-theme-${slug}), var(--mbb-theme-${slug}))`;
-  const png = `url(../kit/themes/${slug}.png)`;
+  const art = themeArtUrl(slug, variant);
   if (Array.isArray(themeArt)) {
     return themeArt.includes(slug)
-      ? `<div class="th art" style="background-image: ${png}"></div>`
+      ? `<div class="th art" style="background-image: ${art}"></div>`
       : `<div class="th noart" style="background-image: ${tint}"></div>`;
   }
-  return `<div class="th" style="background-image: ${png}, ${tint}"></div>`;
+  return `<div class="th" style="background-image: ${art}, ${tint}"></div>`;
 }
 
 export function render(data, state) {

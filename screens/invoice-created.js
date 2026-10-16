@@ -3,6 +3,7 @@ import { amountInWords } from '../src/words.js';
 import { invoiceOf } from '../src/invoice.js';
 import { esc } from '../src/esc.js';
 import { icons } from '../src/icons.js';
+import { themeArtUrl } from '../src/themes.js';
 
 export const name = 'invoice-created';
 
@@ -20,13 +21,15 @@ const DEFAULT_TERMS = [
 /* A theme name becomes a class or a file path, so only plain names get through. */
 const THEME_NAME = /^[A-Za-z0-9_-]+$/;
 
-function themeLayer(theme) {
+function themeLayer(theme, variant) {
   if (!theme || theme === 'none' || !THEME_NAME.test(theme)) return '';
   if (theme === 'warm') return '<div class="bill-theme warm"></div>';
-  /* The art sits over a tint of the theme's own colour, so a theme whose PNG has
-   * not been supplied yet still visibly changes the bill instead of vanishing. */
+  /* The art sits over a tint of the theme's own colour, so a theme whose
+   * picture has not been supplied yet still visibly changes the bill instead
+   * of vanishing. themeArtUrl names both variants and both extensions. */
   const tint = 'var(--mbb-theme-' + theme + ', var(--mbb-surface))';
-  return '<div class="bill-theme" style="background-image: url(../kit/themes/' + theme + '.png), linear-gradient(' + tint + ', ' + tint + ')"></div>';
+  return '<div class="bill-theme" style="background-image: ' + themeArtUrl(theme, variant)
+    + ', linear-gradient(' + tint + ', ' + tint + ')"></div>';
 }
 
 /* One CGST and SGST pair per GST slab on the bill, each with its own share of
@@ -110,7 +113,7 @@ export function billMarkup(data, state) {
     `<td>${formatINR(item.rate * item.qty)}</td></tr>`;
 
   return `<div class="bill" style="opacity: ${appear.toFixed(3)}; transform: scale(${(0.97 + 0.03 * appear).toFixed(3)})">
-    ${themeLayer(state?.theme ?? inv.theme)}
+    ${themeLayer(state?.theme ?? inv.theme, state?.variant)}
     <div class="bill-body">
       <div class="bh">
         <div class="shop">${shop}</div>

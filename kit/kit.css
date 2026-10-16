@@ -300,7 +300,11 @@
 
 /* invoice-created: the bill itself */
 .bill { position: relative; margin: 12px 12px 0; background: var(--mbb-surface); border: 1px solid var(--mbb-border); border-radius: 4px; overflow: hidden; }
-.bill-theme { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.5; }
+/* 0.25, because these are full-strength illustrations and the bill has to
+   stay readable over them - FloBiz draws them to sit at 20-30% behind it. It
+   was 0.5, from when the only theme was a flat CSS wash with nothing in it to
+   compete with the text. */
+.bill-theme { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.25; }
 .bill-theme.warm { opacity: 1; background:
   radial-gradient(ellipse at 50% 38%, var(--mbb-theme-warm-c) 0%, transparent 62%),
   linear-gradient(165deg, var(--mbb-theme-warm-a) 0%, var(--mbb-theme-warm-b) 100%); }

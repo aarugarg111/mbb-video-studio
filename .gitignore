@@ -30,4 +30,8 @@ cf/node_modules/
 # studio still runs: a theme with no art draws as a tinted card, and the clip
 # closes on the plain logo instead of the CTA.
 kit/themes/*.png
+kit/themes/*.jpg
+kit/themes/*.jpeg
+kit/themes/*.webp
 kit/cta/*.png
+kit/cta/*.jpg

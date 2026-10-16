@@ -1,6 +1,6 @@
 import { SCREENS as UNTYPED_SCREENS } from '../../screens/index.js';
 import { stateAt, totalDuration } from '../../src/timeline.js';
-import { loadAssets } from './assets';
+import { loadAssets, themeArtCss } from './assets';
 import { asset } from './base-path';
 import { rasterise } from './rasterise';
 import { createEncoder } from './encode';
@@ -8,6 +8,7 @@ import { STAGE_W, STAGE_H } from '../app/studio/stage';
 /* Shared with the command-line renderer, so the two cannot disagree about
    which shape a screen is. */
 import { deviceOf, urlFor, chromeOf, titleFor } from '../../src/device.js';
+import { themesUsedBy } from '../../src/themes.js';
 import { innerTransform, windowTransform } from '../../src/camera.js';
 const SCREENS = UNTYPED_SCREENS as Record<string, { render(data: unknown, state: unknown): string }>;
 
@@ -118,7 +119,14 @@ export async function renderVideo(recipe: any, opts: Options = {}): Promise<Blob
   const endcardRoot = document.getElementById('stage-endcard-root') as HTMLElement | null;
   if (!stage || !viewport || !endcardRoot) throw new Error('The stage is not mounted.');
 
-  const assets = await loadAssets();
+  /* The shared assets are memoised and reused by every render, so the theme
+   * art - which is the one thing that differs per recipe - is added to a copy
+   * rather than to the cached object. Without it the art loads on the page and
+   * is simply missing from the video, because what gets rasterised is a
+   * separate document with no network of its own. */
+  const shared = await loadAssets();
+  const artCss = await themeArtCss(themesUsedBy(recipe));
+  const assets = artCss ? { ...shared, css: shared.css + artCss } : shared;
 
   /* The SVG embeds the font, but the LAYOUT happens here in the page - so if
    * the page is still on a fallback face, every position is measured wrong
