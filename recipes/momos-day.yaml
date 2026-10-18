@@ -3,8 +3,14 @@
 # Scenes 1 to 5 are the creator's own footage. The app moment is the last one:
 # she opens myBillBook and the day adds up on camera.
 #
-# The item is what the stall sells; every sale, the total and the profit are
-# arithmetic on it rather than figures written on the screen.
+# The two figures the script settles - the day's takings and what was left of
+# them - are stated, because the creator says them out loud at the end. They
+# were arithmetic on the item before, so the reveal was 1,560 and 884 while
+# the voiceover said 10,570 and 2,420.
+#
+# Everything else is still worked out: the script says "you can assume rest of
+# the amount", and a day of 10,570 at 60 rupees a plate is 176 plates, which
+# is what the report costs.
 video: momos-day
 
 business:
@@ -17,6 +23,11 @@ invoice:
   number: 108
   date: "13/10/2026"
   theme: none
+
+# Scene 6: "ye rahi aaj ki total kamaai".
+sales:
+  dayTotal: 10570
+  netProfit: 2420
 
 items:
   - { name: VEG MOMOS PLATE, rate: 60, qty: 2, gst: 5, unit: PLATE, purchase: 26 }

@@ -73,34 +73,61 @@ export function salesOf(data) {
     amount: s.qty * rate
   }));
 
-  const natural = bills.reduce((t, b) => t + b.amount, 0);
-
-  /* A script that says the day took a particular amount gets that amount -
-   * and so do the bills underneath it. Overriding only the headline would
-   * leave a total sitting over a list that adds up to something else, which
-   * is the same defect as an automation that said "4 parties" over a table of
-   * one: nothing fails, and anybody who reads the screen can see it is wrong.
+  /* A script that says the day took a particular amount gets that amount.
    *
-   * So every bill is scaled by the same factor and the rounding is given to
-   * the largest one, which is where a rupee or two is least visible. */
+   * It gets it by having sold MORE, not by having sold dearer. Scaling the
+   * eight bills up to the figure was the obvious way and it is wrong: a stall
+   * selling 60-rupee plates of momos would have shown bills of two thousand
+   * rupees each, which is a number no one at that stall has ever written. The
+   * amount on a bill is what somebody actually bought, so it stays a sensible
+   * multiple of the price, and a bigger day is simply a longer day's worth of
+   * them.
+   *
+   * The list shows the most recent of those, which is what a transaction list
+   * is: the visible rows are not meant to add up to the day, any more than
+   * they do in the real app. */
   const asked = Number(data?.sales?.dayTotal);
-  if (Number.isFinite(asked) && asked > 0 && natural > 0) {
-    const factor = asked / natural;
-    for (const b of bills) b.amount = Math.round(b.amount * factor);
-    const drift = asked - bills.reduce((t, b) => t + b.amount, 0);
-    if (drift !== 0) {
-      const biggest = bills.reduce((a, b) => (b.amount > a.amount ? b : a), bills[0]);
-      biggest.amount += drift;
+  let total = bills.reduce((t, b) => t + b.amount, 0);
+
+  if (Number.isFinite(asked) && asked > 0 && rate > 0) {
+    const wanted = [];
+    let running = 0;
+    for (let i = 0; running < asked; i++) {
+      const base = DAY[i % DAY.length];
+      /* The last bill is trimmed to land exactly on the figure, down to one
+       * plate - a day that ends on a part-plate would be a lie about what was
+       * sold. */
+      const left = asked - running;
+      const qty = Math.min(base.qty, Math.max(1, Math.round(left / rate)));
+      const amount = qty * rate;
+      wanted.push({ ...base, qty, amount });
+      running += amount;
+      if (wanted.length > 400) break;
     }
+
+    /* Whatever rounding is left over rides on the newest bill, so the day
+     * totals exactly what the script said. */
+    const drift = asked - wanted.reduce((t, b) => t + b.amount, 0);
+    if (wanted.length && drift !== 0) wanted[0].amount += drift;
+
+    bills.length = 0;
+    /* Newest first, numbered down from the recipe's own invoice number. */
+    wanted.slice(0, DAY.length).forEach((b, i) => {
+      bills.push({ ...b, no: first - i, party: i % 3 === 2 ? party : 'Cash Sale' });
+    });
+    total = asked;
   }
 
-  const total = bills.reduce((t, b) => t + b.amount, 0);
 
   return {
     rate,
     cost,
     bills,
-    units: bills.reduce((t, b) => t + b.qty, 0),
+    /* The whole day's units, not the visible rows': the Profit & Loss costs
+     * the stock that was sold, and only a fraction of a long day's bills fit
+     * on one screen. Counting what is on screen would have had the report
+     * buying stock for eight bills and selling it for sixty. */
+    units: total > 0 && rate > 0 ? Math.round(total / rate) : bills.reduce((t, b) => t + b.qty, 0),
     total
   };
 }

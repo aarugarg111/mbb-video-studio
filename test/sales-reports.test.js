@@ -120,21 +120,35 @@ test('a shop name that would break the markup is escaped', () => {
   for (const n of BOTH) assert.ok(!SCREENS[n].render(nasty, {}).includes('<script>'), n);
 });
 
-test('a day total the script states is what the screen shows, rows and all', () => {
-  /* The figures a shopkeeper says out loud most often had nowhere to live, so
-     the day's list and the Profit & Loss showed their own arithmetic while
-     the voiceover said something else. Same defect the dashboard tiles had. */
+test('a stated day total is reached by selling more, not by selling dearer', () => {
+  /* The figures a shopkeeper says out loud had nowhere to live, so the day's
+     list and the Profit & Loss showed their own arithmetic while the
+     voiceover said something else.
+
+     Scaling the visible bills up to the figure was the first fix and it was
+     wrong: a momos stall selling 60-rupee plates came out with bills of two
+     thousand rupees each, a number nobody at that stall has ever written. The
+     amount on a bill is what somebody actually bought. A bigger day is a
+     longer day. */
   const data = {
-    items: [{ name: 'SUGAR 5KG', rate: 310, qty: 2, gst: 5, unit: 'PKT', purchase: 272 }],
-    invoice: { number: 5949 },
-    sales: { dayTotal: 45000 }
+    items: [{ name: 'VEG MOMOS PLATE', rate: 60, qty: 2, gst: 5, unit: 'PLATE', purchase: 26 }],
+    invoice: { number: 108 },
+    sales: { dayTotal: 10570 }
   };
   const day = salesOf(data);
-  assert.equal(day.total, 45000);
-  /* And the bills underneath add to it. A headline over a list that sums to
-     something else is a screen anybody can see is wrong. */
-  assert.equal(day.bills.reduce((t, b) => t + b.amount, 0), 45000);
-  for (const b of day.bills) assert.ok(b.amount > 0, 'a bill scaled away to nothing');
+  assert.equal(day.total, 10570);
+
+  /* Every visible bill is something a person could have bought at this
+     stall - a few plates, not a wedding order. */
+  for (const b of day.bills) {
+    assert.ok(b.amount > 0, 'a bill worth nothing');
+    assert.ok(b.amount <= 20 * 60, `a bill of ${b.amount} at a 60-rupee stall`);
+  }
+
+  /* And the day's units are the DAY's, not the visible rows' - the report
+     costs the stock that was sold, and only a few of a long day's bills fit
+     on one screen. */
+  assert.equal(day.units, Math.round(10570 / 60));
 });
 
 test('a net profit the script states leaves a report that still subtracts', () => {
