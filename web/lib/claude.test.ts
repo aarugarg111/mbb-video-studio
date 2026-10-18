@@ -13,6 +13,7 @@ const base: Recipe = {
   /* Nothing the script settled: every tile is worked out from the rest of the
      recipe, and the studio's own stand-in parties stay in the book. */
   dashboard: { toCollect: null, toPay: null, weekSale: null },
+  sales: { dayTotal: null, netProfit: null },
   cashflo: { parties: [] },
   brand: { endCard: null },
   unsupported: ['sharing the invoice on WhatsApp', 'batch-wise stock records'],
