@@ -80,6 +80,11 @@ export function parse(text, catalogue, options = {}) {
      * recipe rather than from the number the reference recording happened to
      * have, so the dashboard moves with the script either way. */
     dashboard: { ...(doc.dashboard || {}) },
+    /* The day's takings and what was left of them. Same reason as the
+     * dashboard tiles: a script that says a figure out loud has to be able to
+     * put it somewhere, or the screen shows its own arithmetic and the video
+     * argues with its own voiceover. */
+    sales: { ...(doc.sales || {}) },
     brand: { endCard: null, cta: { ...DEFAULT_CTA, image: true, tagline: DEFAULT_END_CARD.tagline } },
     shots: []
   };
@@ -244,6 +249,35 @@ export function parse(text, catalogue, options = {}) {
           errors.push(`${at}.balance must be a number, got ${JSON.stringify(p.balance)}.`);
         }
       });
+    }
+  }
+
+  /* The day's sale and the net profit, when a script states them. Both are
+   * money, so both are a number or a typo. */
+  if (doc.sales != null) {
+    if (typeof doc.sales !== 'object' || Array.isArray(doc.sales)) {
+      errors.push('"sales" must be a mapping of figures to amounts.');
+    } else {
+      const figures = ['dayTotal', 'netProfit'];
+      for (const [key, value] of Object.entries(doc.sales)) {
+        if (!figures.includes(key)) {
+          errors.push(`sales.${key} is not a figure. Known: ${figures.join(', ')}.`);
+        } else if (value == null) {
+          delete recipe.sales[key];
+        } else if (!(Number(value) >= 0)) {
+          errors.push(`sales.${key} must be an amount, got ${JSON.stringify(value)}.`);
+        }
+      }
+      /* Profit comes out of the takings, so a profit bigger than the sale
+       * would need a negative purchase - a report that cannot be true. */
+      const day = Number(recipe.sales.dayTotal);
+      const net = Number(recipe.sales.netProfit);
+      if (Number.isFinite(day) && Number.isFinite(net) && net > day) {
+        errors.push(
+          `sales.netProfit (${net}) is more than sales.dayTotal (${day}), which would need the shop ` +
+          'to have bought its stock for less than nothing.'
+        );
+      }
     }
   }
 

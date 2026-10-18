@@ -36,7 +36,19 @@ export function amount(n) {
 export function profitAndLoss(data) {
   const day = salesOf(data);
   const sale = day.total;
-  const purchase = day.units * day.cost;
+
+  /* A script that says what the shop cleared gets that figure - and the rest
+   * of the report is made to agree with it rather than left contradicting it.
+   * This report is four numbers in a column where each one is the one above
+   * minus the one below: state the last and the purchase has to move, or the
+   * screen shows a subtraction that does not work.
+   *
+   * salesOf has already honoured a stated day total, so "sale" here is
+   * whatever the script asked for, and the purchase follows from both. */
+  const asked = Number(data?.sales?.netProfit);
+  const purchase = Number.isFinite(asked) && asked >= 0
+    ? Math.max(0, sale - asked)
+    : day.units * day.cost;
   const gross = sale - purchase;
 
   return {

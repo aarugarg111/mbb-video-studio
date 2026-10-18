@@ -73,12 +73,35 @@ export function salesOf(data) {
     amount: s.qty * rate
   }));
 
+  const natural = bills.reduce((t, b) => t + b.amount, 0);
+
+  /* A script that says the day took a particular amount gets that amount -
+   * and so do the bills underneath it. Overriding only the headline would
+   * leave a total sitting over a list that adds up to something else, which
+   * is the same defect as an automation that said "4 parties" over a table of
+   * one: nothing fails, and anybody who reads the screen can see it is wrong.
+   *
+   * So every bill is scaled by the same factor and the rounding is given to
+   * the largest one, which is where a rupee or two is least visible. */
+  const asked = Number(data?.sales?.dayTotal);
+  if (Number.isFinite(asked) && asked > 0 && natural > 0) {
+    const factor = asked / natural;
+    for (const b of bills) b.amount = Math.round(b.amount * factor);
+    const drift = asked - bills.reduce((t, b) => t + b.amount, 0);
+    if (drift !== 0) {
+      const biggest = bills.reduce((a, b) => (b.amount > a.amount ? b : a), bills[0]);
+      biggest.amount += drift;
+    }
+  }
+
+  const total = bills.reduce((t, b) => t + b.amount, 0);
+
   return {
     rate,
     cost,
     bills,
     units: bills.reduce((t, b) => t + b.qty, 0),
-    total: bills.reduce((t, b) => t + b.amount, 0)
+    total
   };
 }
 

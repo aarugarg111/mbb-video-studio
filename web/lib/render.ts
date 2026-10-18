@@ -35,7 +35,9 @@ function paint(frame: any, recipe: any, viewport: HTMLElement, endcardRoot: HTML
        in step or the browser and CLI renders stop matching. */
     cashflo: recipe.cashflo,
     /* The dashboard tiles a recipe states outright. */
-    dashboard: recipe.dashboard
+    dashboard: recipe.dashboard,
+    /* And the day's takings and what was left of them, for the same reason. */
+    sales: recipe.sales
   };
 
   const layers: string[] = [];

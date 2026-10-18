@@ -138,6 +138,14 @@ export const RecipeSchema = z.object({
     toPay: z.number().nullable(),
     weekSale: z.number().nullable()
   }),
+  /* The day's takings and what was left of them - the two figures a shopkeeper
+   * says out loud most often. Without these the day's list and the Profit &
+   * Loss showed their own arithmetic while the voiceover said something else.
+   * Null means the script never settled it and the studio works it out. */
+  sales: z.object({
+    dayTotal: z.number().nullable(),
+    netProfit: z.number().nullable()
+  }),
   /* The collections book the myCashFlo screens read from. An empty list leaves
    * the studio's own stand-in parties in place. */
   cashflo: z.object({

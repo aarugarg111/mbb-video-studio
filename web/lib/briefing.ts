@@ -34,7 +34,12 @@ function screenTable(): string {
   return Object.entries(SCREENS)
     .map(([screen, targets]) => {
       const list = (targets as readonly string[]);
-      return `  ${screen}${list.length ? ` - tap targets: ${list.join(', ')}` : ' - no tap targets'}`;
+      /* Terse on purpose. This table grows with every screen and is most of
+         the briefing's length, and people paste the briefing by hand into a
+         chat box with an input limit. "screen: a, b, c" says exactly what
+         "screen - tap targets: a, b, c" said, in seventeen fewer characters
+         a line - most of a page across the catalogue. */
+      return `  ${screen}${list.length ? `: ${list.join(', ')}` : ': (nothing to tap)'}`;
     })
     .join('\n');
 }

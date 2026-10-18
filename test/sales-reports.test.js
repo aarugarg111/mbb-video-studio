@@ -119,3 +119,45 @@ test('a shop name that would break the markup is escaped', () => {
   const nasty = { business: { name: '<script>x</script>' }, items: [{ name: 'X', rate: 5 }] };
   for (const n of BOTH) assert.ok(!SCREENS[n].render(nasty, {}).includes('<script>'), n);
 });
+
+test('a day total the script states is what the screen shows, rows and all', () => {
+  /* The figures a shopkeeper says out loud most often had nowhere to live, so
+     the day's list and the Profit & Loss showed their own arithmetic while
+     the voiceover said something else. Same defect the dashboard tiles had. */
+  const data = {
+    items: [{ name: 'SUGAR 5KG', rate: 310, qty: 2, gst: 5, unit: 'PKT', purchase: 272 }],
+    invoice: { number: 5949 },
+    sales: { dayTotal: 45000 }
+  };
+  const day = salesOf(data);
+  assert.equal(day.total, 45000);
+  /* And the bills underneath add to it. A headline over a list that sums to
+     something else is a screen anybody can see is wrong. */
+  assert.equal(day.bills.reduce((t, b) => t + b.amount, 0), 45000);
+  for (const b of day.bills) assert.ok(b.amount > 0, 'a bill scaled away to nothing');
+});
+
+test('a net profit the script states leaves a report that still subtracts', () => {
+  const data = {
+    items: [{ name: 'SUGAR 5KG', rate: 310, qty: 2, gst: 5, unit: 'PKT', purchase: 272 }],
+    invoice: { number: 5949 },
+    sales: { dayTotal: 45000, netProfit: 12000 }
+  };
+  const pl = profitAndLoss(data);
+  assert.equal(pl.net, 12000);
+  assert.equal(pl.sale, 45000);
+  /* This report is a column where each figure is the one above minus the one
+     below. State the last and the purchase has to move with it. */
+  assert.equal(pl.sale - pl.purchase, pl.net);
+  assert.ok(pl.purchase >= 0, 'the shop cannot have bought stock for less than nothing');
+});
+
+test('a recipe that states neither figure is left exactly as it was', () => {
+  const data = {
+    items: [{ name: 'SUGAR 5KG', rate: 310, qty: 2, gst: 5, unit: 'PKT', purchase: 272 }],
+    invoice: { number: 5949 }
+  };
+  const day = salesOf(data);
+  assert.equal(day.total, day.bills.reduce((t, b) => t + b.amount, 0));
+  assert.equal(profitAndLoss(data).purchase, day.units * day.cost);
+});
