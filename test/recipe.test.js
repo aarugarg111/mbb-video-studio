@@ -538,3 +538,26 @@ shots:
     assert.match(errors.join(' '), /duration must be a number of seconds greater than zero/);
   }
 });
+
+test('everything that reads a shot list tells it which screens scroll', async () => {
+  /* parse() sees screen names and their buttons, never the screens
+     themselves, so it has to be TOLD which ones have a list worth scrolling.
+     Left out, the answer is "none", and a perfectly good scroll is refused
+     with "Screens that scroll: ." - which is what the studio did, because the
+     command line was wired up and the web page was not.
+
+     Checked at the source rather than by behaviour: a third caller added
+     later would be wrong in exactly the same way, and nothing else would
+     notice. */
+  const { readFile } = await import('node:fs/promises');
+  const callers = ['../worker/compile.js', '../web/app/page.tsx'];
+
+  for (const file of callers) {
+    const src = await readFile(new URL(file, import.meta.url), 'utf8');
+    assert.match(src, /parse\(/, `${file} no longer reads a shot list - update this test`);
+    assert.match(
+      src, /scrollable:\s*scrollables\(\)/,
+      `${file} reads a shot list without saying which screens scroll`
+    );
+  }
+});

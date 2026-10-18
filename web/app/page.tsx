@@ -15,7 +15,7 @@ import { Stage } from './studio/stage';
 import { ShotListForm } from './studio/shot-list';
 // The renderer's own validator - the same one the CLI uses.
 import { parse } from '../../src/recipe.js';
-import { catalogue } from '../../screens/index.js';
+import { catalogue, scrollables } from '../../screens/index.js';
 
 type Step = 'fill' | 'check' | 'rendering' | 'done';
 
@@ -257,7 +257,10 @@ export default function Page() {
 
     let checked: any;
     try {
-      checked = parse(recipe, catalogue(), { ctaImage: await ctaImageExists() });
+      checked = parse(recipe, catalogue(), {
+        scrollable: scrollables(),
+        ctaImage: await ctaImageExists()
+      });
     } catch (e) {
       setError(e instanceof Error ? e.message : 'The shot list could not be read.');
       return;
