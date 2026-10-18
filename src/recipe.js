@@ -382,8 +382,17 @@ export function parse(text, catalogue, options = {}) {
       }
 
       if ((action.do === 'tap' || action.do === 'type' || action.do === 'zoom') && !targets.includes(action.target)) {
+        /* Naming a button that lives on a DIFFERENT screen is the commonest
+         * way this goes wrong, and a bare list of valid targets does not help
+         * with it: whoever wrote the shot knows what they meant to tap, they
+         * just had the wrong screen under it. So say where it actually is. */
+        const elsewhere = Object.entries(catalogue)
+          .filter(([name, list]) => name !== shot.screen && list.includes(action.target))
+          .map(([name]) => name);
+
         errors.push(
           `${at}: "${action.target}" is not on the ${shot.screen} screen. ` +
+          (elsewhere.length ? `It is on ${elsewhere.join(', ')} - cut to one of those to tap it. ` : '') +
           `Valid targets: ${targets.join(', ')}.`
         );
         return;

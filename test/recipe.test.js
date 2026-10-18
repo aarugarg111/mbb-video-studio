@@ -472,3 +472,46 @@ shots:
 `, { ...CATALOGUE, 'wa-chat': ['back'], 'wa-attach': ['send'] });
   assert.ok(!r.warnings.some(w => /after the invoice is delivered/.test(w)));
 });
+
+test('a target named on the wrong screen says which screen has it', () => {
+  /* The bare list of valid targets does not help with the commonest mistake:
+     whoever wrote the shot knew what they wanted to tap and had the wrong
+     screen under it. "add-item" is a real button - on another screen. */
+  const { errors } = parse(`
+video: wrong-screen
+business: { name: Shop }
+party: { name: Ravi }
+invoice: { number: 1, date: "01/01/2026" }
+items: [{ name: X, rate: 10, qty: 1, gst: 5, unit: PCS }]
+shots:
+  - screen: home
+    duration: 2
+    actions:
+      - { at: 1, do: tap, target: add-item }
+`, CATALOGUE);
+  assert.ok(errors, 'a button from another screen must not pass');
+  const said = errors.join(' ');
+  assert.match(said, /is not on the home screen/);
+  assert.match(said, /It is on create-invoice/);
+});
+
+test('a target that exists nowhere just lists what is valid', () => {
+  /* And no "it is on" clause when there is no such button anywhere: a made-up
+     name must not be answered with a confident pointer to nothing. */
+  const { errors } = parse(`
+video: no-such-button
+business: { name: Shop }
+party: { name: Ravi }
+invoice: { number: 1, date: "01/01/2026" }
+items: [{ name: X, rate: 10, qty: 1, gst: 5, unit: PCS }]
+shots:
+  - screen: home
+    duration: 2
+    actions:
+      - { at: 1, do: tap, target: total }
+`, CATALOGUE);
+  assert.ok(errors);
+  const said = errors.join(' ');
+  assert.match(said, /"total" is not on the home screen/);
+  assert.doesNotMatch(said, /It is on/);
+});
