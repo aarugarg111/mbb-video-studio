@@ -44,18 +44,56 @@ function screenTable(): string {
     .join('\n');
 }
 
+type Node = {
+  type?: string | string[];
+  enum?: unknown[];
+  properties?: Record<string, Node>;
+  required?: string[];
+  items?: Node;
+};
+
+/* One field of the shape, as a line a person could read.
+ *
+ * This used to hand over the JSON Schema itself, all seven and a half thousand
+ * characters of it, which was most of the briefing. The API call does not need
+ * it - it enforces the schema itself - and the briefing goes to somebody
+ * pasting into another chat window, where a readable outline says the same
+ * thing and leaves room for the instructions that actually matter.
+ *
+ * Still generated from the schema rather than written out, so it cannot
+ * describe a recipe the renderer stopped accepting. */
+function outline(node: Node, indent: string, optional: boolean): string {
+  const nullable = Array.isArray(node.type) && node.type.includes('null');
+  const tail = optional ? '' : nullable ? ', or null if the script does not say' : '';
+
+  if (node.enum) {
+    const list = node.enum as string[];
+    const shown = list.length > 8 ? list.slice(0, 8).join(' | ') + ' | ...' : list.join(' | ');
+    return ` one of: ${shown}`;
+  }
+  if (node.properties) {
+    const keys = Object.keys(node.properties);
+    return '\n' + keys.map(k => {
+      const child = node.properties![k];
+      const opt = !(node.required ?? []).includes(k);
+      return `${indent}  ${k}${opt ? ' (optional)' : ''}:${outline(child, indent + '  ', opt)}`;
+    }).join('\n');
+  }
+  if (node.items) return ` a list of${outline(node.items, indent + '  ', false)}`;
+
+  const kind = Array.isArray(node.type) ? node.type.filter(t => t !== 'null')[0] : node.type;
+  return ` ${kind ?? 'value'}${tail}`;
+}
+
 export function shapeOfARecipe(): string {
-  const schema = z.toJSONSchema(RecipeSchema) as {
-    properties?: Record<string, unknown>;
-    required?: string[];
-  };
+  const schema = z.toJSONSchema(RecipeSchema) as Node;
   /* "unsupported" is how the studio's own API call reports features the script
    * asked for and no screen can show. It is stripped from the recipe before
    * rendering and means nothing in a YAML shot list - so asking another tool
    * for it would only put a key in the file that the renderer throws away. */
   delete schema.properties?.unsupported;
   schema.required = (schema.required ?? []).filter(key => key !== 'unsupported');
-  return JSON.stringify(schema, null, 2);
+  return outline(schema, '', false).replace(/^\n/, '');
 }
 
 export function briefingFor(script: string, details: Details = {}): string {

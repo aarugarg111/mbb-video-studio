@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { briefingFor, shapeOfARecipe } from './briefing';
 import { SYSTEM } from './claude';
-import { SCREENS, SCREEN_NAMES } from './schema';
+import { SCREENS, SCREEN_NAMES, RecipeSchema } from './schema';
 
 const SCRIPT = 'Bhaiya ne bola, bill banao. [Internal team adds: UI - create-invoice]';
 
@@ -54,21 +54,37 @@ test('it asks for YAML only, since a chat window has no structured output', () =
 });
 
 test('the shape handed over is generated, so it cannot describe a stale recipe', () => {
+  /* It used to be the JSON Schema itself, and it was seven and a half thousand
+     characters - most of the briefing. The API call enforces the schema on its
+     own; this goes to somebody pasting into another chat window, where an
+     outline says the same thing in a page.
+
+     Generated either way, which is the part that matters: a field added to the
+     recipe appears here without anybody remembering to write it down. */
   const shape = shapeOfARecipe();
-  const parsed = JSON.parse(shape);
-  assert.equal(typeof parsed, 'object');
-  assert.ok(JSON.stringify(parsed).includes('shots'));
+  for (const key of Object.keys(RecipeSchema.shape)) {
+    if (key === 'unsupported') continue;
+    assert.match(shape, new RegExp(`\\b${key}:`), `the shape never mentions ${key}`);
+  }
+  /* Down a level too, or a nested field could go missing unnoticed. */
+  assert.match(shape, /dayTotal:/);
+  assert.match(shape, /netProfit:/);
+  assert.match(shape, /duration:/);
+  assert.ok(shape.length < 2500, `the outline has grown back to ${shape.length} characters`);
 });
 
 test('the briefing is small enough to paste into a chat box', () => {
   /* Chat windows have input limits and people paste by hand.
 
-     The advice here used to be "trim the screens table". That is no longer
-     where the weight is: forty-eight screens come to 3,700 characters, about
-     a ninth of this. The big blocks are the rules in claude.ts and the JSON
-     schema under them, and the rules are what grows every time the studio
-     learns something. So when this fails, tighten the newest rules - they are
-     usually written long - before touching the table or this number. */
+     Two things it used to say are now dealt with. "Trim the screens table" was
+     wrong - forty-eight screens are 3,700 characters, about a seventh of this.
+     And the JSON Schema beneath the rules was 7,900, which is gone: the shape
+     is an outline now, and the API call enforces the schema itself.
+
+     What is left is the rules in claude.ts, and they grow every time the
+     studio learns something. So when this fails, tighten the newest ones -
+     they are usually written long - before touching the table or this
+     number. */
   const briefing = briefingFor(SCRIPT);
   assert.ok(briefing.length < 32000, `the briefing has grown to ${briefing.length} characters`);
 });
