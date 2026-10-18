@@ -26,6 +26,10 @@ export const targets = {
   'new-bill': { x: 299, y: 781 }
 };
 
+/* This screen's list can be scrolled. A day of sixty bills shows six at a
+ * time, and until this existed there was no way to film the rest of them. */
+export const scrolls = true;
+
 /* Narrowing the range to today is the beat a day-in-the-life script wants. */
 export const tapEffects = { 'change-range': { today: 1 } };
 
@@ -45,6 +49,12 @@ const NAV = [
  * "N day(s) overdue" beside that date. An earlier version printed times, which
  * no myBillBook screen does.
  */
+/* The day the range lands on when it is narrowed to today. Every bill on the
+ * list is then dated it: a range reading "Today" over bills from three
+ * different days is a screen contradicting itself, and the longer the list
+ * got the more of them you could see at once. */
+const TODAY = '13 Oct';
+
 const DAY = [
   { qty: 5, paid: true, when: '13 Oct' },
   { qty: 3, paid: true, when: '13 Oct' },
@@ -112,7 +122,10 @@ export function salesOf(data) {
 
     bills.length = 0;
     /* Newest first, numbered down from the recipe's own invoice number. */
-    wanted.slice(0, DAY.length).forEach((b, i) => {
+    /* Enough rows that scrolling has somewhere to go. Six fit on screen; a
+     * day of sixty bills that ran dry after eight would make the scroll look
+     * like the end of the day rather than the middle of it. */
+    wanted.slice(0, 24).forEach((b, i) => {
       bills.push({ ...b, no: first - i, party: i % 3 === 2 ? party : 'Cash Sale' });
     });
     total = asked;
@@ -135,6 +148,8 @@ export function salesOf(data) {
 export function render(data, state) {
   const day = salesOf(data);
   const today = Number(state?.today ?? 0) > 0;
+  /* How far the thumb has pushed the list up, from the timeline. */
+  const scroll = Math.max(0, Number(state?.scroll ?? 0));
 
   const card = (b, i) => `
     <div class="sl-card" ${i === 0 ? 'id="bill-row-0"' : ''}>
@@ -146,7 +161,7 @@ export function render(data, state) {
         <div class="sl-amt">${formatINR(b.amount)}</div>
       </div>
       <div class="sl-bot">
-        <div class="sl-when">${esc(b.when)}${b.overdue ? `<span class="sl-dot">&#183;</span><span class="sl-late">${b.overdue} day(s) overdue</span>` : ''}</div>
+        <div class="sl-when">${esc(today ? TODAY : b.when)}${b.overdue ? `<span class="sl-dot">&#183;</span><span class="sl-late">${b.overdue} day(s) overdue</span>` : ''}</div>
         <span class="sl-pill ${b.paid ? 'paid' : 'unpaid'}">${b.paid ? 'Paid' : 'Unpaid'}</span>
       </div>
       ${b.paid ? '' : `
@@ -175,7 +190,9 @@ export function render(data, state) {
     <span class="sl-change" id="change-range">CHANGE</span>
   </div>
 
-  <div class="sl-list">${day.bills.map(card).join('')}</div>
+  <div class="sl-scroll">
+    <div class="sl-list" style="transform: translateY(${(-scroll).toFixed(1)}px)">${day.bills.map(card).join('')}</div>
+  </div>
 
   <div class="floatbtns">
     <div class="fb dark" id="received-payment">Received Payment</div>

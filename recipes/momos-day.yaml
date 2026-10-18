@@ -33,19 +33,26 @@ items:
   - { name: VEG MOMOS PLATE, rate: 60, qty: 2, gst: 5, unit: PLATE, purchase: 26 }
 
 shots:
-  # Every bill of the day, narrowed to today.
+  # Scene 6, the reveal. Narrow the range to today, then scroll the day's
+  # cash sales past the camera - sixty bills at a momos stall, six on screen
+  # at a time, so the scroll is the only way to show that there were that
+  # many.
   - screen: sales-list
-    duration: 3.6
+    duration: 7.0
     actions:
-      - { at: 1.8, do: tap, target: change-range }
+      - { at: 1.2, do: tap, target: change-range }
+      - { at: 2.8, do: scroll, distance: 300, duration: 1.6 }
+      - { at: 4.8, do: scroll, distance: 300, duration: 1.6 }
 
-  # Dashboard -> Reports. Without this beat the video cut from the day's bills
-  # straight into the Profit and Loss report with nothing explaining the jump.
+  # The total. It is NOT on the list - the real screen has no total on it -
+  # so it is read where the app actually shows it: the week's takings on the
+  # home screen, which for a one-day recipe is the day's.
   - screen: home
-    duration: 2.2
+    duration: 3.0
     actions:
-      - { at: 1.2, do: tap, target: reports }
+      - { at: 1.6, do: tap, target: reports }
 
-  # And what it actually earned - Net Profit is the figure the script asks for.
+  # And what was left of it: Sale 10,570 less Purchase 8,150 is Net Profit
+  # 2,420, which is the figure the script ends on.
   - screen: profit-loss
-    duration: 3.8
+    duration: 4.0

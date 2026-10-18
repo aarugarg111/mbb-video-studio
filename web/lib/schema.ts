@@ -102,7 +102,7 @@ export const SCREENS = {
  * the model to propose, because this is what it is actually constrained to. */
 export const SCREEN_NAMES = Object.keys(SCREENS) as [keyof typeof SCREENS, ...(keyof typeof SCREENS)[]];
 
-export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem', 'zoom', 'zoomOut'] as const;
+export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem', 'zoom', 'zoomOut', 'scroll'] as const;
 
 /* Mirrors the PNGs in kit/themes/, plus the built-in CSS washes. A theme named
  * here but absent from that folder renders plain and warns - never fails. */
@@ -182,6 +182,9 @@ export const RecipeSchema = z.object({
           target: z.string().optional(),
           text: z.string().optional(),
           index: z.number().int().optional(),
+          /* scroll only: how far down the screen's list to move, in its own
+             pixels. Left out, it moves a little over one card. */
+          distance: z.number().optional(),
           duration: z.number().optional()
         })
       )

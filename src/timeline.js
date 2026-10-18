@@ -19,6 +19,10 @@ import { SCREENS } from '../screens/index.js';
 
 export const TRANSITION_SECONDS = 0.25;
 
+const SCROLL_SECONDS = 1.2;
+/* A little over one card: enough to see the list move and to bring the next
+ * ones up, without flinging past what the viewer was reading. */
+const SCROLL_DISTANCE = 240;
 const PARTY_SECONDS = 0.3;
 const ITEM_SECONDS = 0.35;
 const RIPPLE_SECONDS = 0.6;
@@ -82,6 +86,8 @@ export function stateAt(recipe, t) {
     : null;
 
   const screenState = {
+    /* How far the screen's own list has been scrolled, in its pixels. */
+    scroll: 0,
     party: 0,
     items: recipe.items.map(() => 0),
     total: 0,
@@ -130,6 +136,20 @@ export function stateAt(recipe, t) {
             screenState.items[action.index] = easeOut(ramp(at, action.at, ITEM_SECONDS));
           }
           break;
+
+        /* Scrolling a long list, which until now could not be filmed: a
+         * screen showing six of a day's sixty bills had no way to show that
+         * there were more. The distance is in the screen's own pixels and
+         * eases like everything else, so it reads as a thumb rather than as
+         * a jump cut.
+         *
+         * It survives the shot it happened in - a list scrolled down stays
+         * scrolled while the rest of the shot plays out. */
+        case 'scroll': {
+          const over = action.duration ?? SCROLL_SECONDS;
+          screenState.scroll += easeOut(ramp(at, action.at, over)) * (action.distance ?? SCROLL_DISTANCE);
+          break;
+        }
 
         case 'type': {
           if (!current) break;

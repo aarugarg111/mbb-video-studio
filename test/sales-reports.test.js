@@ -175,3 +175,31 @@ test('a recipe that states neither figure is left exactly as it was', () => {
   assert.equal(day.total, day.bills.reduce((t, b) => t + b.amount, 0));
   assert.equal(profitAndLoss(data).purchase, day.units * day.cost);
 });
+
+test('a list narrowed to today is dated today, all the way down', () => {
+  /* A range reading "Today" over bills from three different days is a screen
+     contradicting itself, and the longer the list got - once it could be
+     scrolled - the more of them a viewer could see at once. */
+  const data = {
+    items: [{ name: 'VEG MOMOS PLATE', rate: 60, qty: 2, gst: 5, unit: 'PLATE', purchase: 26 }],
+    invoice: { number: 108 },
+    sales: { dayTotal: 10570 }
+  };
+  const html = SCREENS['sales-list'].render(data, { today: 1 });
+  const dates = [...html.matchAll(/class="sl-when">([^<]*)/g)].map(m => m[1].trim());
+  assert.ok(dates.length > 6, 'a day worth scrolling should have more bills than fit');
+  for (const d of dates) assert.equal(d, '13 Oct', `a bill dated ${d} under a "Today" range`);
+});
+
+test('scrolling moves the list and nothing else', () => {
+  /* The cards used to translate up the page and straight over the search bar
+     and the filter pills, because there was no box for them to scroll
+     inside. */
+  const data = { items: [{ rate: 60 }], invoice: { number: 108 } };
+  const still = SCREENS['sales-list'].render(data, {});
+  const moved = SCREENS['sales-list'].render(data, { scroll: 240 });
+  assert.match(still, /sl-list" style="transform: translateY\(-?0\.0px\)/);
+  assert.match(moved, /sl-list" style="transform: translateY\(-240\.0px\)/);
+  /* And it does it inside something that clips. */
+  assert.match(moved, /class="sl-scroll"/);
+});

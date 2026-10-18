@@ -106,3 +106,10 @@ export function catalogue() {
   }
   return out;
 }
+
+/* Which screens have a list long enough to be worth scrolling. A screen says
+ * so itself; a recipe that scrolls one that does not would play as a shot
+ * where nothing happens, and nothing else would report it. */
+export function scrollables() {
+  return Object.entries(SCREENS).filter(([, mod]) => mod.scrolls).map(([key]) => key);
+}

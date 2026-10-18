@@ -18,7 +18,7 @@ const BRAND_KEYS = ['endCard', 'cta'];
 const CTA_KEYS = ['duration'];
 const END_CARD_KEYS = ['duration', 'tagline'];
 
-export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem', 'zoom', 'zoomOut'];
+export const ACTIONS = ['tap', 'type', 'selectParty', 'addItem', 'zoom', 'zoomOut', 'scroll'];
 
 /* How close a zoom may push. Past about four the screen is a few words wide
  * and the viewer loses where they are; below 1.2 nothing appears to happen. */
@@ -62,6 +62,10 @@ export function parse(text, catalogue, options = {}) {
   }
 
   const screenNames = Object.keys(catalogue);
+  /* Which screens have a list worth scrolling. The caller knows; this file
+   * sees only screen names and their targets. Unspecified, nothing scrolls,
+   * which refuses the action rather than letting it play as a dead shot. */
+  const scrollable = options.scrollable ?? [];
 
   const recipe = {
     video: doc.video ?? 'untitled',
@@ -395,6 +399,22 @@ export function parse(text, catalogue, options = {}) {
           (elsewhere.length ? `It is on ${elsewhere.join(', ')} - cut to one of those to tap it. ` : '') +
           `Valid targets: ${targets.join(', ')}.`
         );
+        return;
+      }
+
+      /* Scrolling a screen with nothing to scroll would play as a shot where
+       * nothing happens, and nothing would report it. A screen says for
+       * itself whether it has a list long enough to move. */
+      if (action.do === 'scroll' && !scrollable.includes(shot.screen)) {
+        errors.push(
+          `${at}: the ${shot.screen} screen does not scroll - everything on it is already on screen. ` +
+          `Screens that scroll: ${scrollable.join(', ')}.`
+        );
+        return;
+      }
+
+      if (action.do === 'scroll' && action.distance != null && !(Number(action.distance) > 0)) {
+        errors.push(`${at}: scroll distance must be a number of pixels greater than zero, got ${JSON.stringify(action.distance)}.`);
         return;
       }
 

@@ -12,17 +12,22 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { parse, BUILT_IN_THEMES } from '../src/recipe.js';
-import { catalogue } from '../screens/index.js';
+import { catalogue, scrollables } from '../screens/index.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 export async function compile(text) {
-  /* Theme art dropped into kit/themes/<name>.png becomes a valid theme name. */
+  /* Theme art dropped into kit/themes/ becomes a valid theme name. Both
+   * extensions: the art is photographic and arrives as JPEG, and this looked
+   * for .png only - which it had never had to be right about, because until
+   * the first pictures arrived the folder held nothing but a README. */
   const art = (await readdir(join(ROOT, 'kit', 'themes')).catch(() => []))
-    .filter(f => f.endsWith('.png')).map(f => f.slice(0, -4));
+    .filter(f => /.(png|jpe?g|webp)$/i.test(f))
+    .map(f => f.replace(/.[^.]+$/, ''));
 
   return parse(text, catalogue(), {
     themes: [...BUILT_IN_THEMES, ...art],
+    scrollable: scrollables(),
     ctaImage: existsSync(join(ROOT, 'kit', 'cta', 'download-now.png'))
   });
 }

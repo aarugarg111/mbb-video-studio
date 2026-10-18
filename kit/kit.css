@@ -1205,7 +1205,12 @@
 .sl-range-v { font-size: 11px; color: var(--mbb-ink-muted); }
 .sl-change { margin-left: auto; font-size: 11.5px; font-weight: 700; color: var(--mbb-primary); }
 
-.sl-list { flex: 1; min-height: 0; padding: 11px 16px 0; display: flex; flex-direction: column; gap: 10px; }
+.sl-scroll { flex: 1; min-height: 0; overflow: hidden; position: relative; z-index: 0; }
+.sl-list { padding: 11px 16px 0; display: flex; flex-direction: column; gap: 10px; }
+/* Above the list, so what scrolls disappears behind it rather than over it. */
+.sl-search, .sl-filters, .sl-range { position: relative; z-index: 1; }
+.sl-search, .sl-range { background-clip: padding-box; }
+.slscreen > .sl-filters { background: var(--mbb-tint-100); }
 .sl-card { padding: 13px 15px; border-radius: 9px; background: var(--mbb-surface); box-shadow: 0 1px 4px var(--mbb-card-shadow); }
 .sl-party { font-size: 12.5px; font-weight: 700; color: var(--mbb-ink); }
 .sl-mid { display: flex; align-items: baseline; justify-content: space-between; margin-top: 7px; }
