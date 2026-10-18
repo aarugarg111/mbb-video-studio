@@ -12,6 +12,7 @@ import { renderRemotely, canRenderRemotely } from '@/lib/render-remote';
 import { briefingFor } from '@/lib/briefing';
 import { runSelfTest, asReport, type Step as CheckStep } from '@/lib/selftest';
 import { Stage } from './studio/stage';
+import { ShotListForm } from './studio/shot-list';
 // The renderer's own validator - the same one the CLI uses.
 import { parse } from '../../src/recipe.js';
 import { catalogue } from '../../screens/index.js';
@@ -70,6 +71,9 @@ export default function Page() {
   /* Set when the shot list came from somewhere other than the studio's own
      Claude call, so the check step can explain what to do with an empty box. */
   const [byHand, setByHand] = useState(false);
+  /* The shot list as a form rather than as text. Off by default: the studio
+   * writes a shot list and renders it, and most clips never need this. */
+  const [asForm, setAsForm] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const urlRef = useRef('');
 
@@ -459,9 +463,18 @@ export default function Page() {
               instructions into the AI of your choice first.
             </div>
           )}
-          <label htmlFor="recipe">The shot list — change anything that looks wrong</label>
-          <textarea id="recipe" className="recipe" value={recipe}
-                    onChange={e => setRecipe(e.target.value)} />
+          <div className="sl-switch">
+            <label htmlFor="recipe">The shot list — change anything that looks wrong</label>
+            <button type="button" className="sl-toggle" aria-pressed={asForm}
+                    onClick={() => setAsForm(v => !v)}>
+              {asForm ? 'Show it as text' : 'Adjust it in a form'}
+            </button>
+          </div>
+
+          {asForm
+            ? <ShotListForm recipe={recipe} onChange={setRecipe} />
+            : <textarea id="recipe" className="recipe" value={recipe}
+                        onChange={e => setRecipe(e.target.value)} />}
 
           <div className="row">
             <button onClick={render} disabled={busy || (!supported && !canRemote)}>Render the video</button>

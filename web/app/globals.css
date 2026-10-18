@@ -271,3 +271,72 @@ video { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 20px; di
 .shape-k { font-size: 13px; font-weight: 600; color: var(--muted); margin-right: 2px; }
 .shape-pick { padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
 .shape-pick.on { border-color: var(--brand); background: var(--brand); color: #fff; }
+
+/* ---- The shot list as a form -------------------------------------------
+ * Optional, and never in the way: the studio writes a shot list and renders
+ * it without this being opened. Built from the page's own tokens so it reads
+ * as part of the studio rather than as a panel bolted onto it. */
+.sl-switch { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.sl-toggle {
+  background: transparent; color: var(--orange); border: 1px solid var(--line);
+  border-radius: 7px; padding: 5px 11px; font-size: 13px; cursor: pointer;
+}
+.sl-toggle[aria-pressed="true"] { background: var(--orange); border-color: var(--orange); color: #fff; }
+
+.sl-form { margin-top: 10px; }
+.sl-scene { border: 1px solid var(--line); border-radius: 10px; padding: 13px 14px; margin-bottom: 11px; }
+.sl-scene-head { display: flex; align-items: flex-start; gap: 10px; }
+.sl-num {
+  flex: none; width: 23px; height: 23px; border-radius: 6px; margin-top: 1px;
+  display: grid; place-items: center; background: var(--line); color: var(--ink);
+  font-size: 12px; font-variant-numeric: tabular-nums;
+}
+.sl-scene-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.sl-scene-title { font-weight: 700; }
+.sl-scene-sub { font-size: 12.5px; color: var(--muted); }
+.sl-x {
+  flex: none; background: none; border: none; color: var(--muted);
+  font-size: 19px; line-height: 1; padding: 2px 5px; cursor: pointer;
+}
+.sl-x:hover { color: var(--orange); background: none; }
+
+.sl-field { display: block; margin-top: 9px; }
+.sl-k {
+  display: block; font-size: 11px; font-weight: 700; letter-spacing: .05em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 3px;
+}
+.sl-field select, .sl-field input[type="number"], .sl-add {
+  width: 100%; font: inherit; font-size: 14px; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px; background: #fff;
+}
+.sl-knob { display: flex; align-items: center; gap: 9px; margin-top: 4px; }
+.sl-knob input[type="range"] { flex: 1; min-width: 0; accent-color: var(--orange); }
+.sl-val {
+  flex: none; font-size: 12.5px; color: var(--muted);
+  min-width: 62px; text-align: right; font-variant-numeric: tabular-nums;
+}
+
+.sl-steps { margin-top: 11px; border-top: 1px dashed var(--line); padding-top: 10px; }
+.sl-step { display: flex; align-items: flex-start; gap: 9px; padding: 6px 0; }
+.sl-step + .sl-step { border-top: 1px solid #F0F0F0; }
+.sl-when {
+  flex: none; width: 40px; font-size: 12px; color: var(--muted);
+  font-variant-numeric: tabular-nums; padding-top: 2px;
+}
+.sl-what { flex: 1; min-width: 0; }
+.sl-step-name { font-size: 14px; }
+.sl-pill {
+  display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2px 6px; border-radius: 4px;
+  background: #ECEFF5; color: #3A4FA8;
+}
+.sl-pill.scroll { background: #FBEADF; color: var(--orange); }
+.sl-none { margin: 0 0 8px; font-size: 12.5px; color: var(--muted); }
+.sl-add { margin-top: 8px; }
+
+.sl-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+.sl-total { font-size: 13px; color: var(--muted); }
+.sl-total b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.sl-figures { margin-top: 16px; border: 1px solid var(--line); border-radius: 10px; padding: 13px 14px; }
+.sl-warn { margin: 9px 0 0; font-size: 12.5px; color: var(--orange); }
