@@ -515,3 +515,26 @@ shots:
   assert.match(said, /"total" is not on the home screen/);
   assert.doesNotMatch(said, /It is on/);
 });
+
+test('a duration of zero is refused rather than flickering', () => {
+  /* Zero divides: ramp returns NaN on the single frame where the clock is
+     exactly on the action, the browser drops a transform it cannot read, and
+     the list snaps back for one frame. Nobody reviewing a shot list would
+     catch that, and nobody watching would be able to say what they saw. */
+  for (const bad of [0, -1]) {
+    const { errors } = parse(`
+video: bad-duration
+business: { name: Shop }
+party: { name: Ravi }
+invoice: { number: 1, date: "01/01/2026" }
+items: [{ name: X, rate: 10, qty: 1, gst: 5, unit: PCS }]
+shots:
+  - screen: home
+    duration: 3
+    actions:
+      - { at: 1, do: tap, target: create-invoice-cta, duration: ${bad} }
+`, CATALOGUE);
+    assert.ok(errors, `duration ${bad} should be refused`);
+    assert.match(errors.join(' '), /duration must be a number of seconds greater than zero/);
+  }
+});

@@ -413,6 +413,17 @@ export function parse(text, catalogue, options = {}) {
         return;
       }
 
+      /* How long a scroll or a typed word takes. Nothing checked it, and the
+       * two ways to get it wrong both fail quietly: zero divides and puts a
+       * NaN in the transform, which the browser drops - so the list snaps
+       * back for exactly one frame - and a negative one never moves at all. */
+      if (action.duration != null && !(Number(action.duration) > 0)) {
+        errors.push(
+          `${at}: duration must be a number of seconds greater than zero, got ${JSON.stringify(action.duration)}.`
+        );
+        return;
+      }
+
       if (action.do === 'scroll' && action.distance != null && !(Number(action.distance) > 0)) {
         errors.push(`${at}: scroll distance must be a number of pixels greater than zero, got ${JSON.stringify(action.distance)}.`);
         return;
