@@ -61,9 +61,14 @@ test('the shape handed over is generated, so it cannot describe a stale recipe',
 });
 
 test('the briefing is small enough to paste into a chat box', () => {
-  /* Chat windows have input limits and people paste by hand. If this ever
-     grows past a point where it is awkward, the screens table is the part to
-     trim, not the instructions. */
+  /* Chat windows have input limits and people paste by hand.
+
+     The advice here used to be "trim the screens table". That is no longer
+     where the weight is: forty-eight screens come to 3,700 characters, about
+     a ninth of this. The big blocks are the rules in claude.ts and the JSON
+     schema under them, and the rules are what grows every time the studio
+     learns something. So when this fails, tighten the newest rules - they are
+     usually written long - before touching the table or this number. */
   const briefing = briefingFor(SCRIPT);
   assert.ok(briefing.length < 32000, `the briefing has grown to ${briefing.length} characters`);
 });
