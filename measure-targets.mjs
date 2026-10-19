@@ -8,6 +8,11 @@
  *
  *   node measure-targets.mjs <recipe.yaml> <screen> [more screens...]
  *
+ * Measure laptop screens in a run of their own. Asking for a laptop screen
+ * after a phone one leaves part of the laptop frame without a size, and
+ * anything inside a clipping box on it - a scrolling list - reports as
+ * untappable rather than as a wrong number.
+ *
  * It prints a targets block ready to paste, listing only the ids the screen
  * actually emits - an id in `targets` with no element behind it cannot be
  * tapped and nothing otherwise complains.
@@ -101,6 +106,23 @@ for (const screen of screens) {
   }
   for (const id of Object.keys(mod.targets ?? {})) if (!(id in measured)) measured[id] = null;
 
+  /* Every target landing on one point is the signature of a screen that was
+   * never laid out - measured while its frame was hidden, which happens when
+   * a laptop screen is measured in the same run as a phone one. The numbers
+   * look like numbers and are entirely wrong, so say so instead of printing
+   * them. */
+  const found = Object.values(measured).filter(Boolean);
+  const identical = found.length > 2 && found.every(p => p.x === found[0].x && p.y === found[0].y);
+  if (identical) {
+    console.error(
+      `\n!! ${screen}: every target measured to the same point ` +
+      `(${found[0].x},${found[0].y}), which means the screen was not on ` +
+      'camera when it was measured.\n   Measure it in a run of its own - a ' +
+      'laptop screen and a phone screen cannot be measured together.'
+    );
+    continue;
+  }
+
   console.log(`\n/* ${screen} - MEASURED */\nexport const targets = {`);
   const lines = [];
   for (const [id, at] of Object.entries(measured)) {
@@ -130,6 +152,13 @@ async function measureOnce(page, wanted, vpId, box) {
       const el = document.getElementById(id);
       if (!el) { out[id] = null; continue; }
       const r = el.getBoundingClientRect();
+      /* An element with no size has no place. It happens while a shot is
+       * still arriving - a list inside a clipping box is briefly zero-high,
+       * and its rows all measure to the same point at the box's corner. The
+       * numbers look like numbers and are entirely wrong, and because the
+       * first sighting of a target is the one kept, they would be the ones
+       * written down. */
+      if (r.width === 0 || r.height === 0) { out[id] = null; continue; }
       out[id] = {
         x: Math.round((r.left + r.width / 2 - vp.left) * kx),
         y: Math.round((r.top + r.height / 2 - vp.top) * ky)

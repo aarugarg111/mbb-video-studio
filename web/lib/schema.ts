@@ -14,7 +14,10 @@ export const SCREENS = {
   'create-invoice': ['item-search', 'add-item-0', 'add-item-1', 'generate-bill'],
   'invoice-created': ['share', 'done'],
   'theme-store': ['theme-0', 'theme-1', 'theme-2', 'theme-3', 'theme-4', 'theme-5', 'variant-1', 'variant-2', 'unlock', 'close'],
-  items: ['create-new-item', 'bulk-action', 'item-row-0', 'low-stock'],
+  /* Five rows, not just the first: a clip that zooms at something in the
+     middle of a shelf needs the middle to have a name. */
+  items: ['create-new-item', 'bulk-action',
+    'item-row-0', 'item-row-1', 'item-row-2', 'item-row-3', 'item-row-4', 'low-stock'],
   parties: ['party-row-0', 'party-row-1', 'send-reminder-0', 'shared-ledgers', 'create-party', 'search'],
   'scan-bills': ['open-camera', 'upload-pdf', 'browse-gallery'],
   'scan-camera': ['shutter', 'flip'],
@@ -86,7 +89,8 @@ export const SCREENS = {
      laptop screen: it is where a laptop bill starts, the way the + Bill /
      Invoice pill is on the phone. */
   'mbb-desktop-parties': ['create-sales-invoice', 'create-party', 'to-collect', 'party-row-0', 'reports'],
-  'mbb-desktop-items': ['create-sales-invoice', 'create-item', 'low-stock', 'item-row-0', 'bulk-actions'],
+  'mbb-desktop-items': ['create-sales-invoice', 'create-item', 'low-stock',
+    'item-row-0', 'item-row-1', 'item-row-2', 'item-row-3', 'item-row-4', 'bulk-actions'],
   /* The billing flow itself: open the catalogue, search it, add lines, put
      them on the bill, save. The same beats as the phone's create-invoice. */
   'mbb-desktop-create-invoice': ['add-item', 'item-search', 'add-item-0', 'add-item-1', 'add-to-bill', 'save', 'add-party', 'upload', 'proceed'],

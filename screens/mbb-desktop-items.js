@@ -30,6 +30,10 @@ export const targets = {
   'create-item': { x: 674, y: 166 },
   'low-stock': { x: 423, y: 118 },
   'item-row-0': { x: 423, y: 233 },
+  'item-row-1': { x: 423, y: 260 },
+  'item-row-2': { x: 423, y: 287 },
+  'item-row-3': { x: 423, y: 314 },
+  'item-row-4': { x: 423, y: 341 },
   'bulk-actions': { x: 590, y: 165 }
 };
 
@@ -38,6 +42,10 @@ export const tapEffects = { 'low-stock': { lowStock: 1 } };
 
 /* A shop's shelf is longer than a window, here too. */
 export const scrolls = true;
+
+/* These move with the list. Everything else on the screen stays put, so only
+ * these have the scroll taken off them when the camera is told where to go. */
+export const scrollingTargets = ['item-row-0', 'item-row-1', 'item-row-2', 'item-row-3', 'item-row-4'];
 
 export function render(data, state) {
   const all = itemsFor(data);
@@ -60,7 +68,7 @@ export function render(data, state) {
     </div>`;
 
   const row = (item, i) => `
-    <div class="mb-row" ${i === 0 ? 'id="item-row-0"' : ''}>
+    <div class="mb-row" id="item-row-${i}">
       <div class="mb-c nm">${esc(item.name)}</div>
       <div class="mb-c cat">${Number(item.stock ?? 0)} ${esc(item.unit || 'PCS')}</div>
       <div class="mb-c kind">${formatINR(item.purchase ?? 0)}</div>

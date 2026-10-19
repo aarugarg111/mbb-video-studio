@@ -9,7 +9,11 @@ export const name = 'items';
 export const targets = {
   'create-new-item': { x: 127, y: 744 },
   'bulk-action': { x: 278, y: 744 },
-  'item-row-0': { x: 195, y: 160 },
+  'item-row-0': { x: 195, y: 159 },
+  'item-row-1': { x: 195, y: 253 },
+  'item-row-2': { x: 195, y: 347 },
+  'item-row-3': { x: 195, y: 441 },
+  'item-row-4': { x: 195, y: 535 },
   'low-stock': { x: 56, y: 73 }
 };
 
@@ -73,6 +77,10 @@ export function itemsFor(data) {
 
 /* A shop's shelf is longer than a phone. */
 export const scrolls = true;
+
+/* These move with the list. Everything else on the screen stays put, so only
+ * these have the scroll taken off them when the camera is told where to go. */
+export const scrollingTargets = ['item-row-0', 'item-row-1', 'item-row-2', 'item-row-3', 'item-row-4'];
 
 export function render(data, state) {
   const all = itemsFor(data);

@@ -418,7 +418,13 @@ test('the new screens emit no raw hex colour', () => {
 
 test('catalogue includes the new screens and their targets', () => {
   const c = catalogue();
-  assert.deepEqual(c.items, ['create-new-item', 'bulk-action', 'item-row-0', 'low-stock']);
+  /* Five rows have names, not just the first: a clip that zooms at
+     something in the middle of a shelf needs the middle to have one. */
+  assert.deepEqual(c.items, [
+    'create-new-item', 'bulk-action',
+    'item-row-0', 'item-row-1', 'item-row-2', 'item-row-3', 'item-row-4',
+    'low-stock'
+  ]);
   assert.deepEqual(c['create-item'], ['item-name', 'hsn', 'tab-stock', 'batching', 'save']);
 });
 
@@ -612,4 +618,76 @@ test('a list cannot be scrolled past its own last row', () => {
   const oneItem = { business: { name: 'X' }, items: [{ name: 'ONLY ITEM', rate: 10, stock: 2 }] };
   const low = SCREENS['mbb-desktop-items'].render(oneItem, { scroll: 500, lowStock: 1 });
   assert.match(low, /translateY\(-?0\.0px\)/, 'a one-row list should not move');
+});
+
+test('a row keeps its place on camera as the list scrolls under it', async () => {
+  /* Targets are fixed coordinates, measured where a screen draws them at
+     rest. A row is not at rest: scroll the list 200px and the third item is
+     200px higher than where it was measured. Without this the camera would
+     zoom at the place the row used to be, and the clip would push in on
+     whatever had taken its seat - which looks deliberate and is wrong. */
+  const { stateAt } = await import('../src/timeline.js');
+  const recipe = {
+    video: 't',
+    business: { name: 'S' }, party: { name: 'R' },
+    invoice: { number: 1, date: '01/01/2026', theme: 'none' },
+    items: [{ name: 'SUGAR 5KG', rate: 310, qty: 1, gst: 5, unit: 'PKT', purchase: 272, stock: 4 }],
+    brand: {},
+    shots: [{
+      screen: 'items',
+      duration: 6,
+      actions: [
+        { at: 0.4, do: 'scroll', distance: 200, duration: 0.6 },
+        { at: 3.0, do: 'tap', target: 'item-row-2' }
+      ]
+    }]
+  };
+
+  const resting = SCREENS['items'].targets['item-row-2'].y;
+  const frame = stateAt(recipe, 3.4);
+  assert.ok(frame.screenState.scroll > 100, 'the list should have scrolled by now');
+
+  const tap = frame.taps.find(Boolean);
+  assert.ok(tap, 'the tap should be on camera');
+  assert.equal(
+    Math.round(tap.y), Math.round(resting - frame.screenState.scroll),
+    'the tap is still aimed at where the row was drawn, not where it is'
+  );
+
+  /* And something that does not ride the list stays put. */
+  const fixed = {
+    ...recipe,
+    shots: [{ ...recipe.shots[0], actions: [
+      { at: 0.4, do: 'scroll', distance: 200, duration: 0.6 },
+      { at: 3.0, do: 'tap', target: 'low-stock' }
+    ] }]
+  };
+  const pinned = stateAt(fixed, 3.4).taps.find(Boolean);
+  assert.equal(pinned.y, SCREENS['items'].targets['low-stock'].y, 'the filter pill moved with the list');
+});
+
+test('zooming at a list row does not cut the name off it', () => {
+  /* Two is right for a tile and too close for a row: a row is the full width
+     of the screen, so pushing in that far crops its left edge - which on a
+     shot about what a shop stocks is the one thing that had to stay readable.
+     Anything that says "to" still gets exactly what it asked for. */
+  const recipe = {
+    video: 't', business: { name: 'S' }, party: { name: 'R' },
+    invoice: { number: 1, date: '01/01/2026', theme: 'none' },
+    items: [{ name: 'SUGAR 5KG', rate: 310, qty: 1, gst: 5, unit: 'PKT', purchase: 272, stock: 4 }],
+    brand: {},
+    shots: [{ screen: 'items', duration: 4, actions: [{ at: 0.5, do: 'zoom', target: 'item-row-2' }] }]
+  };
+  const atRow = stateAt(recipe, 3).zoom;
+  assert.ok(atRow.scale < 1.6, `a row was zoomed to ${atRow.scale}`);
+  assert.ok(atRow.scale > 1.2, 'a zoom that does nothing is not a zoom');
+
+  const asked = { ...recipe, shots: [{ ...recipe.shots[0],
+    actions: [{ at: 0.5, do: 'zoom', target: 'item-row-2', to: 2.4 }] }] };
+  assert.ok(Math.abs(stateAt(asked, 3).zoom.scale - 2.4) < 0.01, 'an explicit "to" must win');
+
+  /* And a tile keeps the close-in default it has always had. */
+  const tile = { ...recipe, shots: [{ screen: 'home', duration: 4,
+    actions: [{ at: 0.5, do: 'zoom', target: 'reports' }] }] };
+  assert.ok(Math.abs(stateAt(tile, 3).zoom.scale - 2) < 0.01, 'the old default changed');
 });

@@ -125,6 +125,28 @@ export function stateAt(recipe, t) {
     const current = i === index;
     const at = current ? localT : s.duration;
 
+    /* Every scroll in this shot first, before anything asks where a row is.
+     * Actions are stored in the order they were written, not the order they
+     * happen, so a zoom listed above the scroll that moves its row would
+     * otherwise be handed the row's old place. */
+    for (const action of s.actions) {
+      if (action.do !== 'scroll') continue;
+      const over = action.duration ?? SCROLL_SECONDS;
+      screenState.scroll += easeOut(ramp(at, action.at, over)) * (action.distance ?? SCROLL_DISTANCE);
+    }
+
+    /* Where a target is NOW. A row rides its list, so once the list has moved
+     * the row has moved with it, and the camera has to be told the place it
+     * is rather than the place it was drawn. Everything else on a screen -
+     * a pill, a button, a tab - stays where it is. */
+    const pointOf = target => {
+      const point = SCREENS[s.screen]?.targets?.[target];
+      if (!point) return point;
+      return SCREENS[s.screen]?.scrollingTargets?.includes(target)
+        ? { x: point.x, y: point.y - screenState.scroll }
+        : point;
+    };
+
     for (const action of s.actions) {
       switch (action.do) {
         case 'selectParty':
@@ -145,12 +167,6 @@ export function stateAt(recipe, t) {
          *
          * It survives the shot it happened in - a list scrolled down stays
          * scrolled while the rest of the shot plays out. */
-        case 'scroll': {
-          const over = action.duration ?? SCROLL_SECONDS;
-          screenState.scroll += easeOut(ramp(at, action.at, over)) * (action.distance ?? SCROLL_DISTANCE);
-          break;
-        }
-
         case 'type': {
           if (!current) break;
           const progress = ramp(at, action.at, action.duration ?? TYPE_SECONDS);
@@ -189,10 +205,10 @@ export function stateAt(recipe, t) {
           }
           /* The camera is told about this tap for the whole shot, not only
            * while its ring is on screen, so the picture holds still. */
-          if (current) taps.push({ x: targets[action.target].x, y: targets[action.target].y });
+          if (current) { const p = pointOf(action.target); taps.push({ x: p.x, y: p.y }); }
           const progress = (at - action.at) / RIPPLE_SECONDS;
           if (progress >= 0 && progress <= 1) {
-            const point = targets[action.target];
+            const point = pointOf(action.target);
             ripple = { x: point.x, y: point.y, progress: clamp01(progress) };
           }
           break;
@@ -200,7 +216,7 @@ export function stateAt(recipe, t) {
         case 'zoom': {
           if (at < action.at) break;
           const targets = SCREENS[s.screen]?.targets;
-          const point = targets?.[action.target];
+          const point = pointOf(action.target);
           if (!point) {
             const known = targets ? Object.keys(targets).join(', ') : '(unknown screen)';
             throw new Error(
@@ -210,7 +226,13 @@ export function stateAt(recipe, t) {
           }
           /* Eases in rather than cutting, so it reads as a camera move and not
            * as a different shot. */
-          const to = Number(action.to) || 2;
+          /* Two is right for a tile or a figure and too close for a row:
+           * a list row is the full width of the screen, so pushing in that
+           * far cuts the name off the left of it - which on a shot about
+           * what a shop stocks is the one thing that had to stay readable.
+           * A row gets a gentler default, and "to" still wins. */
+          const isRow = SCREENS[s.screen]?.scrollingTargets?.includes(action.target);
+          const to = Number(action.to) || (isRow ? 1.45 : 2);
           const grown = 1 + (to - 1) * easeOut(ramp(at, action.at, ZOOM_SECONDS));
           zoom = { x: point.x, y: point.y, scale: grown };
           break;
