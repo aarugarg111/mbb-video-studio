@@ -254,7 +254,7 @@ export default function Page() {
         ...(shape ? { shape } : {})
       };
 
-      const proposed = !TEAM_MODE && provider !== 'anthropic'
+      const proposed = onOwnKey
         ? await askProvider({
             id: provider,
             key: apiKey,
@@ -330,6 +330,11 @@ export default function Page() {
   const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
   const stepIndex = step === 'fill' ? 0 : step === 'done' ? 2 : 1;
   const needKey = !TEAM_MODE && (!apiKey || editingKey);
+  /* The studio's own path asks Claude on the team's key. A viewer who has
+   * picked another AI and saved a key is read by that instead - which is the
+   * whole point of offering them, since Gemini and Grok have free tiers and
+   * the team key does not. */
+  const onOwnKey = provider !== 'anthropic' && apiKey.trim().length > 0;
   /* Whether the studio can read a script ITSELF. The form no longer waits
    * behind this: without a key there is still the free path, where another AI
    * writes the shot list and the studio only renders it. */
@@ -371,6 +376,51 @@ export default function Page() {
         </div>
       )}
 
+
+      {TEAM_MODE && signedIn && (
+        <details className="overrides own-key" open={onOwnKey}>
+          <summary>
+            {onOwnKey
+              ? `Reading your scripts with your own ${providerById(provider).name} key`
+              : 'Use your own AI key instead — free'}
+          </summary>
+          <p className="whose-note">
+            The studio reads scripts on the team&rsquo;s key, which costs the team money.
+            Gemini and Grok have free tiers, so you can use your own instead. It stays in
+            this browser and is sent only to the AI you pick.
+          </p>
+          <div className="whose" role="group" aria-label="Whose AI reads the script">
+            {PROVIDERS.map(p => (
+              <button key={p.id} type="button" className={provider === p.id ? 'on' : ''}
+                      aria-pressed={provider === p.id}
+                      onClick={() => setProvider(p.id)}>
+                {p.id === 'anthropic' ? 'The team key' : p.name}
+              </button>
+            ))}
+          </div>
+          {provider !== 'anthropic' && (
+            <>
+              <p className="whose-note">
+                {providerById(provider).free}{' '}
+                Keys at{' '}
+                <a href={providerById(provider).whereUrl} target="_blank" rel="noreferrer">
+                  {providerById(provider).where}
+                </a>.
+              </p>
+              <input type="password" value={keyDraft} onChange={e => setKeyDraft(e.target.value)}
+                     placeholder={providerById(provider).hint}
+                     aria-label={`${providerById(provider).name} API key`} />
+              {keyDraft.trim() && providerOfKey(keyDraft) && providerOfKey(keyDraft) !== provider && (
+                <p className="whose-note warn">
+                  That looks like a {providerById(providerOfKey(keyDraft)!).name} key.
+                  Saving it will switch to {providerById(providerOfKey(keyDraft)!).name}.
+                </p>
+              )}
+              <button onClick={saveKey} disabled={!keyDraft.trim()}>Save key</button>
+            </>
+          )}
+        </details>
+      )}
 
       {needKey && (
         <div className="keybox">
