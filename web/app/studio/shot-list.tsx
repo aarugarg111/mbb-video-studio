@@ -11,7 +11,7 @@
  * step and nothing new has to be taught to the renderer.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import * as yaml from 'js-yaml';
 import { SCREENS } from '../../lib/schema';
 import { screenLabel, stepsFor, stepLabel } from '../../lib/friendly';
@@ -25,6 +25,11 @@ type Doc = { shots?: Shot[]; sales?: { dayTotal?: number | null; netProfit?: num
 const isLaptop = (screen: string) => screen.includes('desktop') || screen === 'tally-receivables';
 
 export function ShotListForm({ recipe, onChange }: { recipe: string; onChange: (next: string) => void }) {
+  /* Which scene is being carried, and which one it is hovering over. Local to
+   * the form: nothing about a drag belongs in the shot list itself. */
+  const [from, setFrom] = useState<number | null>(null);
+  const [over, setOver] = useState<number | null>(null);
+
   const parsed = useMemo(() => {
     try {
       const doc = yaml.load(recipe) as Doc;
@@ -57,6 +62,20 @@ export function ShotListForm({ recipe, onChange }: { recipe: string; onChange: (
     commit(next);
   };
 
+  /* Carry a scene to another place in the running order. The scene keeps
+   * everything it had - its screen, its length, its steps and their timings -
+   * because only where it sits is changing. */
+  const move = (fromIndex: number | null, toIndex: number) => {
+    setFrom(null);
+    setOver(null);
+    if (fromIndex === null || fromIndex === toIndex) return;
+    if (toIndex < 0 || toIndex >= shots.length) return;
+    edit(d => {
+      const [carried] = d.shots!.splice(fromIndex, 1);
+      d.shots!.splice(toIndex, 0, carried);
+    });
+  };
+
   const total = shots.reduce((t, s) => t + (Number(s.duration) || 0), 0);
   const sales = parsed.sales ?? {};
   const day = Number(sales.dayTotal);
@@ -80,12 +99,38 @@ export function ShotListForm({ recipe, onChange }: { recipe: string; onChange: (
         const taken = actions.map(a => a.target);
 
         return (
-          <div className="sl-scene" key={i}>
+          <div
+            className={`sl-scene${over === i && from !== null && from !== i ? ' sl-over' : ''}${from === i ? ' sl-lifted' : ''}`}
+            key={i}
+            onDragOver={e => { if (from !== null) { e.preventDefault(); setOver(i); } }}
+            onDrop={e => { e.preventDefault(); move(from, i); }}
+          >
             <div className="sl-scene-head">
+              {/* Hold this to carry the scene somewhere else. The handle rather
+                  than the whole card, because the card is full of sliders and
+                  dragging one of those should move the slider. */}
+              <span
+                className="sl-grip"
+                draggable
+                role="button"
+                tabIndex={0}
+                aria-label={`Move scene ${i + 1}. Use the arrows, or hold to drag.`}
+                onDragStart={e => { setFrom(i); e.dataTransfer.effectAllowed = 'move'; }}
+                onDragEnd={() => { setFrom(null); setOver(null); }}
+              >⠿</span>
               <span className="sl-num">{i + 1}</span>
               <span className="sl-scene-main">
                 <span className="sl-scene-title">{label.name}</span>
                 {label.blurb && <span className="sl-scene-sub">{label.blurb}</span>}
+              </span>
+              {/* The same move without a mouse. */}
+              <span className="sl-moves">
+                <button type="button" className="sl-move" disabled={i === 0}
+                        aria-label={`Move scene ${i + 1} earlier`}
+                        onClick={() => move(i, i - 1)}>↑</button>
+                <button type="button" className="sl-move" disabled={i === shots.length - 1}
+                        aria-label={`Move scene ${i + 1} later`}
+                        onClick={() => move(i, i + 1)}>↓</button>
               </span>
               <button type="button" className="sl-x" aria-label={`Remove scene ${i + 1}`}
                       onClick={() => edit(d => { d.shots!.splice(i, 1); })}>×</button>
