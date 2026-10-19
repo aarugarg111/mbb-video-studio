@@ -10,6 +10,7 @@ import { renderVideo } from '@/lib/render';
 import { canEncode } from '@/lib/encode';
 import { renderRemotely, canRenderRemotely } from '@/lib/render-remote';
 import { briefingFor } from '@/lib/briefing';
+import { askProvider, providerById, providerOfKey, PROVIDERS, type ProviderId } from '../lib/providers';
 import { runSelfTest, asReport, type Step as CheckStep } from '@/lib/selftest';
 import { Stage } from './studio/stage';
 import { ShotListForm } from './studio/shot-list';
@@ -27,6 +28,9 @@ const STEPS: [Step, string][] = [
   ['done', 'Your video']
 ];
 const KEY_NAME = 'mbb-anthropic-key';
+/* Which AI the pasted key belongs to. Remembered beside the key, because the
+ * two only make sense together. */
+const PROVIDER_NAME = 'mbb-ai-provider';
 
 export default function Page() {
   const [step, setStep] = useState<Step>('fill');
@@ -74,6 +78,10 @@ export default function Page() {
   /* The shot list as a form rather than as text. Off by default: the studio
    * writes a shot list and renders it, and most clips never need this. */
   const [asForm, setAsForm] = useState(false);
+  /* Whose AI reads the script. The studio's own path asks Claude against a
+   * schema; the others are sent the same briefing a person would paste into a
+   * chat window, and answer with YAML. Both end at the same validator. */
+  const [provider, setProvider] = useState<ProviderId>('anthropic');
   const stageRef = useRef<HTMLDivElement>(null);
   const urlRef = useRef('');
 
@@ -81,7 +89,11 @@ export default function Page() {
     if (TEAM_MODE) {
       isSignedIn().then(setSignedIn).finally(() => setCheckingSession(false));
     } else {
-      try { setApiKey(localStorage.getItem(KEY_NAME) ?? ''); } catch { /* private mode */ }
+      try {
+        setApiKey(localStorage.getItem(KEY_NAME) ?? '');
+        const saved = localStorage.getItem(PROVIDER_NAME);
+        if (saved) setProvider(saved as ProviderId);
+      } catch { /* private mode */ }
     }
     /* Asked, not assumed. Safari has VideoEncoder and VideoFrame and fails
        anyway, so the old check promised a render it could not deliver and the
@@ -100,7 +112,13 @@ export default function Page() {
   function saveKey() {
     const k = keyDraft.trim();
     if (!k) return;
-    try { localStorage.setItem(KEY_NAME, k); } catch { /* kept in memory only */ }
+    try {
+      localStorage.setItem(KEY_NAME, k);
+      /* A pasted key says which AI it belongs to, so nobody has to be asked. */
+      const its = providerOfKey(k);
+      if (its) { setProvider(its); localStorage.setItem(PROVIDER_NAME, its); }
+      else localStorage.setItem(PROVIDER_NAME, provider);
+    } catch { /* kept in memory only */ }
     setApiKey(k);
     setKeyDraft('');
     setEditingKey(false);
@@ -227,18 +245,25 @@ export default function Page() {
     setError('');
     setErrorDetail('');
     try {
-      const proposed = await proposeRecipe({
-        ...(TEAM_MODE ? {} : { apiKey }),
-        script,
-        /* Only send what was filled in - an empty field must not overwrite
-         * something the script got right. */
-        details: {
-          ...(business ? { business: { name: business } } : {}),
-          ...(party ? { party: { name: party } } : {}),
-          ...(theme ? { invoice: { theme } } : {}),
-          ...(shape ? { shape } : {})
-        }
-      });
+      /* Only send what was filled in - an empty field must not overwrite
+       * something the script got right. */
+      const details = {
+        ...(business ? { business: { name: business } } : {}),
+        ...(party ? { party: { name: party } } : {}),
+        ...(theme ? { invoice: { theme } } : {}),
+        ...(shape ? { shape } : {})
+      };
+
+      const proposed = !TEAM_MODE && provider !== 'anthropic'
+        ? await askProvider({
+            id: provider,
+            key: apiKey,
+            model: providerById(provider).defaultModel,
+            /* The same briefing the studio hands to somebody pasting into a
+             * chat window. One set of instructions, whoever reads them. */
+            prompt: briefingFor(script, { business, party, theme, shape })
+          })
+        : await proposeRecipe({ ...(TEAM_MODE ? {} : { apiKey }), script, details });
       setRecipe(proposed.recipe);
       setUnsupported(proposed.unsupported);
       setStep('check');
@@ -350,11 +375,46 @@ export default function Page() {
       {needKey && (
         <div className="keybox">
           <p>
-            Paste your Anthropic API key. It stays in this browser and is sent only to Anthropic.
-            Get one at <a href="https://console.anthropic.com" target="_blank" rel="noreferrer">console.anthropic.com</a>.
+            Paste an API key and the studio reads your scripts for you. It stays in this
+            browser and is sent only to the AI you picked — this page has no server of its
+            own to send it to.
           </p>
+
+          {/* Gemini and Grok both have a free tier, which is the point of
+              offering them: the people writing these videos are not the
+              people with an API budget. */}
+          <div className="whose" role="group" aria-label="Whose AI reads the script">
+            {PROVIDERS.map(p => (
+              <button
+                key={p.id}
+                type="button"
+                className={provider === p.id ? 'on' : ''}
+                aria-pressed={provider === p.id}
+                onClick={() => setProvider(p.id)}
+              >{p.name}</button>
+            ))}
+          </div>
+          <p className="whose-note">
+            {providerById(provider).free}{' '}
+            Keys at{' '}
+            <a href={providerById(provider).whereUrl} target="_blank" rel="noreferrer">
+              {providerById(provider).where}
+            </a>.
+          </p>
+
           <input type="password" value={keyDraft} onChange={e => setKeyDraft(e.target.value)}
-                 placeholder="sk-ant-..." aria-label="Anthropic API key" />
+                 placeholder={providerById(provider).hint}
+                 aria-label={`${providerById(provider).name} API key`} />
+
+          {/* A key pasted into the wrong box comes back as "unauthorised",
+              which reads like a bad key rather than one in the wrong place. */}
+          {keyDraft.trim() && providerOfKey(keyDraft) && providerOfKey(keyDraft) !== provider && (
+            <p className="whose-note warn">
+              That looks like a {providerById(providerOfKey(keyDraft)!).name} key.
+              Saving it will switch to {providerById(providerOfKey(keyDraft)!).name}.
+            </p>
+          )}
+
           <button onClick={saveKey} disabled={!keyDraft.trim()}>Save key</button>
         </div>
       )}
@@ -421,7 +481,7 @@ export default function Page() {
             <p className="hint">
               {TEAM_MODE
                 ? 'Sign in above to have the studio read the script for you — or use the free way below, which needs no sign-in.'
-                : 'Add your Anthropic key above to have the studio read the script for you — or use the free way below, which needs no key.'}
+                : 'Add an API key above to have the studio read the script for you — Gemini and Grok have free tiers — or use the copy-and-paste way below, which needs no key at all.'}
             </p>
           )}
 
