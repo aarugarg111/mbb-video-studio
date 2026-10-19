@@ -2,6 +2,7 @@ import { esc } from '../src/esc.js';
 import { icons } from '../src/icons.js';
 import { formatINR } from '../src/money.js';
 import { isLow } from './items.js';
+import { itemsFor } from './items.js';
 import { sidebar, topActions, referralStrip, pendingActions } from './mbb-desktop-chrome.js';
 
 export const name = 'mbb-desktop-items';
@@ -35,33 +36,19 @@ export const targets = {
 /* Tapping Low Stock narrows the table, the same way the phone's pill does. */
 export const tapEffects = { 'low-stock': { lowStock: 1 } };
 
-/* Enough rows to look like a real catalogue when the recipe lists two. */
-const FILLERS = [
-  { name: 'AMUL RUSK FAMILY PACK', rate: 180, purchase: 120, stock: 99 },
-  { name: 'ANJEER PREMEIUM 500GM', rate: 1200, purchase: 950, stock: 99 },
-  { name: 'ARHAR DAL GOLD 1KG', rate: 180, purchase: 140, stock: 95 },
-  { name: 'BESAN 1KG', rate: 110, purchase: 94, stock: 91 },
-  { name: 'BELLA VITA PERFUME SET', rate: 650, purchase: 250, stock: 199 },
-  { name: 'BOURNVITA 500GM', rate: 245, purchase: 212, stock: 36 },
-  { name: 'BRITANNIA MARIE GOLD', rate: 40, purchase: 33, stock: 120 },
-  { name: 'CHANA DAL 1KG', rate: 95, purchase: 78, stock: 64 },
-  { name: 'COLGATE STRONG TEETH 200G', rate: 115, purchase: 96, stock: 48 }
-];
-
-/* See mbb-desktop-parties.js - what fits above the floating pill. */
-const ROWS = 6;
-
-export function itemsFor(data) {
-  const own = Array.isArray(data?.items) ? data.items : [];
-  const rest = FILLERS.filter(f => !own.some(o => String(o.name).toLowerCase() === f.name.toLowerCase()));
-  return [...own, ...rest].slice(0, ROWS);
-}
+/* A shop's shelf is longer than a window, here too. */
+export const scrolls = true;
 
 export function render(data, state) {
   const all = itemsFor(data);
+  /* Measured against a render, in this screen's own pixels: a row is 27 tall
+   * and the table shows about 175 of them under its header. */
+  const ROW = 27, VISIBLE = 175;
   const low = all.filter(isLow);
   const onlyLow = Number(state?.lowStock ?? 0) > 0;
   const rows = onlyLow ? low : all;
+  const room = Math.max(0, rows.length * ROW - VISIBLE);
+  const scroll = Math.min(room, Math.max(0, Number(state?.scroll ?? 0)));
 
   const stockValue = all.reduce((t, i) =>
     t + (Number(i.purchase ?? i.rate ?? 0) * Number(i.stock ?? 0)), 0);
@@ -113,10 +100,12 @@ export function render(data, state) {
       <div class="mb-c kind">Purchase Price</div>
       <div class="mb-c bal">Selling Price</div>
     </div>
-    <div class="mb-rows">
+    <div class="mb-rowscroll">
+    <div class="mb-rows" style="transform: translateY(${(-scroll).toFixed(1)}px)">
       ${rows.length
         ? rows.map(row).join('')
         : '<div class="mb-empty">Nothing is running low.</div>'}
+    </div>
     </div>
   </div>
 

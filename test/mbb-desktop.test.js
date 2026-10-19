@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { rawColoursIn } from '../src/colour-guard.js';
 import { SCREENS, catalogue } from '../screens/index.js';
 import { deviceOf } from '../src/device.js';
-import { itemsFor } from '../screens/mbb-desktop-items.js';
+import { itemsFor } from '../screens/items.js';
 import { SCANNED } from '../screens/mbb-desktop-chrome.js';
 
 const DESKTOP = ['mbb-desktop-parties', 'mbb-desktop-items', 'mbb-desktop-create-invoice'];
@@ -98,11 +98,26 @@ test('tapping Low Stock narrows the table', () => {
   assert.ok(low.includes('SUGAR 5KG'));
 });
 
-test('an item list fills the table and stops before the floating pill', () => {
-  /* The 16:9 window is shorter than the 4:3 one was, and a row past the bottom
-     of it runs under the Pending Actions pill. */
+test('the shelf is longer than the window, because it scrolls now', () => {
+  /* This used to stop at six, on the grounds that a row past the bottom of a
+     16:9 window runs under the Pending Actions pill. Having more than fits is
+     the point of being able to scroll it: the list is clipped by its own box
+     and the rest is reached by scrolling, rather than cut off at the edge of
+     what one screenful holds.
+
+     Both shapes read the same shelf, so one business cannot be stocking two
+     different catalogues. */
   const many = itemsFor({ items: Array.from({ length: 12 }, (_, i) => ({ name: 'ITEM ' + i, rate: 10, stock: 50 })) });
-  assert.equal(many.length, 6);
+  assert.ok(many.length > 6, `only ${many.length} rows - nothing to scroll`);
+
+  for (const screen of ['items', 'mbb-desktop-items']) {
+    assert.equal(SCREENS[screen].scrolls, true, `${screen} should scroll`);
+    /* How far it goes is the screen's own business - a list stops at its last
+       row - so this asks only that asking it to move moves it. */
+    const moved = SCREENS[screen].render(DATA, { scroll: 60 });
+    const by = Number((moved.match(/translateY\((-?[\d.]+)px\)/) ?? [])[1]);
+    assert.ok(by < 0, `${screen} did not move`);
+  }
 });
 
 test('the bill is empty until items are put on it', () => {

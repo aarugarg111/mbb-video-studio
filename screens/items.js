@@ -45,10 +45,46 @@ const NAV = [
 const purchaseOf = item => Number(item.purchase ?? Math.round(Number(item.rate || 0) * 0.88));
 const rupees = n => '₹ ' + Number(n || 0).toLocaleString('en-IN');
 
+/* The shop's own shelf, so a recipe that lists two items still looks like a
+ * shop. Shared with the laptop's Items page rather than copied: one business
+ * cannot be stocking two different catalogues.
+ *
+ * Long enough to scroll past the bottom of a phone, which is the point of
+ * being able to scroll it at all. */
+const FILLERS = [
+  { name: 'AMUL RUSK FAMILY PACK', rate: 180, purchase: 120, stock: 99 },
+  { name: 'ANJEER PREMEIUM 500GM', rate: 1200, purchase: 950, stock: 99 },
+  { name: 'ARHAR DAL GOLD 1KG', rate: 180, purchase: 140, stock: 95 },
+  { name: 'BESAN 1KG', rate: 110, purchase: 94, stock: 91 },
+  { name: 'BELLA VITA PERFUME SET', rate: 650, purchase: 250, stock: 199 },
+  { name: 'BOURNVITA 500GM', rate: 245, purchase: 212, stock: 36 },
+  { name: 'BRITANNIA MARIE GOLD', rate: 40, purchase: 33, stock: 120 },
+  { name: 'CHANA DAL 1KG', rate: 95, purchase: 78, stock: 64 },
+  { name: 'COLGATE STRONG TEETH 200G', rate: 115, purchase: 96, stock: 48 }
+];
+
+const ROWS = 14;
+
+export function itemsFor(data) {
+  const own = Array.isArray(data?.items) ? data.items : [];
+  const rest = FILLERS.filter(f => !own.some(o => String(o.name).toLowerCase() === f.name.toLowerCase()));
+  return [...own, ...rest].slice(0, ROWS);
+}
+
+/* A shop's shelf is longer than a phone. */
+export const scrolls = true;
+
 export function render(data, state) {
-  const all = data?.items ?? [];
+  const all = itemsFor(data);
+  /* Measured against a render: a card is 94 of this screen's pixels tall, and
+   * the list shows about 626 of them between the filter pills and the tab bar.
+   * A scroll longer than the list leaves is clamped, so the worst a recipe can
+   * do is stop at the bottom rather than scroll into nothing. */
+  const CARD = 94, VISIBLE = 626;
   const filtering = Number(state?.lowStock ?? 0) > 0;
   const items = filtering ? lowStockItems(all) : all;
+  const room = Math.max(0, items.length * CARD - VISIBLE);
+  const scroll = Math.min(room, Math.max(0, Number(state?.scroll ?? 0)));
 
   const row = (item, i) => {
     const unit = esc(item.unit || 'PCS');
@@ -79,10 +115,12 @@ export function render(data, state) {
     <div class="fp">Select Category ${icons.chevDown(14)}</div>
     <div class="fp">Filter By <span class="ico on">${icons.filter(14)}</span></div>
   </div>
-  <div class="itlist">
+  <div class="itscroll">
+  <div class="itlist" style="transform: translateY(${(-scroll).toFixed(1)}px)">
     ${items.length
       ? items.map(row).join('')
       : `<div class="itempty">Nothing is running low.</div>`}
+  </div>
   </div>
   <div class="floatbtns">
     <div class="fb create"><span class="ico">${icons.plusCircle(20)}</span>Create New Item</div>

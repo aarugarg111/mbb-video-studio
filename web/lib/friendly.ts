@@ -12,6 +12,7 @@
  */
 
 import { SCREENS } from './schema';
+import { scrollables } from '../../screens/index.js';
 
 type ScreenName = keyof typeof SCREENS;
 
@@ -222,7 +223,11 @@ export function stepLabel(screen: string, target: string): string {
 /* What can happen on a screen, in the order the form offers them: everything
  * that can be tapped, plus a scroll where the screen has a list long enough
  * to need one. */
-export const SCROLLABLE = ['sales-list'];
+/* Which screens have a list worth scrolling. Read from the screens
+ * themselves, never written down twice: a hand-kept copy of this is exactly
+ * what made the studio refuse every scroll - the command line knew and the
+ * page did not. */
+export const SCROLLABLE: string[] = scrollables();
 
 export function stepsFor(screen: string): { id: string; name: string; scroll?: boolean }[] {
   const targets = (SCREENS as Record<string, readonly string[]>)[screen] ?? [];

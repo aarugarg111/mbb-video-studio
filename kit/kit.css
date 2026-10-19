@@ -1802,3 +1802,9 @@
 .bill.luxury .sigbox { border: 1px solid var(--lux-gold-soft); }
 .bill.luxury .sig b { color: var(--lux-navy); }
 .bill.luxury .sig div { color: var(--lux-muted); }
+
+/* The shelf scrolls under the filter pills, the way the day's bills do. */
+.itscroll { flex: 1; min-height: 0; overflow: hidden; position: relative; z-index: 0; }
+.itemsscreen .appbar, .itemsscreen .itemsstrip, .itemsscreen .fpills { position: relative; z-index: 1; }
+/* And on the laptop, where the table body scrolls under its own header. */
+.mb-rowscroll { flex: 1; min-height: 0; overflow: hidden; position: relative; }

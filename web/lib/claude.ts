@@ -8,7 +8,7 @@ import { explain } from './errors';
 /* Shared with the command line, so the two cannot disagree about which laptop
    screen stands in for which phone screen. */
 import { recastShape } from '../../src/shape.js';
-import { catalogue } from '../../screens/index.js';
+import { catalogue, scrollables } from '../../screens/index.js';
 
 const CATALOGUE = catalogue() as Record<string, string[]>;
 
@@ -77,7 +77,7 @@ Rules you must follow:
 - Tally is a Windows program: tally-receivables is always a laptop window, even in a phone clip. The owner turns to his computer.
 - THE DAY'S SALE AND THE PROFIT GO IN "sales": "aaj 45 hazaar ka sale hua" is sales.dayTotal: 45000, "12 hazaar bacha" is sales.netProfit: 12000. Not the same as dashboard.weekSale, which is the week's figure on the home screen. Null for either the script leaves open. A profit cannot exceed the sale it came out of.
 - THE DAY'S TAKINGS ARE NOT ON THE SALES LIST: it has no total, because the real screen has none. A script ending on "aaj ki total kamaai kitni hui" cuts sales-list for the bills, then home or profit-loss for the number.
-- "scroll" WORKS ON sales-list ONLY - the one screen whose list runs past the bottom. A bill, a report or a form is already on screen in full, and scrolling one is refused. Use it to show a day had more bills than fit.
+- "scroll" WORKS ONLY ON: ${scrollables().join(', ')} - the screens whose list runs past the bottom. A bill, a report or a form is already on screen in full, and scrolling one is refused. Use it to show there was more than fitted.
 - Details supplied alongside the script are OVERRIDES. Where one is given it wins over what the script says; where it is blank, take the value from the script.
 - If the script describes something the renderer has no screen for, cover what you can with the screens above and keep the video short rather than inventing a screen.
 - Put in "unsupported" every feature the script asks for that none of the available screens can show. Name the feature as the script describes it, briefly: "batch-wise stock records", "GST reports". Use an empty array when the screens cover the whole script.

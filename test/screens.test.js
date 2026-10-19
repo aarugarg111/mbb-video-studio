@@ -584,3 +584,32 @@ test('no screen uses an id the stage has already taken', () => {
     }
   }
 });
+
+test('a list cannot be scrolled past its own last row', () => {
+  /* Asking for more scroll than there is leaves the screen blank, and the
+     author has no way to know how tall a list is in the screen's own pixels -
+     the first recipe I wrote for the laptop inventory asked for 160 and
+     emptied the table. The worst a recipe can do now is stop at the bottom. */
+  const data = {
+    business: { name: 'SAGAR SUPERBAZAAR' },
+    items: [{ name: 'SUGAR 5KG', rate: 310, purchase: 272, stock: 4, unit: 'PKT' }]
+  };
+  const far = (screen) => {
+    const html = SCREENS[screen].render(data, { scroll: 9000 });
+    const m = html.match(/translateY\((-?[\d.]+)px\)/);
+    assert.ok(m, `${screen} does not move at all`);
+    return Math.abs(Number(m[1]));
+  };
+
+  for (const screen of ['items', 'mbb-desktop-items']) {
+    const stopped = far(screen);
+    assert.ok(stopped > 0, `${screen} never scrolls`);
+    assert.ok(stopped < 2000, `${screen} scrolled ${stopped}px into nothing`);
+  }
+
+  /* And a short list does not scroll at all, rather than drifting off the top
+     of a screen that was already showing everything. */
+  const oneItem = { business: { name: 'X' }, items: [{ name: 'ONLY ITEM', rate: 10, stock: 2 }] };
+  const low = SCREENS['mbb-desktop-items'].render(oneItem, { scroll: 500, lowStock: 1 });
+  assert.match(low, /translateY\(-?0\.0px\)/, 'a one-row list should not move');
+});
