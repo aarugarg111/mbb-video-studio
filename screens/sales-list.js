@@ -1,6 +1,6 @@
 import { esc } from '../src/esc.js';
 import { icons } from '../src/icons.js';
-import { formatINR } from '../src/money.js';
+import { formatINR, summarise } from '../src/money.js';
 
 export const name = 'sales-list';
 
@@ -52,8 +52,25 @@ const NAV = [
 /* The day the range lands on when it is narrowed to today. Every bill on the
  * list is then dated it: a range reading "Today" over bills from three
  * different days is a screen contradicting itself, and the longer the list
- * got the more of them you could see at once. */
-const TODAY = '13 Oct';
+ * got the more of them you could see at once.
+ *
+ * Which day it is comes from the recipe's own bill, not from here. It used to
+ * be the fixed 13 Oct, and a recipe whose bill was dated 22/10 put "13 Oct"
+ * on the row and "22/10/2026" on the bill that row opened - a bill made nine
+ * days after the day it is filed under. The day the list is showing is the
+ * day the bill was written. */
+const FALLBACK_DAY = { short: '13 Oct', long: '13 Oct 2026', year: 2026 };
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+function dayOf(data) {
+  const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(String(data?.invoice?.date ?? '').trim());
+  if (!m) return FALLBACK_DAY;
+  const month = MONTHS[Number(m[2]) - 1];
+  if (!month) return FALLBACK_DAY;
+  const short = `${Number(m[1])} ${month}`;
+  return { short, long: `${short} ${m[3]}`, year: Number(m[3]) };
+}
 
 const DAY = [
   { qty: 5, paid: true, when: '13 Oct' },
@@ -74,6 +91,43 @@ export function salesOf(data) {
   const first = Number(data?.invoice?.number ?? 101);
   const party = data?.party?.name || 'Cash Sale';
 
+  /* What the recipe's own bill actually comes to. The top row IS that bill,
+   * so this is the figure it has to show. */
+  const own = summarise(data?.items ?? []).total;
+
+  /* The newest row is the recipe's own bill, not an invented one.
+   *
+   * It was invented, and it showed. A script that opens a customer's bill
+   * taps the top row, and the top row read "Cash Sale - 925 - Paid" while the
+   * bill that opened read MEENA BEAUTY PARLOUR and a different total. A
+   * viewer takes in both in one breath. The row a script taps is the bill it
+   * opens, so it carries that bill's name, number and amount; the invented
+   * history starts below it.
+   *
+   * Only when the recipe names a customer. A stall that bills nobody by name
+   * has no bill to look up, and marking its newest row unpaid produced "Cash
+   * Sale - Unpaid - 1 day(s) overdue", which is a row arguing with itself.
+   *
+   * A recipe can say so by leaving the party out or by writing it as "Cash
+   * Sale" outright, which the momos stall does - both mean nobody's name is
+   * on this bill. */
+  const named = Boolean(data?.party?.name)
+    && String(data.party.name).trim().toLowerCase() !== 'cash sale';
+
+  const mine = b => (!named ? b : {
+    ...b,
+    party,
+    amount: own > 0 ? own : b.amount,
+    /* Unpaid, because looking an old bill up is how a shopkeeper answers
+     * "kitna baaki hai" - and because the bill it opens says outstanding
+     * until somebody records the payment on camera. */
+    paid: false,
+    /* Not overdue: it was written today. Unpaid is the whole of the story. */
+    overdue: 0,
+    /* Its own date, so the row and the bill it opens agree. */
+    when: dayOf(data).short
+  });
+
   const bills = DAY.map((s, i) => ({
     ...s,
     no: first - i,
@@ -81,7 +135,7 @@ export function salesOf(data) {
      * ones that are not, which is how the real list reads. */
     party: i % 3 === 2 ? party : 'Cash Sale',
     amount: s.qty * rate
-  }));
+  })).map((b, i) => (i === 0 ? mine(b) : b));
 
   /* A script that says the day took a particular amount gets that amount.
    *
@@ -126,7 +180,8 @@ export function salesOf(data) {
      * day of sixty bills that ran dry after eight would make the scroll look
      * like the end of the day rather than the middle of it. */
     wanted.slice(0, 24).forEach((b, i) => {
-      bills.push({ ...b, no: first - i, party: i % 3 === 2 ? party : 'Cash Sale' });
+      const row = { ...b, no: first - i, party: i % 3 === 2 ? party : 'Cash Sale' };
+      bills.push(i === 0 ? mine(row) : row);
     });
     total = asked;
   }
@@ -148,6 +203,7 @@ export function salesOf(data) {
 export function render(data, state) {
   const day = salesOf(data);
   const today = Number(state?.today ?? 0) > 0;
+  const on = dayOf(data);
   /* How far the thumb has pushed the list up, from the timeline. */
   const scroll = Math.max(0, Number(state?.scroll ?? 0));
 
@@ -161,7 +217,12 @@ export function render(data, state) {
         <div class="sl-amt">${formatINR(b.amount)}</div>
       </div>
       <div class="sl-bot">
-        <div class="sl-when">${esc(today ? TODAY : b.when)}${b.overdue ? `<span class="sl-dot">&#183;</span><span class="sl-late">${b.overdue} day(s) overdue</span>` : ''}</div>
+        <!-- Nothing written today is overdue. Narrowing the range to Today
+             redates every row to today, and the ones carrying an overdue note
+             then read "22 Oct - 1 day(s) overdue" under a header saying the
+             day IS 22 Oct. The note belongs to the older dates it came
+             with. -->
+        <div class="sl-when">${esc(today ? on.short : b.when)}${b.overdue && !today ? `<span class="sl-dot">&#183;</span><span class="sl-late">${b.overdue} day(s) overdue</span>` : ''}</div>
         <span class="sl-pill ${b.paid ? 'paid' : 'unpaid'}">${b.paid ? 'Paid' : 'Unpaid'}</span>
       </div>
       ${b.paid ? '' : `
@@ -186,7 +247,7 @@ export function render(data, state) {
   <div class="sl-range">
     <span class="ico">${icons.calendar(17)}</span>
     <span class="sl-range-k">${today ? 'Today' : 'Last 365 Days'}</span>
-    <span class="sl-range-v">${today ? '13 Oct 2026' : '13 Oct 2025 - 13 Oct 2026'}</span>
+    <span class="sl-range-v">${today ? on.long : `${on.short} ${on.year - 1} - ${on.long}`}</span>
     <span class="sl-change" id="change-range">CHANGE</span>
   </div>
 

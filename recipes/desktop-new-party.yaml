@@ -19,7 +19,6 @@ party:
 
 invoice:
   number: 5947
-  date: "08/10/2026"
   theme: none
 
 items:

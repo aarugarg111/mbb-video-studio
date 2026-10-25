@@ -7,7 +7,7 @@
 
 import { THEME_SLUGS } from './themes.js';
 import yaml from 'js-yaml';
-import { DEFAULT_INVOICE } from './invoice.js';
+import { defaultInvoice } from './invoice.js';
 import { deviceOf } from './device.js';
 import { SCREENS } from '../screens/index.js';
 
@@ -74,7 +74,7 @@ export function parse(text, catalogue, options = {}) {
 
   const recipe = {
     video: doc.video ?? 'untitled',
-    invoice: { ...DEFAULT_INVOICE },
+    invoice: { ...defaultInvoice() },
     business: { name: '', ...(doc.business || {}) },
     party: { name: '', ...(doc.party || {}) },
     items: Array.isArray(doc.items) ? doc.items : [],

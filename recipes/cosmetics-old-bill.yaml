@@ -1,0 +1,41 @@
+# A cosmetics shop looks up a customer's old bill.
+#
+# She rings up asking what she bought and what is still owed. The owner does
+# not make a new bill - he FINDS hers, and the camera goes to her number
+# first, because that is how he knew which bill was hers.
+#
+# Every name and figure is invented.
+video: cosmetics-old-bill
+
+business:
+  name: SHREE BEAUTY COLLECTION
+
+party:
+  name: MEENA BEAUTY PARLOUR
+  phone: "98765 43210"
+  address: Lajpat Nagar, New Delhi
+
+invoice:
+  number: 2187
+
+items:
+  - { name: FACEWASH 100ML, rate: 185, qty: 3, gst: 18, unit: PCS, purchase: 142 }
+  - { name: NAIL PAINT, rate: 120, qty: 5, gst: 18, unit: PCS, purchase: 88 }
+
+shots:
+  # Her bill is in the day's list - not a new one being written.
+  - screen: sales-list
+    duration: 4.2
+    actions:
+      - { at: 1.2, do: tap, target: change-range }
+      - { at: 2.8, do: tap, target: bill-row-0 }
+
+  # The saved bill opens, with what is still owed printed on it. The camera
+  # holds on her mobile number, then reads the two items back.
+  - screen: bill-open
+    duration: 10.0
+    actions:
+      - { at: 1.4, do: zoom, target: mobile-number, to: 2.3 }
+      - { at: 4.4, do: zoomOut }
+      - { at: 5.4, do: zoom, target: bill-items, to: 2.2 }
+      - { at: 8.2, do: zoomOut }

@@ -8,7 +8,6 @@ video: agarwal-fast-billing
 # screens show the default number.
 invoice:
   number: 5945
-  date: "08/10/2026"
   theme: none
 
 business:

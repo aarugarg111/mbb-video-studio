@@ -17,7 +17,6 @@ party:
 
 invoice:
   number: 212
-  date: "13/10/2026"
   theme: none
 
 items:

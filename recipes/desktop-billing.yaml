@@ -18,7 +18,6 @@ party:
 
 invoice:
   number: 5945
-  date: "08/10/2026"
 
 items:
   - { name: SUGAR 5KG, rate: 310, qty: 2, gst: 5, unit: PKT, purchase: 272, stock: 4 }

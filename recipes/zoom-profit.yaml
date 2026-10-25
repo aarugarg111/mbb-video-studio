@@ -7,7 +7,6 @@ business:
 
 invoice:
   number: 108
-  date: "13/10/2026"
 
 items:
   - { name: VEG MOMOS PLATE, rate: 60, qty: 2, gst: 5, unit: PLATE, purchase: 26 }
