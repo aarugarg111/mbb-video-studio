@@ -4,7 +4,7 @@ import { parse } from '../../src/recipe.js';
 import { catalogue, scrollables } from '../../screens/index.js';
 import {
   PROVIDERS, providerById, providerOfKey, buildRequest, extractText, recipeFromText,
-  readKey, writeKey, migrateKey, keySlotFor
+  readKey, writeKey, migrateKey, keySlotFor, replacementModel, askProvider
 } from './providers';
 
 test('a key goes to the provider it came from', () => {
@@ -19,9 +19,9 @@ test('a key goes to the provider it came from', () => {
 });
 
 test('each provider is asked in the shape it expects', () => {
-  const gem = buildRequest('gemini', 'AIzaKEY', 'gemini-2.5-flash', 'BRIEFING');
+  const gem = buildRequest('gemini', 'AIzaKEY', 'gemini-3.8-flash', 'BRIEFING');
   assert.match(gem.url, /generativelanguage\.googleapis\.com/);
-  assert.match(gem.url, /gemini-2\.5-flash:generateContent$/);
+  assert.match(gem.url, /gemini-3.8-flash:generateContent$/);
   /* The key goes in a header, never in the URL: a URL ends up in logs,
      history and referrers. */
   assert.equal(gem.headers['x-goog-api-key'], 'AIzaKEY');
@@ -166,4 +166,58 @@ test('nothing to migrate is not an error', () => {
   const s = store();
   migrateKey(s);
   assert.equal(readKey(s, 'anthropic'), '');
+});
+
+/* Google's own words when it retired the model this studio was asking for. */
+const RETIRED = JSON.stringify({
+  error: {
+    code: 404,
+    message: 'This model models/gemini-2.5-flash is no longer available to new users. '
+      + 'Please update your code to use models/gemini-3.8-flash for the latest features.',
+    status: 'NOT_FOUND'
+  }
+});
+
+test('a retired model is swapped for the one the provider names', () => {
+  /* A model name written into this file goes stale on somebody else's
+     schedule, and the people using the studio cannot edit it. */
+  assert.equal(replacementModel('gemini-2.5-flash', RETIRED), 'gemini-3.8-flash');
+});
+
+test('the dead model named in the refusal is not retried', () => {
+  /* The message names both. Picking the first one would ask again for the
+     model that was just refused, forever. */
+  const named = replacementModel('gemini-2.5-flash', RETIRED);
+  assert.notEqual(named, 'gemini-2.5-flash');
+});
+
+test('a refusal that is not about a model is left alone', () => {
+  assert.equal(replacementModel('grok-4', '{"error":"Incorrect API key provided"}'), null);
+  assert.equal(replacementModel('gemini-3.8-flash', ''), null);
+  assert.equal(
+    replacementModel('gemini-3.8-flash', 'This model models/gemini-3.8-flash is overloaded'),
+    null,
+    'a refusal naming only the model asked for suggests nothing'
+  );
+});
+
+test('a retired model is asked again once, and only once', async () => {
+  const asked: string[] = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (async (url: string) => {
+    asked.push(String(url));
+    return { ok: false, status: 404, text: async () => RETIRED } as unknown as Response;
+  }) as typeof fetch;
+
+  try {
+    await assert.rejects(
+      askProvider({ id: 'gemini', key: 'AIzaKEY', model: 'gemini-2.5-flash', prompt: 'B' }),
+      /404/,
+      'a second refusal is reported, not retried again'
+    );
+    assert.equal(asked.length, 2, 'asked once, then once more with the named model');
+    assert.match(asked[1], /gemini-3\.8-flash:generateContent$/);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
 });

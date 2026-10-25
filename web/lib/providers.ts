@@ -50,7 +50,7 @@ export const PROVIDERS: Provider[] = [
     hint: 'AIza…',
     where: 'aistudio.google.com',
     whereUrl: 'https://aistudio.google.com/apikey',
-    defaultModel: 'gemini-2.5-flash',
+    defaultModel: 'gemini-3.8-flash',
     free: 'Has a free tier. Good enough for a shot list.'
   },
   {
@@ -152,10 +152,31 @@ export function recipeFromText(text: string): { recipe: string; unsupported: str
   return { recipe: kept.join('\n').trim() + '\n', unsupported };
 }
 
+/* The model a provider says to use instead of the one that was asked for.
+ *
+ * A model name written into this file goes stale on somebody else's
+ * schedule: Google retired gemini-2.5-flash for new keys and answered the
+ * call with a 404 naming its replacement. The name in PROVIDERS is kept
+ * current, but the next retirement would be another dead studio until
+ * somebody edited this file again - and the people using it cannot. So when
+ * a provider refuses a model AND names another one, that one is tried.
+ *
+ * The refusal names the dead model too, so only a name that is not the one
+ * just asked for counts. Nothing is retried that is not a 404 about a model:
+ * a bad key must stay a bad key. */
+export function replacementModel(asked: string, detail: string): string | null {
+  if (!/model/i.test(detail)) return null;
+  const named = [...detail.matchAll(/models\/([A-Za-z0-9][\w.\-]*)/g)].map(m => m[1]);
+  return named.find(n => n !== asked) ?? null;
+}
+
 /* Ask, and hand back a shot list. Everything specific to a provider is in the
  * two functions above; this is the same for all of them. */
 export async function askProvider(
-  { id, key, model, prompt }: { id: ProviderId; key: string; model: string; prompt: string }
+  { id, key, model, prompt }: { id: ProviderId; key: string; model: string; prompt: string },
+  /* Set when this is already the second try, so a provider that renames a
+   * model in a circle cannot keep the page asking forever. */
+  retried = false
 ): Promise<{ recipe: string; unsupported: string[] }> {
   const request = buildRequest(id, key, model, prompt);
 
@@ -174,6 +195,12 @@ export async function askProvider(
 
   if (!response.ok) {
     const detail = await response.text().catch(() => '');
+
+    if (response.status === 404 && !retried) {
+      const instead = replacementModel(model, detail);
+      if (instead) return askProvider({ id, key, model: instead, prompt }, true);
+    }
+
     throw Object.assign(
       new Error(`${response.status} ${detail.slice(0, 600)}`),
       { status: response.status }
