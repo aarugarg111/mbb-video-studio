@@ -1130,7 +1130,12 @@
    last cell: what changes here is only what the bill's own colour names point
    at, so the two can differ in skin and never in content. */
 .mb-paper {
+  /* The sheet is wider than this pane before it is scaled down, so it is
+     centred by the flex rather than by margin:auto - which gives an
+     over-wide child no margin at all and left the bill sitting 16px right
+     of the pane it is in. */
   flex: 1; min-width: 0; border-radius: 8px; overflow: hidden;
+  display: flex; justify-content: center; align-items: flex-start;
   background: var(--dsk-bill-back);
   --mbb-surface: var(--dsk-bill-page);
   --mbb-ink: var(--dsk-ink);
@@ -1141,7 +1146,9 @@
   --mbb-primary-deep: var(--dsk-bill-shop);
   --mbb-pill-grey: var(--dsk-bill-back);
 }
-.mb-paper-fit { width: 390px; margin: 0 auto; transform: scale(0.7); transform-origin: top center; }
+/* The scale is the screen own: it depends on how long the bill is. See
+   screens/mbb-desktop-invoice.js. */
+.mb-paper-fit { width: 390px; flex: none; transform-origin: top center; }
 
 .mb-payhist { flex: none; width: 176px; padding: 11px; border-radius: 8px; background: var(--dsk-card); border: 1px solid var(--dsk-rule); display: flex; flex-direction: column; }
 .mb-payhist-top { flex: 1; min-height: 0; }

@@ -336,93 +336,104 @@
 
 /* The browser window the desktop screens are drawn inside. */
 :root {
-  --stage-window-dot:     #4A4A52;
-  --stage-window-url:     #2A2A31;
-  --stage-window-urltext: #9A9AA6;
+  --stage-window-dot:     #C9CCD4;
+  --stage-window-url:     #EDEFF3;
+  --stage-window-urltext: #5C6270;
   /* A program's title bar rather than a browser's address bar. Darker than the
      window body so the title reads as chrome and not as part of the report. */
-  --stage-window-title:     #1E1E24;
-  --stage-window-titletext: #C8C8D2;
+  --stage-window-title:     #E2E5EB;
+  --stage-window-titletext: #3A3F4A;
 }
 
 /* ---------------------------------------------------------------------------
- * The desktop apps. SAMPLED from reference/frames/dsk-mcf-10.png. Both
- * myBillBook and myCashFlo are DARK on a laptop where they are light on a
- * phone - the same product with a different skin - so these are their own
- * tokens rather than a shade of the --mcf-* ones.
+ * The desktop apps.
+ *
+ * These were SAMPLED from reference/frames/dsk-mcf-10.png and the other
+ * laptop frames, which were captured with the app in DARK mode - so the
+ * studio drew every laptop clip dark while every phone clip was white. In a
+ * reel the two cut together, and the laptop half looked like a different
+ * product. Aryan asked for white.
+ *
+ * So these are the same screens in the app's light skin, keyed to the phone's
+ * --mbb-* palette above rather than sampled: one business, one set of
+ * colours, whichever machine it is filmed on. The structure - which token
+ * means "the page", "a card", "the rail" - is unchanged, so no screen had to
+ * be touched.
  * ------------------------------------------------------------------------ */
 :root {
-  --dsk-page:    #040404;  /* SAMPLED - the page behind everything */
-  --dsk-sidebar: #0B1323;  /* SAMPLED - the left rail            */
-  --dsk-panel:   #202222;  /* SAMPLED - cards, fields, pills      */
-  --dsk-modal:   #111111;  /* SAMPLED - the follow-up sheet       */
-  --dsk-blue:    #243D99;  /* SAMPLED - the primary button        */
-  --dsk-active:  #2C3567;  /* SAMPLED - the chosen nav item       */
-  --dsk-ink:     #EDF1FE;  /* SAMPLED - text                      */
-  --dsk-muted:   #8A92A6;
-  --dsk-rule:    #1E2230;
-  --dsk-late:    #E06B63;
-  --dsk-credit:  #4ADE80;
-  --dsk-ai:      #080718;  /* SAMPLED - the AI bar                */
-  --dsk-ai-edge: #2A2550;
-  --dsk-ai-live: #8B7CF6;
-  --dsk-scrim:   rgba(0, 0, 0, 0.62);
+  --dsk-page:    #F4F5F9;  /* the page behind everything */
+  --dsk-sidebar: #FFFFFF;  /* the left rail              */
+  --dsk-panel:   #FFFFFF;  /* cards, fields, pills       */
+  --dsk-modal:   #FFFFFF;  /* the follow-up sheet        */
+  --dsk-blue:    #2A47B8;  /* the primary button         */
+  --dsk-active:  #ECE8FF;  /* the chosen nav item        */
+  --dsk-ink:     #27303B;  /* text                       */
+  --dsk-muted:   #6B7280;
+  --dsk-rule:    #E4E7EE;
+  --dsk-late:    #D1453B;
+  --dsk-credit:  #1E7A46;
+  --dsk-ai:      #F0EEFD;  /* the AI bar                 */
+  --dsk-ai-edge: #CFC7F4;
+  --dsk-ai-live: #6D5BE0;
+  /* A scrim dims the page behind a sheet. On a white page it has to be dark
+     to dim anything at all, but far lighter than it was over black. */
+  --dsk-scrim:   rgba(39, 48, 59, 0.38);
 }
 
-/* myBillBook on a laptop. Shares the dark ground above; the primary is
- * myBillBook's purple rather than myCashFlo's blue. SAMPLED from
- * reference/frames/dsk-mbb-4.png. */
+/* myBillBook on a laptop. Shares the light ground above; the primary is
+ * myBillBook's own indigo, the same one the phone uses. */
 :root {
-  --dsk-purple: #4A2FC6;  /* SAMPLED - Create Party, Create Item */
-  --dsk-card:   #23232B;  /* SAMPLED - the figures across the top */
-  --dsk-in:     #4ADE80;  /* money coming in                     */
-  --dsk-out:    #F87171;  /* money going out                     */
+  --dsk-purple: #4C3CCE;  /* Create Party, Create Item          */
+  --dsk-card:   #FFFFFF;  /* the figures across the top         */
+  --dsk-in:     #1E7A46;  /* money coming in                    */
+  --dsk-out:    #D1453B;  /* money going out                    */
   --dsk-new:    #DC2626;  /* the "New" tag beside AI Collections */
 }
 
 /* The Mira AI autofill panel and the empty form it fills. */
 :root {
-  --dsk-mira: #E1540C;  /* SAMPLED - Mira AI's orange  */
-  --dsk-drop: #38291E;  /* SAMPLED - the drop zone fill */
-  --dsk-dash: #3A3A46;  /* an outline waiting to fill  */
-  --dsk-link: #7AA2F7;
+  --dsk-mira: #E1540C;  /* Mira AI's orange            */
+  --dsk-drop: #FDF1E9;  /* the drop zone fill          */
+  --dsk-dash: #C9CCD4;  /* an outline waiting to fill  */
+  --dsk-link: #2A47B8;
 }
 
 /* Paid and unpaid, on the desktop invoice. */
 :root {
-  /* The invoice preview on a laptop. SAMPLED from
-   * reference/frames/dsk-mbb-52.png: the app shows the bill on its own dark
-   * page, not as a white sheet. */
-  --dsk-bill-page: #111111;  /* SAMPLED - the bill ground          */
-  --dsk-bill-edge: #443E10;  /* SAMPLED - the themed border        */
-  --dsk-bill-band: #303030;  /* SAMPLED - the item table's header  */
-  --dsk-bill-rule: #2A2A2A;
-  --dsk-bill-shop: #C9CFF9;  /* SAMPLED - the shop's own name      */
-  --dsk-bill-back: #252525;  /* SAMPLED - the pane behind the bill */
-  --dsk-explore:   #1A8BC4;  /* SAMPLED - the Explore Now button    */
-  --dsk-link-edge: #27406B;  /* the e-document buttons' outline     */
-  --dsk-unpaid-bg: #3A1D1D;
-  --dsk-paid-bg:   #14301F;
+  /* The bill is a piece of paper. On the dark skin it was drawn on the app's
+   * own dark ground, which made the preview a grey slab with grey writing -
+   * the one thing in a billing video that has to be legible. It is a white
+   * sheet on a soft grey pane now, as it is on the phone and as it prints. */
+  --dsk-bill-page: #FFFFFF;  /* the bill ground                   */
+  --dsk-bill-edge: #BE9A4A;  /* the themed border                 */
+  --dsk-bill-band: #F3F1E7;  /* the item table's header           */
+  --dsk-bill-rule: #E2E0D6;
+  --dsk-bill-shop: #22386A;  /* the shop's own name               */
+  --dsk-bill-back: #EBEDF2;  /* the pane behind the bill          */
+  --dsk-explore:   #1A8BC4;  /* the Explore Now button            */
+  --dsk-link-edge: #BFCCE8;  /* the e-document buttons' outline   */
+  --dsk-unpaid-bg: #FBEDEE;
+  --dsk-paid-bg:   #EDF4EE;
 }
 
-/* myCashFlo on a laptop, rebuilt. SAMPLED from reference/frames/dmcf-3.png. */
+/* myCashFlo on a laptop. */
 :root {
-  --dsk-table:      #161818;  /* SAMPLED - the table ground        */
-  --dsk-mcf-rail:   #111111;  /* SAMPLED - myCashFlo's own rail    */
-  --dsk-ai-bar:     #2F277C;  /* SAMPLED - the AI Accountant bar   */
-  --dsk-ai-mic:     #7530DE;  /* SAMPLED - its mic button          */
-  --dsk-ai-said:    #BFB8E8;
-  --dsk-breach-bg:  #261F1F;  /* SAMPLED - "Promise Breached"      */
-  --dsk-daily-bg:   #15231C;  /* SAMPLED - the daily WhatsApp pill */
+  --dsk-table:      #FFFFFF;  /* the table ground           */
+  --dsk-mcf-rail:   #FFFFFF;  /* myCashFlo's own rail       */
+  --dsk-ai-bar:     #EDEBFB;  /* the AI Accountant bar      */
+  --dsk-ai-mic:     #7530DE;  /* its mic button             */
+  --dsk-ai-said:    #4A4370;
+  --dsk-breach-bg:  #FBEDEE;  /* "Promise Breached"         */
+  --dsk-daily-bg:   #EDF4EE;  /* the daily WhatsApp pill    */
 }
 
-/* myBillBook on a laptop, rebuilt. SAMPLED from reference/frames/dmbb-7.png. */
+/* myBillBook on a laptop, the dashboard furniture. */
 :root {
-  --dsk-promo:     #1C262C;  /* SAMPLED - the referral strip   */
-  --dsk-promo-ico: #0B8EDA;  /* SAMPLED - its gift icon        */
-  --dsk-pending:   #46A159;  /* SAMPLED - the Pending Actions pill */
-  --dsk-in-edge:   #2A5B3F;
-  --dsk-out-edge:  #5E2B2B;
+  --dsk-promo:     #E8F3F9;  /* the referral strip          */
+  --dsk-promo-ico: #0B8EDA;  /* its gift icon               */
+  --dsk-pending:   #2E8B49;  /* the Pending Actions pill    */
+  --dsk-in-edge:   #A9D4B9;
+  --dsk-out-edge:  #EFC0BC;
 }
 
 /* ---- The Luxury bill ---------------------------------------------------

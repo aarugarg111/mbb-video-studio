@@ -54,6 +54,57 @@ export const zoomPoints = {
   balance: { x: 392, y: 387 }
 };
 
+/* Fitting a tall document into a short pane.
+ *
+ * The bill is the phone's own markup at the phone's own width, and it is
+ * taller than a laptop window is deep. It used to be drawn at a fixed 0.7
+ * and simply ran off the bottom: the clip ended on a bill whose total was
+ * cut through the middle, which is the one thing a billing video must not
+ * do. The app scrolls that pane; a four-second shot cannot. So the sheet is
+ * fitted to the pane instead - whole and small, rather than large and
+ * guillotined - and the camera zooms onto whatever the recipe asks for,
+ * which is what makes the small size affordable.
+ *
+ * MEASURED from a render. test/desktop-bill-fits.test.js measures all of it
+ * again and fails if the layout drifts, because nothing on screen would say
+ * so: the bill would just start hanging over the edge again. */
+/* Where the sheet sits: the top of the pane, its centre line, and a floor a
+ * few pixels short of the pane's own, because a sheet whose last hairline
+ * lands exactly on the edge reads as cut off even when it is not. */
+const PANE = { top: 115, bottom: 390, centreX: 318 };
+/* The bill's own height, unscaled: a fixed head and foot, plus a row per
+ * item. */
+const BILL = { head: 518, row: 26 };
+/* The scale zoomPoints above were measured at. */
+export const DRAWN_AT = 0.7;
+/* And where the sheet sat when they were measured. It has moved since: it
+ * was centred with margin:auto, which gives a child wider than its parent no
+ * margin at all, so the bill hung 16px right of the pane it was in, and its
+ * own top margin collapsed out through the pane's edge. Rather than measure
+ * seven points by hand again, they are read as offsets from the sheet's old
+ * origin and re-anchored to its new one. */
+const DRAWN_AT_ORIGIN = { top: 127, centreX: 334.5 };
+
+export function billScale(data) {
+  const items = Array.isArray(data?.items) ? data.items.length : 0;
+  const tall = BILL.head + BILL.row * items;
+  /* Never larger than it was drawn: a one-line bill should not balloon. */
+  return Math.min(DRAWN_AT, (PANE.bottom - PANE.top) / tall);
+}
+
+/* The same seven places, wherever the sheet actually ended up. It scales
+ * about the top of the pane and its own centre line, so every point keeps
+ * its distance from those two in the sheet's own terms - which is what
+ * keeps a zoom aimed at the customer's number on the customer's number,
+ * whatever the bill's length did to the scale. */
+export function zoomPointsFor(data) {
+  const k = billScale(data) / DRAWN_AT;
+  return Object.fromEntries(Object.entries(zoomPoints).map(([name, p]) => [name, {
+    x: PANE.centreX + (p.x - DRAWN_AT_ORIGIN.centreX) * k,
+    y: PANE.top + (p.y - DRAWN_AT_ORIGIN.top) * k
+  }]));
+}
+
 export const tapEffects = {
   'record-payment': { paid: 1 },
   share: { sharing: 1 },
@@ -107,7 +158,7 @@ export function render(data, state) {
 
     <div class="mb-view-body">
       <div class="mb-paper">
-        <div class="mb-paper-fit">${billMarkup(data ?? {}, { ...state, appear: 1 })}</div>
+        <div class="mb-paper-fit" style="transform: scale(${billScale(data).toFixed(3)})">${billMarkup(data ?? {}, { ...state, appear: 1 })}</div>
       </div>
 
       ${sharing ? `

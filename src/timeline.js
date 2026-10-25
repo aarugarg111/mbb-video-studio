@@ -145,7 +145,13 @@ export function stateAt(recipe, t) {
        * it, what is still owed - so a screen may name places as well as
        * buttons, and the camera takes either. */
       const screen = SCREENS[s.screen];
-      const point = screen?.targets?.[target] ?? screen?.zoomPoints?.[target];
+      /* A place can move with what is on the screen rather than sit still:
+       * the laptop's bill is fitted to its pane, so a longer bill is drawn
+       * smaller and every place on it shifts with it. A screen that has to
+       * work that out says so with zoomPointsFor; the rest keep a table. */
+      const point = screen?.targets?.[target]
+        ?? screen?.zoomPointsFor?.(recipe)?.[target]
+        ?? screen?.zoomPoints?.[target];
       if (!point) return point;
       return screen?.scrollingTargets?.includes(target)
         ? { x: point.x, y: point.y - screenState.scroll }
