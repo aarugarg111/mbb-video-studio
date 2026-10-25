@@ -10,7 +10,10 @@ import { renderVideo } from '@/lib/render';
 import { canEncode } from '@/lib/encode';
 import { renderRemotely, canRenderRemotely } from '@/lib/render-remote';
 import { briefingFor } from '@/lib/briefing';
-import { askProvider, providerById, providerOfKey, PROVIDERS, type ProviderId } from '../lib/providers';
+import {
+  askProvider, providerById, providerOfKey, PROVIDERS, type ProviderId,
+  readKey, writeKey, migrateKey, PROVIDER_SLOT
+} from '../lib/providers';
 import { runSelfTest, asReport, type Step as CheckStep } from '@/lib/selftest';
 import { Stage } from './studio/stage';
 import { ShotListForm } from './studio/shot-list';
@@ -27,10 +30,9 @@ const STEPS: [Step, string][] = [
   ['check', 'Check the shot list'],
   ['done', 'Your video']
 ];
-const KEY_NAME = 'mbb-anthropic-key';
-/* Which AI the pasted key belongs to. Remembered beside the key, because the
- * two only make sense together. */
-const PROVIDER_NAME = 'mbb-ai-provider';
+/* Which AI reads the script. Each provider's key is kept in its own slot
+ * beside it - see lib/providers.ts - so switching AI switches the key too. */
+const PROVIDER_NAME = PROVIDER_SLOT;
 
 export default function Page() {
   const [step, setStep] = useState<Step>('fill');
@@ -90,9 +92,11 @@ export default function Page() {
       isSignedIn().then(setSignedIn).finally(() => setCheckingSession(false));
     } else {
       try {
-        setApiKey(localStorage.getItem(KEY_NAME) ?? '');
+        migrateKey(localStorage);
         const saved = localStorage.getItem(PROVIDER_NAME);
-        if (saved) setProvider(saved as ProviderId);
+        const its = PROVIDERS.find(p => p.id === saved)?.id ?? 'anthropic';
+        setProvider(its);
+        setApiKey(readKey(localStorage, its));
       } catch { /* private mode */ }
     }
     /* Asked, not assumed. Safari has VideoEncoder and VideoFrame and fails
@@ -112,16 +116,30 @@ export default function Page() {
   function saveKey() {
     const k = keyDraft.trim();
     if (!k) return;
+    /* A pasted key says which AI it belongs to, so nobody has to be asked -
+     * and it is filed under that AI, not under whichever one happens to be
+     * selected. */
+    const its = providerOfKey(k) ?? provider;
     try {
-      localStorage.setItem(KEY_NAME, k);
-      /* A pasted key says which AI it belongs to, so nobody has to be asked. */
-      const its = providerOfKey(k);
-      if (its) { setProvider(its); localStorage.setItem(PROVIDER_NAME, its); }
-      else localStorage.setItem(PROVIDER_NAME, provider);
+      writeKey(localStorage, its, k);
+      localStorage.setItem(PROVIDER_NAME, its);
     } catch { /* kept in memory only */ }
+    setProvider(its);
     setApiKey(k);
     setKeyDraft('');
     setEditingKey(false);
+  }
+
+  /* Picking a different AI brings its own key with it. It used to leave the
+   * previous one in place, which is how a Gemini key ended up at x.ai. */
+  function pickProvider(id: ProviderId) {
+    setProvider(id);
+    setKeyDraft('');
+    setEditingKey(false);
+    try {
+      localStorage.setItem(PROVIDER_NAME, id);
+      setApiKey(readKey(localStorage, id));
+    } catch { setApiKey(''); }
   }
 
   async function submitPassword() {
@@ -394,7 +412,7 @@ export default function Page() {
             {PROVIDERS.map(p => (
               <button key={p.id} type="button" className={provider === p.id ? 'on' : ''}
                       aria-pressed={provider === p.id}
-                      onClick={() => setProvider(p.id)}>
+                      onClick={() => pickProvider(p.id)}>
                 {p.id === 'anthropic' ? 'The team key' : p.name}
               </button>
             ))}
@@ -441,7 +459,7 @@ export default function Page() {
                 type="button"
                 className={provider === p.id ? 'on' : ''}
                 aria-pressed={provider === p.id}
-                onClick={() => setProvider(p.id)}
+                onClick={() => pickProvider(p.id)}
               >{p.name}</button>
             ))}
           </div>

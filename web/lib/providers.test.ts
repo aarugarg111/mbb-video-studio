@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { parse } from '../../src/recipe.js';
 import { catalogue, scrollables } from '../../screens/index.js';
 import {
-  PROVIDERS, providerById, providerOfKey, buildRequest, extractText, recipeFromText
+  PROVIDERS, providerById, providerOfKey, buildRequest, extractText, recipeFromText,
+  readKey, writeKey, migrateKey, keySlotFor
 } from './providers';
 
 test('a key goes to the provider it came from', () => {
@@ -105,4 +106,64 @@ test('every provider says where to get a key and what it costs', () => {
     assert.equal(providerById(p.id).id, p.id);
   }
   assert.equal(providerById('nonsense').id, 'anthropic', 'an unknown id falls back to the studio own path');
+});
+
+/* A fake localStorage, which is all these need. */
+function store(seed: Record<string, string> = {}) {
+  const map = new Map(Object.entries(seed));
+  return {
+    getItem: (k: string) => map.get(k) ?? null,
+    setItem: (k: string, v: string) => { map.set(k, v); },
+    removeItem: (k: string) => { map.delete(k); },
+    seen: map
+  };
+}
+
+test('each provider keeps its own key, so switching AI switches the key', () => {
+  /* The bug: one key under one name. Saving a Gemini key and then picking
+     Grok sent the Gemini key to x.ai, which answers "Incorrect API key
+     provided" - a true sentence about the wrong problem. */
+  const s = store();
+  writeKey(s, 'gemini', 'AIzaGEM');
+  writeKey(s, 'grok', 'xai-GROK');
+  assert.equal(readKey(s, 'gemini'), 'AIzaGEM');
+  assert.equal(readKey(s, 'grok'), 'xai-GROK');
+  assert.equal(readKey(s, 'anthropic'), '', 'a provider with no key has no key');
+  assert.notEqual(keySlotFor('gemini'), keySlotFor('grok'));
+});
+
+test('a pasted key is trimmed before it is kept', () => {
+  /* It arrives from a clipboard, and a trailing newline in an Authorization
+     header is rejected by the browser before it ever reaches the provider. */
+  const s = store();
+  writeKey(s, 'grok', '  xai-GROK\n');
+  assert.equal(readKey(s, 'grok'), 'xai-GROK');
+});
+
+test('the one old shared key is filed under whoever it belongs to', () => {
+  const s = store({ 'mbb-anthropic-key': 'xai-GROK', 'mbb-ai-provider': 'grok' });
+  migrateKey(s);
+  assert.equal(readKey(s, 'grok'), 'xai-GROK');
+  assert.equal(readKey(s, 'anthropic'), '', 'and not left sitting under Claude');
+  assert.equal(s.getItem('mbb-anthropic-key'), null, 'the old slot is emptied');
+});
+
+test('an old key of no recognisable shape goes to the AI that was selected', () => {
+  const s = store({ 'mbb-anthropic-key': 'plain-token', 'mbb-ai-provider': 'gemini' });
+  migrateKey(s);
+  assert.equal(readKey(s, 'gemini'), 'plain-token');
+});
+
+test('migrating twice does not overwrite a key saved since', () => {
+  const s = store({ 'mbb-anthropic-key': 'AIzaOLD' });
+  migrateKey(s);
+  writeKey(s, 'gemini', 'AIzaNEW');
+  migrateKey(s);
+  assert.equal(readKey(s, 'gemini'), 'AIzaNEW');
+});
+
+test('nothing to migrate is not an error', () => {
+  const s = store();
+  migrateKey(s);
+  assert.equal(readKey(s, 'anthropic'), '');
 });

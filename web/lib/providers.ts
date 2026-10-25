@@ -182,3 +182,44 @@ export async function askProvider(
 
   return recipeFromText(extractText(id, await response.json()));
 }
+
+/* Where each key is kept.
+ *
+ * The studio used to keep ONE key, under one name, whatever provider it
+ * belonged to - so picking a different AI left the previous AI's key in
+ * place and sent it onward. x.ai answers that with "Incorrect API key
+ * provided", which reads like a bad key rather than somebody else's key, and
+ * Google answers the same mix-up with "API key not valid". Aryan hit both in
+ * one sitting. A key belongs to the provider it came from, so each provider
+ * now has its own slot.
+ */
+export type KeyStore = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
+
+/* The name the single shared key used to be kept under. */
+const LEGACY_SLOT = 'mbb-anthropic-key';
+
+export const PROVIDER_SLOT = 'mbb-ai-provider';
+
+export const keySlotFor = (id: ProviderId): string => `mbb-key-${id}`;
+
+export function readKey(store: KeyStore, id: ProviderId): string {
+  try { return store.getItem(keySlotFor(id))?.trim() ?? ''; } catch { return ''; }
+}
+
+export function writeKey(store: KeyStore, id: ProviderId, key: string): void {
+  try { store.setItem(keySlotFor(id), key.trim()); } catch { /* private mode */ }
+}
+
+/* The one old key, filed under whoever it actually belongs to. Its shape
+ * says so; failing that, the provider that was selected when it was saved.
+ * Runs once - afterwards there is nothing in the old slot to move. */
+export function migrateKey(store: KeyStore): void {
+  try {
+    const old = store.getItem(LEGACY_SLOT)?.trim();
+    store.removeItem(LEGACY_SLOT);
+    if (!old) return;
+    const id = providerOfKey(old)
+      ?? (PROVIDERS.find(p => p.id === store.getItem(PROVIDER_SLOT))?.id ?? 'anthropic');
+    if (!readKey(store, id)) writeKey(store, id, old);
+  } catch { /* private mode */ }
+}
