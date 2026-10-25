@@ -8,6 +8,7 @@
 import { THEME_SLUGS } from './themes.js';
 import yaml from 'js-yaml';
 import { defaultInvoice } from './invoice.js';
+import { TRADES } from './shelves.js';
 import { deviceOf } from './device.js';
 import { SCREENS } from '../screens/index.js';
 
@@ -104,6 +105,20 @@ export function parse(text, catalogue, options = {}) {
     errors.push(
       `"video" must be a name of letters, digits, "-" and "_" only, got ${JSON.stringify(recipe.video)}.`
     );
+  }
+
+  /* What the shop sells, which decides the rest of its shelf. A typo here
+   * used to pass straight through and quietly restock a cosmetics shop with
+   * dal, so it is checked and the choices are named. */
+  if (doc.business?.trade != null) {
+    const trade = String(doc.business.trade).trim().toLowerCase();
+    if (TRADES.includes(trade)) {
+      recipe.business.trade = trade;
+    } else {
+      errors.push(
+        `business.trade must be one of ${TRADES.join(', ')}, got ${JSON.stringify(doc.business.trade)}.`
+      );
+    }
   }
 
   if (doc.invoice != null) {

@@ -1,5 +1,6 @@
 import { esc } from '../src/esc.js';
 import { icons } from '../src/icons.js';
+import { shelfFor } from '../src/shelves.js';
 
 export const name = 'items';
 
@@ -49,30 +50,20 @@ const NAV = [
 const purchaseOf = item => Number(item.purchase ?? Math.round(Number(item.rate || 0) * 0.88));
 const rupees = n => '₹ ' + Number(n || 0).toLocaleString('en-IN');
 
-/* The shop's own shelf, so a recipe that lists two items still looks like a
- * shop. Shared with the laptop's Items page rather than copied: one business
- * cannot be stocking two different catalogues.
- *
- * Long enough to scroll past the bottom of a phone, which is the point of
- * being able to scroll it at all. */
-const FILLERS = [
-  { name: 'AMUL RUSK FAMILY PACK', rate: 180, purchase: 120, stock: 99 },
-  { name: 'ANJEER PREMEIUM 500GM', rate: 1200, purchase: 950, stock: 99 },
-  { name: 'ARHAR DAL GOLD 1KG', rate: 180, purchase: 140, stock: 95 },
-  { name: 'BESAN 1KG', rate: 110, purchase: 94, stock: 91 },
-  { name: 'BELLA VITA PERFUME SET', rate: 650, purchase: 250, stock: 199 },
-  { name: 'BOURNVITA 500GM', rate: 245, purchase: 212, stock: 36 },
-  { name: 'BRITANNIA MARIE GOLD', rate: 40, purchase: 33, stock: 120 },
-  { name: 'CHANA DAL 1KG', rate: 95, purchase: 78, stock: 64 },
-  { name: 'COLGATE STRONG TEETH 200G', rate: 115, purchase: 96, stock: 48 }
-];
-
 const ROWS = 14;
 
+/* The page is the recipe's own items, then the rest of that shop's shelf.
+ *
+ * The shelf comes from src/shelves.js and follows the shop's trade. It used
+ * to be one fixed kirana list, so a cosmetics shop's Items page read FACEWASH,
+ * NAIL PAINT, then ARHAR DAL GOLD 1KG and BESAN 1KG - the same page showing
+ * two different shops, three rows apart.
+ *
+ * Shared with the laptop's Items page rather than copied: one business cannot
+ * be stocking two different catalogues. */
 export function itemsFor(data) {
   const own = Array.isArray(data?.items) ? data.items : [];
-  const rest = FILLERS.filter(f => !own.some(o => String(o.name).toLowerCase() === f.name.toLowerCase()));
-  return [...own, ...rest].slice(0, ROWS);
+  return [...own, ...shelfFor(data)].slice(0, ROWS);
 }
 
 /* A shop's shelf is longer than a phone. */

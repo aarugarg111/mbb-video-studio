@@ -17,6 +17,7 @@
 import { z } from 'zod';
 import { SYSTEM } from './claude';
 import { RecipeSchema, SCREENS, ACTIONS } from './schema';
+import { TRADES } from '../../src/shelves.js';
 
 export interface Details {
   business?: string;
@@ -136,6 +137,12 @@ The YAML the studio expects looks like this:
 video: a-short-name-with-hyphens
 business:
   name: BALAJI TRADING CO
+  trade: kirana          # one of: ${TRADES.join(', ')}
+                         # What the shop sells. The rest of its stock list is
+                         # filled in from this, so a cosmetics script does not
+                         # end up on a grocer's shelf. Worked out from the items
+                         # when left out; state it whenever the script names a
+                         # trade or a category.
 party:
   name: Rakesh Kumar
 items:

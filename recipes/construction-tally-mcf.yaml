@@ -12,6 +12,8 @@ video: construction-tally-mcf
 
 business:
   name: SHREE BALAJI BUILDING MATERIALS
+  # What the shop sells, so its shelf is not a grocer's.
+  trade: hardware
 
 # The party the AI rings: the biggest and the oldest.
 party:
