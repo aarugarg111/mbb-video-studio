@@ -1,0 +1,45 @@
+# A customer rings up asking what they owe, and the owner looks their bill up.
+#
+# The commoner beat by far: most of the time a shopkeeper is not MAKING a bill,
+# he is finding one. "Uska purana bill nikalo" ends on the balance, and on the
+# way there the camera looks at the things the script names - the customer,
+# their number, what was on the bill.
+#
+# Every name and figure is invented.
+video: open-old-bill
+
+business:
+  name: SAGAR SUPERBAZAAR
+
+party:
+  name: ASHOK TRADING CO
+  phone: "98765 43210"
+  address: Sadar Bazaar, Agra
+
+invoice:
+  number: 5949
+  date: "16/10/2026"
+
+items:
+  - { name: SUGAR 5KG, rate: 310, qty: 2, gst: 5, unit: PKT, purchase: 272 }
+  - { name: TATA SALT 1KG, rate: 28, qty: 6, gst: 5, unit: PKT, purchase: 24 }
+
+shots:
+  # Find it in the day's bills.
+  - screen: sales-list
+    duration: 4.0
+    actions:
+      - { at: 1.2, do: tap, target: change-range }
+      - { at: 2.6, do: tap, target: bill-row-0 }
+
+  # The bill as it was saved, with what is still owed on it. The camera looks
+  # at the customer's number, then at what they bought, then at the balance -
+  # none of which is a button.
+  - screen: bill-open
+    duration: 11.0
+    actions:
+      - { at: 1.4, do: zoom, target: mobile-number }
+      - { at: 3.6, do: zoomOut }
+      - { at: 4.6, do: zoom, target: bill-items }
+      - { at: 7.0, do: zoomOut }
+      - { at: 8.0, do: zoom, target: balance }

@@ -98,13 +98,19 @@ for (const screen of screens) {
   /* Walked through the shot rather than read at one instant, keeping the first
    * place each id is seen: an element that appears on one tap and goes on the
    * next is on camera for part of the shot and nowhere for the rest. */
+  /* Both: the things a finger can press, and the places a screen names only
+   * to be looked at. A bill has nothing to press and seven places worth a
+   * close-up, and those need measuring just as much. */
+  const wanted = { ...(mod.targets ?? {}), ...(mod.zoomPoints ?? {}) };
+  const places = new Set(Object.keys(mod.zoomPoints ?? {}));
+
   const measured = {};
   for (let t = 0.25; t <= span; t += 0.25) {
     await page.evaluate(at => window.setTime(at), Number(t.toFixed(2)));
-    const found = await measureOnce(page, Object.keys(mod.targets ?? {}), vpId, box);
+    const found = await measureOnce(page, Object.keys(wanted), vpId, box);
     for (const [id, at] of Object.entries(found)) if (at && !measured[id]) measured[id] = at;
   }
-  for (const id of Object.keys(mod.targets ?? {})) if (!(id in measured)) measured[id] = null;
+  for (const id of Object.keys(wanted)) if (!(id in measured)) measured[id] = null;
 
   /* Every target landing on one point is the signature of a screen that was
    * never laid out - measured while its frame was hidden, which happens when
@@ -123,19 +129,31 @@ for (const screen of screens) {
     continue;
   }
 
-  console.log(`\n/* ${screen} - MEASURED */\nexport const targets = {`);
-  const lines = [];
-  for (const [id, at] of Object.entries(measured)) {
-    if (!at) {
-      console.error(`  !! ${id}: no element with that id on ${screen} - it cannot be tapped`);
-      continue;
+  /* Buttons and places go back to different blocks in the screen, so they
+     print as different blocks here. */
+  const block = (name, wantPlaces) => {
+    const lines = [];
+    for (const [id, at] of Object.entries(measured)) {
+      if (places.has(id) !== wantPlaces) continue;
+      if (!at) {
+        console.error(
+          `  !! ${id}: no element with that id on ${screen} - ` +
+          (wantPlaces ? 'there is nothing there to look at' : 'it cannot be tapped')
+        );
+        continue;
+      }
+      const was = wanted[id];
+      const drift = Math.max(Math.abs(was.x - at.x), Math.abs(was.y - at.y));
+      lines.push(`  '${id}': { x: ${at.x}, y: ${at.y} }` + (drift > 8 ? `,  // was ${was.x},${was.y} - out by ${drift}px` : ','));
     }
-    const was = mod.targets[id];
-    const drift = Math.max(Math.abs(was.x - at.x), Math.abs(was.y - at.y));
-    lines.push(`  '${id}': { x: ${at.x}, y: ${at.y} }` + (drift > 8 ? `,  // was ${was.x},${was.y} - out by ${drift}px` : ','));
-  }
-  console.log(lines.join('\n').replace(/,$/, ''));
-  console.log('};');
+    if (!lines.length) return;
+    console.log(`\n/* ${screen} - MEASURED */\nexport const ${name} = {`);
+    console.log(lines.join('\n').replace(/,$/, ''));
+    console.log('};');
+  };
+
+  block('targets', false);
+  block('zoomPoints', true);
 }
 
 await browser.close();

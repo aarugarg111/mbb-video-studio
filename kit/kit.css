@@ -1808,3 +1808,29 @@
 .itemsscreen .appbar, .itemsscreen .itemsstrip, .itemsscreen .fpills { position: relative; z-index: 1; }
 /* And on the laptop, where the table body scrolls under its own header. */
 .mb-rowscroll { flex: 1; min-height: 0; overflow: hidden; position: relative; }
+
+/* ---- A bill opened from the list --------------------------------------- */
+.boscreen { background: var(--mbb-page); display: flex; flex-direction: column; }
+.boscreen .topbar .sub { font-size: 11px; color: var(--mbb-ink-muted); margin-top: 2px; }
+.bo-state {
+  flex: none; display: flex; align-items: center; gap: 10px;
+  padding: 11px 17px; background: var(--mbb-surface);
+  border-bottom: 1px solid var(--mbb-hairline);
+}
+.bo-chip {
+  padding: 3px 9px; border-radius: 5px; font-size: 10.5px; font-weight: 700;
+  background: var(--mbb-unpaid); color: var(--mbb-surface);
+}
+.bo-state.paid .bo-chip { background: var(--mbb-success-tint); color: var(--mbb-scan-done); }
+.bo-owed { font-size: 12px; color: var(--mbb-ink-muted); }
+.bo-paper { flex: 1; min-height: 0; overflow: hidden; padding: 12px 14px 0; }
+.bo-bar {
+  flex: none; display: flex; align-items: center; justify-content: space-around;
+  padding: 12px 10px 18px; background: var(--mbb-surface);
+  border-top: 1px solid var(--mbb-hairline);
+}
+.bo-act {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 600; color: var(--mbb-primary);
+}
+.bo-act .ico { color: var(--mbb-primary); }

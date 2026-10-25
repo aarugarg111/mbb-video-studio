@@ -238,3 +238,14 @@ export function stepsFor(screen: string): { id: string; name: string; scroll?: b
   }
   return steps;
 }
+
+/* Places inside a bill, which are looked at rather than pressed. */
+export const PLACE_LABELS: Record<string, string> = {
+  customer: 'the customer',
+  'mobile-number': 'their mobile number',
+  'invoice-number': 'the invoice number',
+  'invoice-date': 'the date',
+  'bill-items': 'the items on the bill',
+  totals: 'the totals',
+  balance: 'what is still owed'
+};

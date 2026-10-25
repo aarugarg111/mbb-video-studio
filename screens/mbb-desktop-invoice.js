@@ -41,6 +41,19 @@ export const targets = {
  * it: the same choices the phone's share sheet offers, as a menu beside the
  * bill rather than a sheet sliding up from the bottom. Same flow, different
  * interface - which is the whole rule for these laptop screens. */
+/* The places inside the bill, which are the bill's own - the same seven on
+ * every screen that draws one. Measured in this screen's space, because the
+ * bill is drawn smaller here than on a phone. */
+export const zoomPoints = {
+  customer: { x: 276, y: 230 },
+  'mobile-number': { x: 276, y: 241 },
+  'invoice-number': { x: 276, y: 191 },
+  'invoice-date': { x: 392, y: 191 },
+  'bill-items': { x: 334, y: 272 },
+  totals: { x: 392, y: 357 },
+  balance: { x: 392, y: 387 }
+};
+
 export const tapEffects = {
   'record-payment': { paid: 1 },
   share: { sharing: 1 },

@@ -1,6 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parse } from '../src/recipe.js';
+/* Most of this file works against the small catalogue below, deliberately.
+   The places on a bill are a property of the real screens, so the test for
+   those uses the real ones. */
+import { catalogue, scrollables, zoomCatalogue } from '../screens/index.js';
 
 const CATALOGUE = {
   home: ['create-invoice-cta'],
@@ -560,4 +564,35 @@ test('everything that reads a shot list tells it which screens scroll', async ()
       `${file} reads a shot list without saying which screens scroll`
     );
   }
+});
+
+test('a tap has to be a button, but a zoom may be a place', () => {
+  /* Places are for looking at. Tapping a customer's mobile number is not
+     something the app does, and a clip that rang a ripple there would be
+     showing a button that does not exist. */
+  const shot = (verb, target) => `
+video: places
+business: { name: Shop }
+party: { name: Ravi }
+invoice: { number: 1, date: "01/01/2026" }
+items: [{ name: X, rate: 10, qty: 1, gst: 5, unit: PCS }]
+shots:
+  - screen: bill-open
+    duration: 4
+    actions:
+      - { at: 1, do: ${verb}, target: ${target} }
+`;
+  const opts = { scrollable: scrollables(), zoomable: zoomCatalogue() };
+
+  const zoomed = parse(shot('zoom', 'mobile-number'), catalogue(), opts);
+  assert.ok(!zoomed.errors, `a zoom at a place was refused: ${zoomed.errors?.join(' ')}`);
+
+  const tapped = parse(shot('tap', 'mobile-number'), catalogue(), opts);
+  assert.ok(tapped.errors, 'a tap on a place should be refused');
+  assert.match(tapped.errors.join(' '), /is not on the bill-open screen/);
+
+  const nowhere = parse(shot('zoom', 'the-moon'), catalogue(), opts);
+  assert.ok(nowhere.errors, 'a zoom at nothing should be refused');
+  assert.match(nowhere.errors.join(' '), /nowhere called "the-moon"/);
+  assert.match(nowhere.errors.join(' '), /mobile-number/, 'and it should say what there is');
 });

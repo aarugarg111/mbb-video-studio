@@ -140,9 +140,14 @@ export function stateAt(recipe, t) {
      * is rather than the place it was drawn. Everything else on a screen -
      * a pill, a button, a tab - stays where it is. */
     const pointOf = target => {
-      const point = SCREENS[s.screen]?.targets?.[target];
+      /* Somewhere to look, or something to press. A bill has nothing to press
+       * and a great deal worth looking at - the customer's number, a line on
+       * it, what is still owed - so a screen may name places as well as
+       * buttons, and the camera takes either. */
+      const screen = SCREENS[s.screen];
+      const point = screen?.targets?.[target] ?? screen?.zoomPoints?.[target];
       if (!point) return point;
-      return SCREENS[s.screen]?.scrollingTargets?.includes(target)
+      return screen?.scrollingTargets?.includes(target)
         ? { x: point.x, y: point.y - screenState.scroll }
         : point;
     };
@@ -218,10 +223,13 @@ export function stateAt(recipe, t) {
           const targets = SCREENS[s.screen]?.targets;
           const point = pointOf(action.target);
           if (!point) {
-            const known = targets ? Object.keys(targets).join(', ') : '(unknown screen)';
+            const places = [
+              ...Object.keys(SCREENS[s.screen]?.targets ?? {}),
+              ...Object.keys(SCREENS[s.screen]?.zoomPoints ?? {})
+            ];
             throw new Error(
               `Shot ${i}: screen "${s.screen}" has no point "${action.target}" to zoom to. ` +
-              `Valid points: ${known}`
+              `Valid points: ${places.join(', ') || '(unknown screen)'}`
             );
           }
           /* Eases in rather than cutting, so it reads as a camera move and not

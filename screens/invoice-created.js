@@ -12,6 +12,18 @@ export const targets = {
   done: { x: 195, y: 794 }
 };
 
+/* The places inside the bill - what a script points at rather than presses.
+ * The same seven wherever a bill is drawn; these are where they land here. */
+export const zoomPoints = {
+  customer: { x: 113, y: 224 },
+  'mobile-number': { x: 113, y: 239 },
+  'invoice-number': { x: 113, y: 168 },
+  'invoice-date': { x: 277, y: 168 },
+  'bill-items': { x: 195, y: 283 },
+  totals: { x: 277, y: 405 },
+  balance: { x: 277, y: 447 }
+};
+
 /* The terms the app prints when the shop has not written its own. */
 const DEFAULT_TERMS = [
   'Goods once sold will not be taken back or exchanged',
@@ -110,7 +122,15 @@ export function billMarkup(data, state) {
   const party = data?.party ?? {};
   const appear = state?.appear ?? 1;
   const terms = inv.terms ?? DEFAULT_TERMS;
-  const received = sum.total;
+  /* A bill made and paid on the spot is received in full, which is the case
+   * this started with. A bill looked up afterwards may be owed in full, and
+   * the screen around it says which - so when it says, the bill agrees. It
+   * said "788 outstanding" over a bill reading "Balance 0" otherwise, which
+   * is the screen contradicting itself in the one place a viewer is
+   * reading. */
+  const received = Number.isFinite(Number(state?.received))
+    ? Number(state.received)
+    : sum.total;
   /* "plain" is the undecorated bill this studio started with; anything else,
    * including nothing at all, is the decorated template the ads are meant to
    * show. */
@@ -130,16 +150,16 @@ export function billMarkup(data, state) {
       ${data?.business?.address ? '<div class="addr">' + esc(data.business.address) + '</div>' : ''}
 
       <div class="cols two">
-        <div><b>Invoice No.</b><div>${esc(inv.number)}</div></div>
-        <div><b>Invoice Date</b><div>${esc(inv.date)}</div></div>
+        <div id="invoice-number"><b>Invoice No.</b><div>${esc(inv.number)}</div></div>
+        <div id="invoice-date"><b>Invoice Date</b><div>${esc(inv.date)}</div></div>
       </div>
 
       <div class="cols two">
-        <div><b>Bill To</b><div>${esc(party.name)}</div>${party.phone ? '<div>Mobile ' + esc(party.phone) + '</div>' : ''}</div>
+        <div id="customer"><b>Bill To</b><div>${esc(party.name)}</div>${party.phone ? '<div id="mobile-number">Mobile ' + esc(party.phone) + '</div>' : ''}</div>
         <div><b>Ship To</b><div>${esc(party.name)}</div>${party.address ? '<div class="sm">' + esc(party.address) + '</div>' : ''}</div>
       </div>
 
-      <table class="tbl">
+      <table class="tbl" id="bill-items">
         <thead><tr><th>No</th><th class="nm">Items</th><th>HSN No.</th><th>Qty.</th><th>Rate</th><th>Total</th></tr></thead>
         <tbody>${items.map(row).join('')}</tbody>
       </table>
@@ -148,11 +168,11 @@ export function billMarkup(data, state) {
 
       <div class="cols two tot">
         <div class="terms"><b>Terms &amp; Conditions</b>${terms.map((t, i) => '<div>' + (i + 1) + '. ' + esc(t) + '</div>').join('')}</div>
-        <div class="sums">
+        <div class="sums" id="totals">
           ${taxRows(items)}
           <div class="r strong"><span>Total Amount</span><span>${formatINR(sum.total)}</span></div>
           <div class="r"><span>Received Amount</span><span>${formatINR(received)}</span></div>
-          <div class="r strong"><span>Balance</span><span>${formatINR(sum.total - received)}</span></div>
+          <div class="r strong" id="balance"><span>Balance</span><span>${formatINR(sum.total - received)}</span></div>
         </div>
       </div>
 

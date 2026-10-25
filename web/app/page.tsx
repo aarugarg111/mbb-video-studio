@@ -16,7 +16,7 @@ import { Stage } from './studio/stage';
 import { ShotListForm } from './studio/shot-list';
 // The renderer's own validator - the same one the CLI uses.
 import { parse } from '../../src/recipe.js';
-import { catalogue, scrollables } from '../../screens/index.js';
+import { catalogue, scrollables, zoomCatalogue } from '../../screens/index.js';
 
 type Step = 'fill' | 'check' | 'rendering' | 'done';
 
@@ -284,6 +284,7 @@ export default function Page() {
     try {
       checked = parse(recipe, catalogue(), {
         scrollable: scrollables(),
+        zoomable: zoomCatalogue(),
         ctaImage: await ctaImageExists()
       });
     } catch (e) {

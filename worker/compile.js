@@ -12,7 +12,7 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { parse, BUILT_IN_THEMES } from '../src/recipe.js';
-import { catalogue, scrollables } from '../screens/index.js';
+import { catalogue, scrollables, zoomCatalogue } from '../screens/index.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -28,6 +28,7 @@ export async function compile(text) {
   return parse(text, catalogue(), {
     themes: [...BUILT_IN_THEMES, ...art],
     scrollable: scrollables(),
+    zoomable: zoomCatalogue(),
     ctaImage: existsSync(join(ROOT, 'kit', 'cta', 'download-now.png'))
   });
 }

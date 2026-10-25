@@ -13,6 +13,9 @@ export const SCREENS = {
   'create-bill': ['party-field', 'add-items', 'scan-record'],
   'create-invoice': ['item-search', 'add-item-0', 'add-item-1', 'generate-bill'],
   'invoice-created': ['share', 'done'],
+  /* A bill that already exists, opened from the list - the commoner beat: a
+     customer rings asking what they owe and the owner looks it up. */
+  'bill-open': ['back', 'edit', 'share', 'record-payment', 'download'],
   'theme-store': ['theme-0', 'theme-1', 'theme-2', 'theme-3', 'theme-4', 'theme-5', 'variant-1', 'variant-2', 'unlock', 'close'],
   /* Five rows, not just the first: a clip that zooms at something in the
      middle of a shelf needs the middle to have a name. */
@@ -197,3 +200,13 @@ export const RecipeSchema = z.object({
 });
 
 export type Recipe = z.infer<typeof RecipeSchema>;
+
+/* Places a camera can be sent that are not buttons. A bill has nothing worth
+ * pressing and a great deal worth a close-up - the customer, their number, a
+ * line on it, what is still owed - and a script asks for exactly those. Only
+ * "zoom" may name one of these; a tap still has to be a real button. */
+export const ZOOM_PLACES = {
+  'invoice-created': ['customer', 'mobile-number', 'invoice-number', 'invoice-date', 'bill-items', 'totals', 'balance'],
+  'bill-open': ['customer', 'mobile-number', 'invoice-number', 'invoice-date', 'bill-items', 'totals', 'balance'],
+  'mbb-desktop-invoice': ['customer', 'mobile-number', 'invoice-number', 'invoice-date', 'bill-items', 'totals', 'balance']
+} as const;

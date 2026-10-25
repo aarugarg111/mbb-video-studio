@@ -691,3 +691,52 @@ test('zooming at a list row does not cut the name off it', () => {
     actions: [{ at: 0.5, do: 'zoom', target: 'reports' }] }] };
   assert.ok(Math.abs(stateAt(tile, 3).zoom.scale - 2) < 0.01, 'the old default changed');
 });
+
+test('a camera can be sent to a place on a bill, not only to a button', () => {
+  /* A bill has nothing worth pressing and a great deal worth a close-up: the
+     customer, their number, a line on it, what is still owed. A script asks
+     for exactly those - "uska number dikhao" - and until a screen could name
+     a place rather than a button, there was nowhere for the camera to go. */
+  for (const screen of ['invoice-created', 'bill-open', 'mbb-desktop-invoice']) {
+    const places = SCREENS[screen].zoomPoints ?? {};
+    for (const id of ['customer', 'mobile-number', 'bill-items', 'totals', 'balance']) {
+      const at = places[id];
+      assert.ok(at, `${screen} has nowhere called ${id}`);
+      assert.ok(at.x > 0 && at.y > 0, `${screen}/${id} was never measured`);
+    }
+  }
+
+  const recipe = {
+    video: 't', business: { name: 'S' },
+    party: { name: 'ASHOK TRADING CO', phone: '98765 43210' },
+    invoice: { number: 5949, date: '16/10/2026', theme: 'none' },
+    items: [{ name: 'SUGAR 5KG', rate: 310, qty: 2, gst: 5, unit: 'PKT' }],
+    brand: {},
+    shots: [{ screen: 'bill-open', duration: 5,
+      actions: [{ at: 1, do: 'zoom', target: 'mobile-number' }] }]
+  };
+  const camera = stateAt(recipe, 3).zoom;
+  assert.ok(camera, 'the camera never moved');
+  assert.equal(camera.y, SCREENS['bill-open'].zoomPoints['mobile-number'].y);
+});
+
+test('an opened bill does not contradict the strip above it', () => {
+  /* The strip said "788 outstanding" over a bill reading "Balance 0" - the
+     screen disagreeing with itself in the one place a viewer is reading. */
+  const data = {
+    business: { name: 'SAGAR SUPERBAZAAR' },
+    party: { name: 'ASHOK TRADING CO', phone: '98765 43210' },
+    invoice: { number: 5949, date: '16/10/2026' },
+    items: [{ name: 'SUGAR 5KG', rate: 310, qty: 2, gst: 5, unit: 'PKT' }]
+  };
+  const owed = SCREENS['bill-open'].render(data, {});
+  assert.match(owed, /outstanding/, 'the strip should say it is owed');
+  assert.match(owed, /Balance<\/span><span>₹620/, 'and the bill should agree');
+
+  const settled = SCREENS['bill-open'].render(data, { paid: 1 });
+  assert.match(settled, /Settled in full/);
+  assert.match(settled, /Balance<\/span><span>₹0/);
+
+  /* A bill made on the spot is still received in full, as it always was. */
+  assert.match(SCREENS['invoice-created'].render(data, {}), /Balance<\/span><span>₹0/);
+});

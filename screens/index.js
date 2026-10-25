@@ -33,6 +33,7 @@ import * as mbbDesktopDashboard from './mbb-desktop-dashboard.js';
 import * as mbbDesktopSalesList from './mbb-desktop-sales-list.js';
 import * as mbbDesktopReports from './mbb-desktop-reports.js';
 import * as mbbDesktopCreateItem from './mbb-desktop-create-item.js';
+import * as billOpen from './bill-open.js';
 import * as createParty from './create-party.js';
 import * as mbbDesktopCreateParty from './mbb-desktop-create-party.js';
 import * as mbbDesktopThemeStore from './mbb-desktop-theme-store.js';
@@ -81,6 +82,7 @@ export const SCREENS = {
   [mcfDesktopAutomations.name]: mcfDesktopAutomations,
   [mbbDesktopDashboard.name]: mbbDesktopDashboard,
   [mbbDesktopSalesList.name]: mbbDesktopSalesList,
+  [billOpen.name]: billOpen,
   [createParty.name]: createParty,
   [mbbDesktopCreateParty.name]: mbbDesktopCreateParty,
   [mbbDesktopThemeStore.name]: mbbDesktopThemeStore,
@@ -112,4 +114,15 @@ export function catalogue() {
  * where nothing happens, and nothing else would report it. */
 export function scrollables() {
   return Object.entries(SCREENS).filter(([, mod]) => mod.scrolls).map(([key]) => key);
+}
+
+/* Everywhere a camera may be sent, per screen: the things a finger can press
+ * plus the places a screen names only to be looked at. A bill has nothing to
+ * press and plenty worth a close-up. */
+export function zoomCatalogue() {
+  const out = {};
+  for (const [key, mod] of Object.entries(SCREENS)) {
+    out[key] = [...Object.keys(mod.targets ?? {}), ...Object.keys(mod.zoomPoints ?? {})];
+  }
+  return out;
 }

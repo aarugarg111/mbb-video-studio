@@ -32,6 +32,7 @@ const ON_A_LAPTOP = {
   'create-bill': 'mbb-desktop-create-invoice',
   'create-invoice': 'mbb-desktop-create-invoice',
   'invoice-created': 'mbb-desktop-invoice',
+  'bill-open': 'mbb-desktop-invoice',
   'create-purchase': 'mbb-desktop-purchase',
   'mcf-parties': 'mcf-desktop',
   'mcf-party': 'mcf-desktop',

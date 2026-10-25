@@ -46,6 +46,11 @@ const MIN_ACTION_GAP_SECONDS = 0.6;
 export const BUILT_IN_THEMES = ['none', 'warm', ...THEME_SLUGS];
 
 export function parse(text, catalogue, options = {}) {
+  /* Where a camera may be sent, which is more than what a finger may press: a
+   * bill has nothing to press and plenty worth a close-up. Unspecified, a
+   * zoom may only go to a tap target, which is how this behaved before any
+   * screen named a place. */
+  const zoomable = options.zoomable ?? catalogue;
   const themes = options.themes ?? BUILT_IN_THEMES;
   const errors = [];
   const warnings = [];
@@ -385,7 +390,17 @@ export function parse(text, catalogue, options = {}) {
         return;
       }
 
-      if ((action.do === 'tap' || action.do === 'type' || action.do === 'zoom') && !targets.includes(action.target)) {
+      /* A zoom is checked against the places as well as the buttons. */
+      if (action.do === 'zoom' && !(zoomable[shot.screen] ?? targets).includes(action.target)) {
+        const places = zoomable[shot.screen] ?? targets;
+        errors.push(
+          `${at}: the ${shot.screen} screen has nowhere called "${action.target}" to zoom to. ` +
+          `Places: ${places.join(', ')}.`
+        );
+        return;
+      }
+
+      if ((action.do === 'tap' || action.do === 'type') && !targets.includes(action.target)) {
         /* Naming a button that lives on a DIFFERENT screen is the commonest
          * way this goes wrong, and a bare list of valid targets does not help
          * with it: whoever wrote the shot knows what they meant to tap, they
