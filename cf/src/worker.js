@@ -1,4 +1,9 @@
 import { signSession, verifySession, cookieHeader, clearCookie, readCookie, sameSecret } from './auth.js';
+import { REGIONS, blockedBeforeAnthropic } from './egress.js';
+
+/* The Durable Object the call to Anthropic is made from. Cloudflare needs it
+ * exported from the Worker's entry point, not only defined. */
+export { Egress } from './egress.js';
 
 /* The studio holds no key of its own. The browser builds the whole Anthropic
  * request - prompt, schema, everything - and posts it here; this Worker checks
@@ -105,25 +110,19 @@ async function proxy(request, env) {
    * and allowing it here would only add a path nothing exercises. */
   delete body.stream;
 
-  /* The key is trimmed for the reason the password is: `wrangler secret put`
-   * stores whatever the terminal gave it, and a key with a trailing newline
-   * comes back from Anthropic as "invalid x-api-key" - which reads like the
-   * wrong key rather than the right one with a character stuck to it. */
-  const headers = {
-    'Content-Type': 'application/json',
-    'x-api-key': String(env.ANTHROPIC_API_KEY).trim(),
-    'anthropic-version': request.headers.get('anthropic-version') || '2023-06-01'
-  };
   /* The structured-output helper the studio uses asks for a beta; forward
    * whichever one the SDK asked for rather than pinning a version here. */
-  const beta = request.headers.get('anthropic-beta');
-  if (beta) headers['anthropic-beta'] = beta;
+  const payload = {
+    body,
+    version: request.headers.get('anthropic-version') || '2023-06-01',
+    beta: request.headers.get('anthropic-beta') || null
+  };
 
-  const upstream = await fetch(UPSTREAM, { method: 'POST', headers, body: JSON.stringify(body) });
+  const { upstream, region } = await askAnthropic(env, payload);
 
   /* Passed through as-is: the SDK reads Anthropic's own error shapes and says
    * something useful about them, which a reworded message would lose. The
-   * header is added so that a refusal can be traced to whoever issued it -
+   * headers are added so that a refusal can be traced to whoever issued it -
    * this Worker, Cloudflare in front of it, or Anthropic behind it. They look
    * identical on the screen and are fixed in three different places. */
   return new Response(upstream.body, {
@@ -131,6 +130,10 @@ async function proxy(request, env) {
     headers: {
       'Content-Type': upstream.headers.get('Content-Type') || 'application/json',
       'x-mvs-stage': 'anthropic',
+      /* Where the call left from - the whole point of the fix below, and the
+       * one thing an error report could not say before. A refusal naming no
+       * region came from a studio that never pinned one. */
+      ...(region ? { 'x-mvs-egress': region } : {}),
       /* Cloudflare's own reference. A refusal from an edge rather than from
        * Anthropic's API carries a ray and no request id - which is exactly
        * the difference worth knowing. */
@@ -138,6 +141,75 @@ async function proxy(request, env) {
       ...(upstream.headers.get('request-id') ? { 'x-mvs-request-id': upstream.headers.get('request-id') } : {})
     }
   });
+}
+
+/* Anthropic, called from somewhere Anthropic answers.
+ *
+ * A Worker calls out from whichever data centre it happened to run in, and
+ * Anthropic refuses whole regions at its own edge - so the studio broke for
+ * one teammate at a time while working perfectly for everybody else. The call
+ * is made from a Durable Object pinned to a region instead. cf/src/egress.js
+ * has the why, including why smart placement was not enough.
+ *
+ * Without the binding this falls back to calling Anthropic directly, which is
+ * what the tests do and what a studio deployed before this did. That studio
+ * then behaves exactly as it used to, which is the point: the fallback is the
+ * old behaviour rather than a broken one.
+ */
+async function askAnthropic(env, payload) {
+  if (!env.EGRESS) return { upstream: await callDirect(env, payload), region: null };
+
+  let last = null;
+  for (const region of REGIONS) {
+    /* One object per region, named after it. A location hint only applies
+     * when an object is first created, so asking a second region means
+     * asking a second object - the first one cannot be moved. */
+    const stub = env.EGRESS.get(
+      env.EGRESS.idFromName('anthropic-' + region), { locationHint: region }
+    );
+
+    let upstream;
+    try {
+      upstream = await stub.fetch('https://egress.invalid/call', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      /* A region that cannot be reached at all is worth trying past, but not
+       * worth losing: if every one of them fails, say what happened. */
+      last = {
+        upstream: json({
+          error: {
+            type: 'api_error',
+            message: `The studio could not reach Anthropic from ${region}: ${err.message}`
+          }
+        }, 502),
+        region
+      };
+      continue;
+    }
+
+    if (!blockedBeforeAnthropic(upstream)) return { upstream, region };
+    last = { upstream, region };
+  }
+
+  return last;
+}
+
+/* The old path, for a studio with no Durable Object behind it. */
+async function callDirect(env, payload) {
+  const headers = {
+    'Content-Type': 'application/json',
+    /* Trimmed for the reason the password is: `wrangler secret put` stores
+     * whatever the terminal gave it, and a key with a trailing newline comes
+     * back from Anthropic as "invalid x-api-key" - which reads like the wrong
+     * key rather than the right one with a character stuck to it. */
+    'x-api-key': String(env.ANTHROPIC_API_KEY).trim(),
+    'anthropic-version': payload.version || '2023-06-01'
+  };
+  if (payload.beta) headers['anthropic-beta'] = payload.beta;
+  return fetch(UPSTREAM, { method: 'POST', headers, body: JSON.stringify(payload.body) });
 }
 
 export default {

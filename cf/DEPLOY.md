@@ -86,10 +86,43 @@ To change the password or rotate the key, run the matching
 signs everyone out, which is the quickest way to cut off access to everybody
 at once.
 
+## If somebody gets "Request not allowed"
+
+The report says `403 {"error":{"type":"forbidden","message":"Request not
+allowed"}}` and carries a Cloudflare ray and no request id. Anthropic refuses
+whole regions at its own edge, before the key is ever looked at, so it reads
+exactly like the key being turned off. It is not the key — everybody else is
+working on that same key at that same moment.
+
+It is also **not** about the country the person is sitting in. The teammates
+this happened to were in Bangalore, and the ray said `HKG`. India is served.
+Cloudflare routes by network peering rather than by geography, and a great
+deal of Indian traffic reaches it through Hong Kong — so the person was in a
+supported country and their request was not. "They're in India, so it can't be
+a region problem" is the first conclusion everybody reaches and it is wrong.
+
+The studio now makes the call from inside a Durable Object pinned to the
+United States, so it leaves from the same place for everybody whoever opens
+the page. `npm run deploy` applies that itself; there is no separate step.
+
+If a report still shows the refusal, read its `called claude from:` line:
+
+- **it names a region** (`enam`, `wnam`) — both pinned regions were refused,
+  which is something changing on Anthropic's side rather than a routing
+  accident. Quote that line when you report it.
+- **it says "this studio is not pinned"** — the deploy did not include the
+  Durable Object. Redeploy from `cf/`, and check the output lists
+  `env.EGRESS (Egress)` among the bindings.
+
 ## If the deploy fails
 
 `Failed to fetch auth token: 400` means the Cloudflare login has expired.
 Run `npx wrangler login` again from a normal terminal.
+
+If it complains about Durable Objects or migrations, the account is on a plan
+that cannot create them. The studio still works without one — it falls back to
+calling Anthropic directly, exactly as it did before — but the region refusal
+comes back with it.
 
 ## Running it on this machine first
 

@@ -20,11 +20,31 @@ compatibility_date = "2026-01-01"
 # everyone reaches.
 #
 # Smart placement runs the Worker near what it talks to rather than near the
-# viewer, so the call to Anthropic leaves from one place instead of from
-# wherever the viewer happens to be. The page itself is still served from the
-# edge, so nothing gets slower to load.
+# viewer. It is kept because it costs nothing and helps, but it was NOT enough
+# on its own: it is a latency optimisation, it needs traffic before it decides
+# anything, it is free to change its mind, and it never promises a region. The
+# refusal happened again with it switched on.
 [placement]
 mode = "smart"
+
+# So the call to Anthropic is made from inside a Durable Object instead. An
+# object is created with a location hint and then stays where it was put, so
+# the call leaves from the United States for everybody - whoever opened the
+# page, and wherever Cloudflare happened to route them. The page itself is
+# still served from the edge, so nothing got slower to load.
+# See cf/src/egress.js for the whole story.
+#
+# The object stores nothing. It exists for its address.
+[[durable_objects.bindings]]
+name = "EGRESS"
+class_name = "Egress"
+
+# SQLite-backed, which is the kind of Durable Object the free plan can create.
+# Nothing is ever written to it - this is about which plans may declare the
+# class at all. `wrangler deploy` applies this itself; there is no extra step.
+[[migrations]]
+tag = "v1-egress"
+new_sqlite_classes = ["Egress"]
 
 [assets]
 directory = "../web/out"

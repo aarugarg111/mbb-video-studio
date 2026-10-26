@@ -30,6 +30,15 @@ function traceOf(res: Response): string {
     `HTTP ${res.status}`,
     `answered by: ${stageOf(res)}`,
     res.headers.get('x-mvs-request-id') && `claude request id: ${res.headers.get('x-mvs-request-id')}`,
+    /* Where the studio called Claude FROM. Anthropic refuses whole regions at
+       its own edge, and the studio pins its call to one that is served - so a
+       report carrying no region came from a studio deployed before that fix,
+       which is a different thing to go and look at. */
+    stageOf(res) === 'anthropic' && (
+      res.headers.get('x-mvs-egress')
+        ? `called claude from: ${res.headers.get('x-mvs-egress')}`
+        : 'called claude from: wherever the viewer is - this studio is not pinned, so redeploy it'
+    ),
     res.headers.get('x-mvs-cf-ray') && `cloudflare ray (claude side): ${res.headers.get('x-mvs-cf-ray')}`,
     res.headers.get('cf-ray') && `cloudflare ray: ${res.headers.get('cf-ray')}`
   ].filter(Boolean);
