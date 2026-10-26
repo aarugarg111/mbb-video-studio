@@ -35,3 +35,6 @@ kit/themes/*.jpeg
 kit/themes/*.webp
 kit/cta/*.png
 kit/cta/*.jpg
+# An "npm install --prefix web" run from inside cf/ creates this instead of
+# touching the real one. It is empty and nothing reads it.
+cf/web/
