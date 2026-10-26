@@ -3,6 +3,12 @@ import assert from 'node:assert/strict';
 import { SCREENS } from '../screens/index.js';
 import { restingCamera, cameraAt, innerTransform, windowTransform } from '../src/camera.js';
 import { DEVICES } from '../src/device.js';
+import { ASPECTS, DEFAULT_ASPECT } from '../src/aspect.js';
+
+/* The shape these were written against. The camera takes the shape now - a
+   16:9 window needs a shove to fill a Reel and none to fill a widescreen -
+   and these are about the Reel. test/aspect.test.js covers the other two. */
+const VERTICAL = ASPECTS[DEFAULT_ASPECT];
 
 /* A 16:9 window inside a 9:16 video is a band across the middle of the
  * picture. Pushing in INSIDE that band - which is what a phone zoom does -
@@ -21,7 +27,7 @@ test('a phone has no resting camera - it already fills the picture', () => {
 test('a laptop rests pushed in, so no shot is a small band in the middle', () => {
   const resting = restingCamera(LAPTOP);
   assert.ok(resting.scale > 1, 'the window should start larger than the frame');
-  assert.equal(resting.scale, DEVICES.desktop.framing);
+  assert.equal(resting.scale, VERTICAL.framing);
   assert.ok(windowTransform(LAPTOP, null).includes('scale('));
 });
 
@@ -30,7 +36,7 @@ test('the whole width of a page stays in frame at rest', () => {
      the crop were tighter than that, a laptop clip would lose the column the
      video is about - which is how it lost the Balance column. */
   const box = DEVICES.desktop;
-  const visible = box.width / box.framing;
+  const visible = box.width / VERTICAL.framing;
   const rail = 126;
   const padding = 13;
   assert.ok(
@@ -62,7 +68,7 @@ test('the camera never shows past the edges of the window', () => {
   for (const x of [0, 50, box.width / 2, box.width - 10, box.width]) {
     const t = windowTransform(LAPTOP, { x, y: 10, scale: 2.5 });
     const dx = Number(/translate\((-?[\d.]+)px/.exec(t)[1]);
-    const halfW = box.width / 2 / (box.framing * 2.5);
+    const halfW = box.width / 2 / (VERTICAL.framing * 2.5);
     assert.ok(Math.abs(dx) <= box.width / 2 - halfW + 0.01, `x=${x} pans past the edge (${dx})`);
   }
 });
@@ -97,7 +103,7 @@ test('the camera holds whatever the shot taps', () => {
   const rail = { x: 63, y: 46 };
   const held = windowTransform(LAPTOP, null, [rail]);
   const dx = Number(/translate\((-?[\d.]+)px/.exec(held)[1]);
-  const halfW = box.width / 2 / box.framing;
+  const halfW = box.width / 2 / VERTICAL.framing;
   /* Where the band sits after the pan, in the screen's own pixels. */
   const centre = box.width / 2 - dx;
   assert.ok(rail.x >= centre - halfW && rail.x <= centre + halfW,
@@ -114,7 +120,7 @@ test('the pan still never shows past the window edges', () => {
   for (const x of [0, 5, box.width - 5, box.width]) {
     const t = windowTransform(LAPTOP, null, [{ x, y: 100 }]);
     const dx = Number(/translate\((-?[\d.]+)px/.exec(t)[1]);
-    const halfW = box.width / 2 / box.framing;
+    const halfW = box.width / 2 / VERTICAL.framing;
     assert.ok(Math.abs(dx) <= box.width / 2 - halfW + 0.01, `tap at ${x} pans past the edge`);
   }
 });

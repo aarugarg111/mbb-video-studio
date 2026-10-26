@@ -267,13 +267,13 @@
 
 /* --- brand furniture (stage only; never inside the app screens) ---------- */
 .logo-band {
-  height: 150px;
+  height: var(--band-h, 150px);
   flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.logo-band img { width: 300px; height: auto; display: block; }
+.logo-band img { width: var(--band-logo, 300px); height: auto; display: block; }
 
 .endcard {
   position: absolute;
@@ -286,13 +286,13 @@
   gap: 48px;
   background: var(--mbb-brand-slate);
 }
-.endcard img { width: 420px; height: auto; display: block; }
+.endcard img { width: var(--endcard-logo, 420px); height: auto; display: block; }
 .endcard-cta { gap: 0; }
 .endcard-cta img { width: 100%; height: 100%; object-fit: cover; }
 .endcard-tagline {
   margin: 0;
   font-family: var(--mbb-font);
-  font-size: 38px;
+  font-size: var(--endcard-tagline, 38px);
   font-weight: 500;
   color: var(--mbb-brand-text);
   text-align: center;

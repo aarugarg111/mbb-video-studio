@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { asset } from '../lib/base-path';
 import { ctaImageExists } from '../lib/assets';
 import { THEMES } from '@/lib/schema';
+/* The three shapes a clip can be posted as. Shared with both renderers. */
+import { ASPECTS, DEFAULT_ASPECT } from '../../src/aspect.js';
 import { proposeRecipe } from '@/lib/claude';
 import { TEAM_MODE, signIn, signOut, isSignedIn } from '@/lib/team';
 import { renderVideo } from '@/lib/render';
@@ -44,6 +46,10 @@ export default function Page() {
      is right for most of them - a counter scene is a phone, a desk scene is a
      laptop, and the script usually says which. */
   const [shape, setShape] = useState('');
+  /* What shape the finished picture is: a Reel, a square feed post or a
+     widescreen one. Unlike the screens, this is never left to the script -
+     where a clip gets posted is not something a script says. */
+  const [aspect, setAspect] = useState<string>(DEFAULT_ASPECT);
   const [recipe, setRecipe] = useState('');
   const [unsupported, setUnsupported] = useState<string[]>([]);
   const [error, setError] = useState('');
@@ -315,6 +321,15 @@ export default function Page() {
     }
     setWarnings(checked.warnings ?? []);
 
+    /* The picker decides the shape, not the shot list.
+     *
+     * A shot list reaches this point from four places - the studio's own
+     * Claude call, somebody else's AI, a paste from a chat window, or typed
+     * by hand - and only the first of those has ever been told which shape
+     * was picked. Setting it here means the button on screen is the one that
+     * governs, whichever way the shot list arrived. */
+    checked.recipe.aspect = aspect;
+
     /* Free the previous video before making another, or repeated renders
      * hold every MP4 in memory until the tab dies. */
     if (urlRef.current) {
@@ -519,6 +534,22 @@ export default function Page() {
                 className={'shape-pick' + (shape === value ? ' on' : '')}
                 onClick={() => setShape(value)}
               >{label}</button>
+            ))}
+          </div>
+
+          {/* What shape the finished picture is. Separate from "Filmed on":
+              a phone clip can be posted to a feed and a laptop clip to
+              YouTube, and the two choices answer different questions. */}
+          <div className="shape">
+            <span className="shape-k">Posted as</span>
+            {Object.entries(ASPECTS).map(([id, a]) => (
+              <button
+                key={id}
+                type="button"
+                title={a.where}
+                className={'shape-pick' + (aspect === id ? ' on' : '')}
+                onClick={() => setAspect(id)}
+              >{a.name} <span className="shape-sub">{id}</span></button>
             ))}
           </div>
 

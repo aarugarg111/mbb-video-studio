@@ -8,14 +8,14 @@
 <style>
   html, body {
     margin: 0;
-    width: 1080px;
-    height: 1920px;
+    width: var(--frame-w);
+    height: var(--frame-h);
     overflow: hidden;
     background: var(--mbb-brand-slate);
   }
   #frame {
-    width: 1080px;
-    height: 1920px;
+    width: var(--frame-w);
+    height: var(--frame-h);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -36,7 +36,7 @@
     padding: 11px;
     background: var(--stage-phone-body);
     border-radius: 46px;
-    transform: scale(1.8);
+    transform: scale(var(--phone-scale));
   }
   #viewport {
     position: relative;
@@ -55,7 +55,7 @@
     background: var(--stage-phone-body);
     border-radius: 14px;
     padding: 0 0 8px;
-    transform: scale(1.5);
+    transform: scale(var(--desktop-scale));
   }
   #desktop-bar {
     height: 30px;

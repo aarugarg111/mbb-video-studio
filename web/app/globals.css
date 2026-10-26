@@ -88,7 +88,7 @@ video { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 20px; di
   padding: 11px;
   background: var(--stage-phone-body);
   border-radius: 46px;
-  transform: scale(1.8);
+  transform: scale(var(--phone-scale, 1.8));
 }
 #stage-viewport {
   position: relative;
@@ -106,7 +106,7 @@ video { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 20px; di
   background: var(--stage-phone-body);
   border-radius: 14px;
   padding: 0 0 8px;
-  transform: scale(1.5);
+  transform: scale(var(--desktop-scale, 1.5));
 }
 .stage-desktop.hidden, .stage-phone.hidden { display: none; }
 .stage-desktop-bar { height: 30px; display: flex; align-items: center; gap: 8px; padding: 0 12px; }
@@ -271,6 +271,9 @@ video { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 20px; di
 .shape-k { font-size: 13px; font-weight: 600; color: var(--muted); margin-right: 2px; }
 .shape-pick { padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
 .shape-pick.on { border-color: var(--brand); background: var(--brand); color: #fff; }
+/* The ratio, under the name. A person picking a shape knows "square"; a
+   person checking one against what a platform wants knows "1:1". */
+.shape-sub { opacity: 0.6; font-size: 11px; margin-left: 3px; }
 
 /* ---- The shot list as a form -------------------------------------------
  * Optional, and never in the way: the studio writes a shot list and renders

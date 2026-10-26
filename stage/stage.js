@@ -2,6 +2,7 @@ import { SCREENS } from '../screens/index.js';
 import { stateAt, totalDuration } from '../src/timeline.js';
 import { deviceOf, urlFor, chromeOf, titleFor } from '../src/device.js';
 import { innerTransform, windowTransform } from '../src/camera.js';
+import { aspectOf, cssVarsFor } from '../src/aspect.js';
 
 const viewport = document.getElementById('viewport');
 const phoneFrame = document.getElementById('phone');
@@ -18,6 +19,17 @@ function escapeHtml(text) {
 window.mount = function mount(r) {
   recipe = r;
   window.videoDuration = totalDuration(r);
+
+  /* The shape the video is in: the frame size, how big a phone and a
+     laptop window are drawn in it, and the brand strip above them. Set
+     once, here, because every frame of a clip is the same shape - and set
+     from the same function the browser renderer uses, so the two cannot
+     drift apart. */
+  const aspect = aspectOf(r);
+  window.videoSize = { width: aspect.width, height: aspect.height };
+  for (const [name, value] of Object.entries(cssVarsFor(aspect))) {
+    document.documentElement.style.setProperty(name, value);
+  }
 };
 
 window.setTime = function setTime(t) {
@@ -91,7 +103,7 @@ window.setTime = function setTime(t) {
      on a laptop it moves the window itself. Both are worked out in
      src/camera.js, which the browser renderer calls too. */
   const inner = innerTransform(screen, frame.zoom);
-  const outer = windowTransform(screen, frame.zoom, frame.taps);
+  const outer = windowTransform(screen, frame.zoom, frame.taps, aspectOf(recipe));
   const camera = inner
     ? '<div class="camera" style="transform-origin: 0 0; transform: ' + inner + '">'
     : '<div class="camera">';

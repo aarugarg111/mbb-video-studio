@@ -7,6 +7,7 @@ import { compile } from './compile.js';
 import { voiceLines, toSrt, toScript } from '../src/voiceover.js';
 import { renderFrames, renderStill } from './render.js';
 import { encode } from './encode.js';
+import { ASPECTS, DEFAULT_ASPECT, aspectNamed } from '../src/aspect.js';
 
 const FPS = 30;
 
@@ -14,12 +15,29 @@ async function main() {
   const [recipePath, ...rest] = process.argv.slice(2);
 
   if (!recipePath) {
-    console.error('Usage: node worker/cli.js <recipe.yaml> [--still <seconds>]');
+    console.error(
+      'Usage: node worker/cli.js <recipe.yaml> [--still <seconds>] [--aspect <shape>]\n'
+      + `  shape: ${Object.keys(ASPECTS).join(', ')}, or vertical, square, horizontal`
+    );
     process.exit(1);
   }
 
   const stillIndex = rest.indexOf('--still');
   const stillAt = stillIndex >= 0 ? Number(rest[stillIndex + 1]) : null;
+
+  /* The same shot list posted three ways. The recipe may say which shape it
+   * is; this overrides it, so one clip can be cut for a Reel, a feed and
+   * YouTube without three near-identical recipe files. */
+  const aspectIndex = rest.indexOf('--aspect');
+  const asked = aspectIndex >= 0 ? rest[aspectIndex + 1] : null;
+  const override = asked == null ? null : aspectNamed(asked);
+  if (asked != null && !override) {
+    console.error(
+      `--aspect must be one of ${Object.keys(ASPECTS).join(', ')} `
+      + `(or vertical, square, horizontal), got ${JSON.stringify(asked)}.`
+    );
+    process.exit(1);
+  }
 
   const text = await readFile(recipePath, 'utf8');
   const result = await compile(text);
@@ -33,7 +51,12 @@ async function main() {
   }
 
   const { recipe } = result;
-  const outDir = join('out', recipe.video);
+  if (override) recipe.aspect = override;
+  /* Three shapes of the same clip would otherwise overwrite each other, and
+   * the one left in out/ would be whichever finished last. */
+  const outDir = join('out', override && override !== DEFAULT_ASPECT
+    ? `${recipe.video}-${override.replace(':', 'x')}`
+    : recipe.video);
   await mkdir(outDir, { recursive: true });
 
   if (stillAt !== null) {

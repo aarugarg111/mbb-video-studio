@@ -9,6 +9,7 @@ import { THEME_SLUGS } from './themes.js';
 import yaml from 'js-yaml';
 import { defaultInvoice } from './invoice.js';
 import { TRADES } from './shelves.js';
+import { ASPECTS, DEFAULT_ASPECT, aspectNamed } from './aspect.js';
 import { deviceOf } from './device.js';
 import { SCREENS } from '../screens/index.js';
 
@@ -75,6 +76,10 @@ export function parse(text, catalogue, options = {}) {
 
   const recipe = {
     video: doc.video ?? 'untitled',
+    /* What shape the finished video is: a Reel, a square feed post or a
+     * widescreen one. Left out it is vertical, which is what every clip was
+     * before there was a choice, so no recipe written before this changes. */
+    aspect: DEFAULT_ASPECT,
     invoice: { ...defaultInvoice() },
     business: { name: '', ...(doc.business || {}) },
     party: { name: '', ...(doc.party || {}) },
@@ -105,6 +110,21 @@ export function parse(text, catalogue, options = {}) {
     errors.push(
       `"video" must be a name of letters, digits, "-" and "_" only, got ${JSON.stringify(recipe.video)}.`
     );
+  }
+
+  /* The shape of the picture. A misspelling must not pass: it would render
+   * a whole clip in the wrong shape, which looks like a finished video and
+   * is only wrong where it gets posted. */
+  if (doc.aspect != null) {
+    const named = aspectNamed(doc.aspect);
+    if (named) {
+      recipe.aspect = named;
+    } else {
+      errors.push(
+        `aspect must be one of ${Object.keys(ASPECTS).join(', ')} `
+        + `(or vertical, square, horizontal), got ${JSON.stringify(doc.aspect)}.`
+      );
+    }
   }
 
   /* What the shop sells, which decides the rest of its shelf. A typo here

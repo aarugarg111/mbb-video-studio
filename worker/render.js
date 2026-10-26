@@ -11,12 +11,14 @@ import { join, dirname, extname, normalize, sep } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { totalDuration } from '../src/timeline.js';
+import { aspectOf } from '../src/aspect.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
 
-const WIDTH = 1080;
-const HEIGHT = 1920;
+/* The frame size is the recipe's own - a clip can be a Reel, a square feed
+ * post or a widescreen video - so the window is sized from the recipe when
+ * the stage opens rather than fixed here. See src/aspect.js. */
 const READY_TIMEOUT_MS = 10000;
 
 const TYPES = {
@@ -68,9 +70,10 @@ function serveRepo() {
 
 async function openStage(recipe) {
   const { server, origin } = await serveRepo();
+  const aspect = aspectOf(recipe);
   const browser = await chromium.launch();
   const page = await browser.newPage({
-    viewport: { width: WIDTH, height: HEIGHT },
+    viewport: { width: aspect.width, height: aspect.height },
     deviceScaleFactor: 1
   });
 

@@ -4,12 +4,15 @@ import { loadAssets, themeArtCss } from './assets';
 import { asset } from './base-path';
 import { rasterise } from './rasterise';
 import { createEncoder } from './encode';
-import { STAGE_W, STAGE_H } from '../app/studio/stage';
 /* Shared with the command-line renderer, so the two cannot disagree about
    which shape a screen is. */
 import { deviceOf, urlFor, chromeOf, titleFor } from '../../src/device.js';
 import { themesUsedBy } from '../../src/themes.js';
 import { innerTransform, windowTransform } from '../../src/camera.js';
+/* The shape of the finished video, shared with the command-line renderer so
+   the two cannot disagree about how big a frame is or how big a phone is
+   drawn in it. */
+import { aspectOf, cssVarsFor, cssTextFor } from '../../src/aspect.js';
 const SCREENS = UNTYPED_SCREENS as Record<string, { render(data: unknown, state: unknown): string }>;
 
 type Options = { fps?: number; onProgress?: (done: number, total: number) => void };
@@ -94,7 +97,7 @@ function paint(frame: any, recipe: any, viewport: HTMLElement, endcardRoot: HTML
      moves the window itself - worked out in src/camera.js, which stage.js
      calls too, so the two renderers cannot disagree about a frame. */
   const inner = innerTransform(screen, frame.zoom);
-  const outer = windowTransform(screen, frame.zoom, frame.taps);
+  const outer = windowTransform(screen, frame.zoom, frame.taps, aspectOf(recipe));
   const camera = inner
     ? '<div class="camera" style="transform-origin: 0 0; transform: ' + inner + '">'
     : '<div class="camera">';
@@ -121,14 +124,32 @@ export async function renderVideo(recipe: any, opts: Options = {}): Promise<Blob
   const endcardRoot = document.getElementById('stage-endcard-root') as HTMLElement | null;
   if (!stage || !viewport || !endcardRoot) throw new Error('The stage is not mounted.');
 
+  /* The shape this clip is in: a Reel, a square feed post or a widescreen
+   * one. The stage is built once for the page and this recipe may be a
+   * different shape from the last, so it is resized here rather than when it
+   * was mounted. The LAYOUT happens in this page, so these must be set
+   * before the first frame is painted. */
+  const aspect = aspectOf(recipe);
+  stage.style.width = `${aspect.width}px`;
+  stage.style.height = `${aspect.height}px`;
+  for (const [name, value] of Object.entries(cssVarsFor(aspect))) {
+    stage.style.setProperty(name, value);
+  }
+
   /* The shared assets are memoised and reused by every render, so the theme
    * art - which is the one thing that differs per recipe - is added to a copy
    * rather than to the cached object. Without it the art loads on the page and
    * is simply missing from the video, because what gets rasterised is a
-   * separate document with no network of its own. */
+   * separate document with no network of its own.
+   *
+   * The shape's own properties go the same way: the rasterised SVG is a
+   * separate document that never sees the style attribute set above, so
+   * without this the video comes out at the right size with everything in it
+   * drawn for the wrong one. */
   const shared = await loadAssets();
   const artCss = await themeArtCss(themesUsedBy(recipe));
-  const assets = artCss ? { ...shared, css: shared.css + artCss } : shared;
+  const perClip = cssTextFor(aspect) + artCss;
+  const assets = { ...shared, css: shared.css + perClip };
 
   /* The SVG embeds the font, but the LAYOUT happens here in the page - so if
    * the page is still on a fallback face, every position is measured wrong
@@ -148,16 +169,16 @@ export async function renderVideo(recipe: any, opts: Options = {}): Promise<Blob
   await document.fonts.ready;
 
   const canvas = document.createElement('canvas');
-  canvas.width = STAGE_W;
-  canvas.height = STAGE_H;
+  canvas.width = aspect.width;
+  canvas.height = aspect.height;
   const ctx = canvas.getContext('2d', { alpha: false })!;
 
-  const encoder = await createEncoder({ width: STAGE_W, height: STAGE_H, fps });
+  const encoder = await createEncoder({ width: aspect.width, height: aspect.height, fps });
 
   for (let i = 0; i < frames; i++) {
     paint(stateAt(recipe, i / fps), recipe, viewport, endcardRoot);
 
-    const img = await rasterise(stage, assets, STAGE_W, STAGE_H);
+    const img = await rasterise(stage, assets, aspect.width, aspect.height);
     ctx.drawImage(img, 0, 0);
     await encoder.addFrame(canvas, i);
 

@@ -14,8 +14,8 @@
  * drawn to the same width in the finished frame, so what changes between them
  * is how much fits, not how big the pixels are:
  *
- *   phone    390 x 844  at 1.8  -> 702 x 1519
- *   desktop  720 x 405  at 1.5  -> 1080 x 608
+ *   phone    390 x 844   (at 1.8 in a vertical video -> 702 x 1519)
+ *   desktop  720 x 405   (at 1.5 in a vertical video -> 1080 x 608)
  *
  * The desktop scale is deliberately high. A real 1280-wide window shrunk into
  * a 1080-wide vertical video puts its text at about four pixels, which nobody
@@ -28,16 +28,18 @@
  * cards too tall, the whole thing looking like the app with something wrong
  * with it. Nobody could say what, and everybody could see it.
  *
- * "framing" is where the camera sits before a shot asks for anything. A 16:9
- * window in a 9:16 video is a band across the middle with a great deal of
- * nothing above and below, so the window is pushed in on until it fills the
- * picture and its sides go out of frame - which is what a screen recording in
- * a Reel does too. A shot that zooms further does so from here.
+ * How big each is DRAWN, and how far the camera rests into a laptop window
+ * before a shot asks for anything, are NOT here. Those belong to the shape of
+ * the finished video - a 16:9 window needs a shove to fill a Reel and none at
+ * all to fill a widescreen, and a phone drawn at the size that suits a Reel
+ * runs off the bottom of a square - so they live in src/aspect.js. The sizes
+ * below are the logical space a screen is authored in, and that does not
+ * change with the shape: a screen is drawn once and framed three ways.
  */
 
 export const DEVICES = {
-  phone: { width: 390, height: 844, scale: 1.8 },
-  desktop: { width: 720, height: 405, scale: 1.5, framing: 1.26 }
+  phone: { width: 390, height: 844 },
+  desktop: { width: 720, height: 405 }
 };
 
 export const DEFAULT_DEVICE = 'phone';

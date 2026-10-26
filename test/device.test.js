@@ -4,6 +4,7 @@ import { rawColoursIn } from '../src/colour-guard.js';
 import { readFile } from 'node:fs/promises';
 import { SCREENS, catalogue } from '../screens/index.js';
 import { deviceOf, viewportFor, urlFor, chromeOf, titleFor, DEVICES } from '../src/device.js';
+import { ASPECTS, PHONE_BOX, DESKTOP_BOX, scaleFor, stageAreaHeight } from '../src/aspect.js';
 
 test('a screen that says nothing is a phone screen', () => {
   assert.equal(deviceOf(SCREENS.home), 'phone');
@@ -46,15 +47,46 @@ test('a desktop screen carries the address its browser shows', () => {
   assert.equal(urlFor({}), 'mybillbook.in', 'and there is always something to show');
 });
 
-test('both shapes fill the same width, so text is the same size in either', () => {
-  for (const [name, d] of Object.entries(DEVICES)) {
-    assert.ok(d.width * d.scale <= 1080, `${name} is wider than the frame`);
-    assert.ok(d.height * d.scale <= 1770, `${name} is taller than the space under the logo`);
+test('both devices fit inside every shape of picture', () => {
+  /* The scales used to live on the device, which meant one pair of numbers,
+     chosen for a vertical video. A square is a third of the height, so a
+     phone drawn at the Reel's size would have hung off the bottom of it -
+     and nothing would have failed, because a frame that is wrong is still a
+     frame. */
+  for (const [shape, aspect] of Object.entries(ASPECTS)) {
+    for (const name of Object.keys(DEVICES)) {
+      const scale = scaleFor(aspect, name);
+      /* The phone body and the laptop window carry their own chrome, and it
+         is drawn too - see PHONE_BOX and DESKTOP_BOX. */
+      const box = name === 'desktop' ? DESKTOP_BOX : PHONE_BOX;
+      /* The laptop window is ALLOWED to be wider than the picture - its
+         sides go out of frame the way a screen recording's do, which is the
+         whole point of the resting push-in. The phone is not: a phone with
+         its edges cut off is not a phone, it is a mistake. */
+      if (name !== 'desktop') {
+        assert.ok(box.width * scale <= aspect.width + 1,
+          `in ${shape} the ${name} is ${Math.round(box.width * scale)}px wide `
+          + `in a ${aspect.width}px picture`);
+      }
+      /* Height is not negotiable for either. Nothing may hang below the
+         picture, because there is no "out of frame" that reads as deliberate
+         at the bottom of a window. */
+      assert.ok(box.height * scale <= stageAreaHeight(aspect) + 1,
+        `in ${shape} the ${name} is ${Math.round(box.height * scale)}px tall `
+        + `in the ${stageAreaHeight(aspect)}px under the brand strip`);
+    }
   }
-  /* The point of the two scales: a desktop screen holds more, drawn no
-     smaller. Within a few per cent of the same width is what makes that true. */
-  const widths = Object.values(DEVICES).map(d => d.width * d.scale);
-  assert.ok(Math.max(...widths) - Math.min(...widths) < 400);
+});
+
+test('a laptop window is drawn large enough to read in every shape', () => {
+  /* Why the laptop has a scale of its own at all: a real window shrunk to
+     fit puts its text at about four pixels. Counting the resting push-in, it
+     has to fill most of the picture's width in every shape. */
+  for (const [shape, aspect] of Object.entries(ASPECTS)) {
+    const drawn = DESKTOP_BOX.width * scaleFor(aspect, 'desktop') * aspect.framing;
+    assert.ok(drawn >= aspect.width * 0.75,
+      `in ${shape} the laptop fills only ${Math.round(100 * drawn / aspect.width)}% of the width`);
+  }
 });
 
 test('both renderers draw the same two frames', async () => {
@@ -79,7 +111,12 @@ test('both renderers draw the same two frames', async () => {
        being wrong. */
     assert.ok(src.includes(`width: ${DEVICES.desktop.width}px`), `${file} draws the desktop at another width`);
     assert.ok(src.includes(`height: ${DEVICES.desktop.height}px`), `${file} draws the desktop at another height`);
-    assert.ok(src.includes(`scale(${DEVICES.desktop.scale})`), `${file} scales the desktop differently`);
+    /* Both now scale from the same custom property rather than a literal,
+       because how big a window is drawn depends on the shape of the picture.
+       The property NAME is what has to match: two files reading different
+       names is the same bug as two files holding different numbers. */
+    assert.ok(src.includes('scale(var(--desktop-scale'), `${file} scales the desktop from somewhere else`);
+    assert.ok(src.includes('scale(var(--phone-scale'), `${file} scales the phone from somewhere else`);
   }
 });
 
@@ -135,7 +172,7 @@ test('the CSS handed to the rasteriser describes both frames', async () => {
   /* And at the same size as everywhere else. */
   assert.ok(inlined.includes(`width: ${DEVICES.desktop.width}px`), 'the inlined desktop is another width');
   assert.ok(inlined.includes(`height: ${DEVICES.desktop.height}px`), 'the inlined desktop is another height');
-  assert.ok(inlined.includes('scale(1.5)'), 'the inlined desktop is another scale');
+  assert.ok(inlined.includes('scale(var(--desktop-scale'), 'the inlined desktop is scaled from somewhere else');
 });
 
 test('Tally is a desktop program, and is never drawn as a web page', () => {
