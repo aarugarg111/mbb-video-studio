@@ -150,6 +150,19 @@ export function cssVarsFor(aspect) {
   };
 }
 
+/* The shot list with its shape set to this one.
+ *
+ * The render machine is handed YAML rather than a recipe object, so when the
+ * studio renders the same clip in all three shapes it has to say which shape
+ * each one is in the text itself. Only a top-level key is touched - a key at
+ * column 0 - so an "aspect" nested inside something else is left alone.
+ */
+export function withAspect(recipeText, aspect) {
+  const id = aspectNamed(aspect) ?? DEFAULT_ASPECT;
+  const without = String(recipeText ?? '').replace(/^aspect[ \t]*:.*(\r?\n|$)/gm, '');
+  return `aspect: "${id}"\n${without}`;
+}
+
 /* The same thing as a block of CSS, for the renderer that has no DOM to set
  * properties on. */
 export function cssTextFor(aspect) {

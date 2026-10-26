@@ -5,7 +5,11 @@ import { asset } from '../lib/base-path';
 import { ctaImageExists } from '../lib/assets';
 import { THEMES } from '@/lib/schema';
 /* The three shapes a clip can be posted as. Shared with both renderers. */
-import { ASPECTS, DEFAULT_ASPECT } from '../../src/aspect.js';
+import { ASPECTS, DEFAULT_ASPECT, withAspect } from '../../src/aspect.js';
+import { zipBlobs } from '@/lib/zip';
+
+/* The picker's fourth button: cut the same shot list in all three shapes. */
+const ALL = 'all';
 import { proposeRecipe } from '@/lib/claude';
 import { TEAM_MODE, signIn, signOut, isSignedIn } from '@/lib/team';
 import { renderVideo } from '@/lib/render';
@@ -62,6 +66,13 @@ export default function Page() {
   const [checking, setChecking] = useState(false);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [videoUrl, setVideoUrl] = useState('');
+  /* Every shape this run produced, in the order they were cut. One entry for
+   * an ordinary render; three when "All three" was picked. The player shows
+   * the first and each gets its own download, plus one archive for the lot -
+   * three separate saves is three dialogs and three loose files with nothing
+   * saying they belong together. */
+  const [cuts, setCuts] = useState<{ id: string; name: string; file: string; url: string }[]>([]);
+  const [bundleUrl, setBundleUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [apiKey, setApiKey] = useState('');
@@ -92,6 +103,8 @@ export default function Page() {
   const [provider, setProvider] = useState<ProviderId>('anthropic');
   const stageRef = useRef<HTMLDivElement>(null);
   const urlRef = useRef('');
+  /* Every object URL this run handed out, so they can all be released. */
+  const urlsRef = useRef<string[]>([]);
 
   useEffect(() => {
     if (TEAM_MODE) {
@@ -171,12 +184,20 @@ export default function Page() {
   /* Clears the whole run so the next video starts from an empty form. The
    * object URL has to go with it, or every video made in this tab stays in
    * memory until the tab is closed. */
-  function startOver() {
-    if (urlRef.current) {
-      URL.revokeObjectURL(urlRef.current);
-      urlRef.current = '';
-    }
+  /* Every object URL this run made. A render can now produce four - three
+   * videos and the archive - and one forgotten reference keeps a whole
+   * minute of video in memory until the tab is closed. */
+  function releaseVideos() {
+    for (const url of urlsRef.current) URL.revokeObjectURL(url);
+    urlsRef.current = [];
+    urlRef.current = '';
     setVideoUrl('');
+    setCuts([]);
+    setBundleUrl('');
+  }
+
+  function startOver() {
+    releaseVideos();
     setScript('');
     setBusiness('');
     setParty('');
@@ -328,30 +349,56 @@ export default function Page() {
      * by hand - and only the first of those has ever been told which shape
      * was picked. Setting it here means the button on screen is the one that
      * governs, whichever way the shot list arrived. */
-    checked.recipe.aspect = aspect;
+    /* Which shapes this run cuts. "All three" is one pass of the shot list
+     * per shape rather than one video cropped three ways: a crop would throw
+     * away the sides of the picture, and the sides are where a laptop screen
+     * keeps its rail and a phone keeps its tab bar. */
+    const wanted = aspect === ALL ? Object.keys(ASPECTS) : [aspect];
 
-    /* Free the previous video before making another, or repeated renders
-     * hold every MP4 in memory until the tab dies. */
-    if (urlRef.current) {
-      URL.revokeObjectURL(urlRef.current);
-      urlRef.current = '';
-      setVideoUrl('');
-    }
+    /* Free the previous videos before making more, or repeated renders hold
+     * every MP4 in memory until the tab dies. */
+    releaseVideos();
 
     setBusy(true);
     setProgress({ done: 0, total: 0 });
     setStep('rendering');
     try {
-      /* In the browser when the browser can, on the render machine when it
-         cannot. Both make the same clip from the same shot list; the only
-         difference is which machine spends the minute. */
-      const onProgress = (done: number, total: number) => setProgress({ done, total });
-      const blob = supported
-        ? await renderVideo(checked.recipe, { onProgress })
-        : await renderRemotely(recipe, { onProgress });
-      const url = URL.createObjectURL(blob);
-      urlRef.current = url;
-      setVideoUrl(url);
+      const made: { id: string; name: string; file: string; url: string }[] = [];
+      const blobs: { name: string; blob: Blob }[] = [];
+
+      for (const [i, id] of wanted.entries()) {
+        /* One bar across the whole job rather than three that each restart
+           at nothing - otherwise the second shape looks like a failure. */
+        const onProgress = (done: number, total: number) =>
+          setProgress({ done: i * total + done, total: total * wanted.length });
+
+        /* In the browser when the browser can, on the render machine when it
+           cannot. Both make the same clip from the same shot list; the only
+           difference is which machine spends the minute. The render machine
+           is handed YAML rather than a recipe, so the shape goes into the
+           text for it. */
+        const blob = supported
+          ? await renderVideo({ ...checked.recipe, aspect: id }, { onProgress })
+          : await renderRemotely(withAspect(recipe, id), { onProgress });
+
+        const url = URL.createObjectURL(blob);
+        urlsRef.current.push(url);
+        const file = `${checked.recipe.video}-${id.replace(':', 'x')}.mp4`;
+        made.push({ id, name: ASPECTS[id as keyof typeof ASPECTS].name, file, url });
+        blobs.push({ name: file, blob });
+      }
+
+      urlRef.current = made[0].url;
+      setVideoUrl(made[0].url);
+      setCuts(made);
+
+      /* All of them in one download. Only worth an archive when there is
+         more than one thing in it. */
+      if (blobs.length > 1) {
+        const bundle = URL.createObjectURL(await zipBlobs(blobs));
+        urlsRef.current.push(bundle);
+        setBundleUrl(bundle);
+      }
       setStep('done');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'The render failed.');
@@ -362,6 +409,10 @@ export default function Page() {
   }
 
   const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
+  /* What the download is called. The shot list names the clip; failing that
+     the archive is just "video", which is three of them in a Downloads
+     folder by Friday. */
+  const videoName = cuts[0]?.file.replace(/-[0-9]+x[0-9]+.mp4$/, "") || "video";
   const stepIndex = step === 'fill' ? 0 : step === 'done' ? 2 : 1;
   const needKey = !TEAM_MODE && (!apiKey || editingKey);
   /* The studio's own path asks Claude on the team's key. A viewer who has
@@ -551,7 +602,20 @@ export default function Page() {
                 onClick={() => setAspect(id)}
               >{a.name} <span className="shape-sub">{id}</span></button>
             ))}
+            <button
+              type="button"
+              title="Cut the same shot list in all three, and download them together"
+              className={'shape-pick' + (aspect === ALL ? ' on' : '')}
+              onClick={() => setAspect(ALL)}
+            >All three</button>
           </div>
+          {aspect === ALL && (
+            <p className="hint">
+              The shot list is filmed three times, once composed for each shape — not one
+              video cropped, which would cut off the sides. It takes about three times as
+              long, and you get all three in one download.
+            </p>
+          )}
 
           <details className="overrides">
             <summary>Overrides — only if the script gets something wrong</summary>
@@ -662,12 +726,29 @@ export default function Page() {
 
       {step === 'done' && (
         <>
-          <div className="note good">Your video is ready. Play it below, then download it.</div>
+          <div className="note good">
+            {cuts.length > 1
+              ? `All ${cuts.length} shapes are ready. The ${cuts[0].name.toLowerCase()} one is below.`
+              : 'Your video is ready. Play it below, then download it.'}
+          </div>
           <video src={videoUrl} controls />
           <div className="actions">
-            <a className="btnlink" href={videoUrl} download="video.mp4">
-              <button>Download the video</button>
-            </a>
+            {bundleUrl && (
+              <a className="btnlink" href={bundleUrl} download={`${videoName}-all-shapes.zip`}>
+                <button>Download all {cuts.length}</button>
+              </a>
+            )}
+            {cuts.length > 1
+              ? cuts.map(c => (
+                  <a key={c.id} className="btnlink" href={c.url} download={c.file}>
+                    <button className="secondary">{c.name} <span className="shape-sub">{c.id}</span></button>
+                  </a>
+                ))
+              : (
+                <a className="btnlink" href={videoUrl} download={cuts[0]?.file ?? 'video.mp4'}>
+                  <button>Download the video</button>
+                </a>
+              )}
             <button className="secondary" onClick={() => setStep('check')}>
               Change the shot list
             </button>

@@ -27,13 +27,17 @@ async function main() {
 
   /* The same shot list posted three ways. The recipe may say which shape it
    * is; this overrides it, so one clip can be cut for a Reel, a feed and
-   * YouTube without three near-identical recipe files. */
+   * YouTube without three near-identical recipe files. "all" does all three
+   * in one go - each filmed in its own shape, not one video cropped, because
+   * a crop throws away the sides and the sides are where a laptop screen
+   * keeps its rail. */
   const aspectIndex = rest.indexOf('--aspect');
   const asked = aspectIndex >= 0 ? rest[aspectIndex + 1] : null;
-  const override = asked == null ? null : aspectNamed(asked);
-  if (asked != null && !override) {
+  const everyShape = String(asked ?? '').trim().toLowerCase() === 'all';
+  const override = asked == null || everyShape ? null : aspectNamed(asked);
+  if (asked != null && !everyShape && !override) {
     console.error(
-      `--aspect must be one of ${Object.keys(ASPECTS).join(', ')} `
+      `--aspect must be one of ${Object.keys(ASPECTS).join(', ')}, or all `
       + `(or vertical, square, horizontal), got ${JSON.stringify(asked)}.`
     );
     process.exit(1);
@@ -51,11 +55,23 @@ async function main() {
   }
 
   const { recipe } = result;
-  if (override) recipe.aspect = override;
-  /* Three shapes of the same clip would otherwise overwrite each other, and
-   * the one left in out/ would be whichever finished last. */
-  const outDir = join('out', override && override !== DEFAULT_ASPECT
-    ? `${recipe.video}-${override.replace(':', 'x')}`
+  const shapes = everyShape ? Object.keys(ASPECTS) : [override ?? recipe.aspect];
+
+  for (const [i, shape] of shapes.entries()) {
+    if (shapes.length > 1) {
+      console.log(`\n--- ${ASPECTS[shape].name} (${shape}) - ${i + 1} of ${shapes.length} ---`);
+    }
+    await renderOne({ ...recipe, aspect: shape }, shape, stillAt,
+      shapes.length > 1 || Boolean(override && override !== DEFAULT_ASPECT));
+  }
+}
+
+/* One shape of one clip. "named" is whether the shape goes in the folder
+ * name: three shapes of the same clip would otherwise overwrite each other
+ * and the one left in out/ would be whichever finished last. */
+async function renderOne(recipe, shape, stillAt, named) {
+  const outDir = join('out', named
+    ? `${recipe.video}-${shape.replace(':', 'x')}`
     : recipe.video);
   await mkdir(outDir, { recursive: true });
 
