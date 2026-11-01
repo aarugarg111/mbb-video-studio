@@ -69,6 +69,23 @@ export function itemsFor(data) {
   return [...own, ...shelfFor(data)].slice(0, ROWS);
 }
 
+/* What the page shows when Low Stock is on.
+ *
+ * Taken from the shop, not from the fourteen rows that happened to fit.
+ * Filtering the page meant a script listing a dozen healthy items of its own
+ * filled every row before one shelf item got in, so Low Stock came up empty
+ * - the one thing that screen must never do, because a script only asks for
+ * it when running out IS the story. The studio warned about it instead,
+ * which told the writer to go and edit stock figures by hand to get the
+ * screen they had already asked for.
+ *
+ * The shop's own low items lead, because those are the ones the script is
+ * about; what is running out on the rest of its shelf follows. */
+export function lowStockFor(data) {
+  const own = (Array.isArray(data?.items) ? data.items : []).filter(isLow);
+  return [...own, ...shelfFor(data).filter(isLow)].slice(0, ROWS);
+}
+
 /* The strip across the top of the list, offering to read items off a bill.
  *
  * It is in the app's own Items page and it scrolls with the list, so it is
@@ -102,7 +119,7 @@ export function render(data, state) {
    * do is stop at the bottom rather than scroll into nothing. */
   const CARD = 94, VISIBLE = 626;
   const filtering = Number(state?.lowStock ?? 0) > 0;
-  const items = filtering ? lowStockItems(all) : all;
+  const items = filtering ? lowStockFor(data) : all;
   /* The promo strip scrolls with the list, so it is part of what there is to
    * scroll past. Left out of this, a short list would refuse to scroll far
    * enough to clear it. */

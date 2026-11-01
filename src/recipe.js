@@ -573,32 +573,19 @@ export function parse(text, catalogue, options = {}) {
     );
   }
 
-  /* Showing Low Stock on a list where nothing is low empties the screen on
-   * camera. The clip still renders - the app would do the same - but it is
-   * almost never what the script meant.
+  /* There was a warning here about Low Stock emptying the screen on camera.
    *
-   * Asked of the page rather than of the recipe. This used to count only the
-   * recipe's OWN items, which was right while the rest of the page came from
-   * a shelf with nothing running out on it. Now that a shelf has three or
-   * four, a script with healthy items of its own draws a perfectly good Low
-   * Stock page - and the warning fired at every single one of them, telling
-   * the writer to go and fix something that was not broken.
+   * It is gone because the screen cannot empty any more. It used to be able
+   * to - the page filtered the fourteen rows it had room for, so a script
+   * listing a dozen healthy items of its own left nothing to show - and the
+   * studio's answer was to tell the writer to go and edit stock figures by
+   * hand until the screen they had already asked for appeared.
    *
-   * It also now covers the screens that open already filtered, and the
-   * laptop's. A page that empties empties whichever way it was reached. */
-  const FILTERED = new Set(['low-stock', 'mbb-desktop-low-stock']);
-  const FILTERABLE = new Set(['items', 'mbb-desktop-items', ...FILTERED]);
-  const showsLowStock = recipe.shots.some(shot =>
-    FILTERED.has(shot.screen) || (
-      FILTERABLE.has(shot.screen)
-      && (shot.actions ?? []).some(a => a.do === 'tap' && a.target === 'low-stock')
-    ));
-  if (showsLowStock && lowStockItems(itemsFor(recipe)).length === 0) {
-    warnings.push(
-      'The clip shows Low Stock but nothing on the page is low, so the list empties ' +
-      'on camera. Give an item a smaller stock, or a lowAt above its stock.'
-    );
-  }
+   * That is the wrong way round. A script that asks what is running out is
+   * asking for a screen, not setting a puzzle. screens/items.js answers it
+   * from the shop's whole shelf now, so there is always something to show,
+   * and nothing to warn about. test/low-stock.test.js holds that line.
+   */
 
   const lastWhatsApp = recipe.shots.map(s => s.screen).lastIndexOf('wa-chat');
   if (lastWhatsApp !== -1) {

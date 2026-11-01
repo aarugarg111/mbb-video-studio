@@ -18,10 +18,10 @@ export const SHELVES = {
     { name: 'AMUL RUSK FAMILY PACK', rate: 180, purchase: 120, stock: 99 },
     { name: 'ANJEER PREMIUM 500GM', rate: 1200, purchase: 950, stock: 99 },
     { name: 'ARHAR DAL GOLD 1KG', rate: 180, purchase: 140, stock: -14 },
-    { name: 'BESAN 1KG', rate: 110, purchase: 94, stock: 91 },
+    { name: 'BESAN 1KG', rate: 110, purchase: 94, stock: -5 },
     { name: 'BOURNVITA 500GM', rate: 245, purchase: 212, stock: 6 },
     { name: 'BRITANNIA MARIE GOLD', rate: 40, purchase: 33, stock: 120 },
-    { name: 'CHANA DAL 1KG', rate: 95, purchase: 78, stock: 64 },
+    { name: 'CHANA DAL 1KG', rate: 95, purchase: 78, stock: 7 },
     { name: 'COLGATE STRONG TEETH 200G', rate: 115, purchase: 96, stock: -2 },
     { name: 'FORTUNE SUNFLOWER OIL 1L', rate: 165, purchase: 142, stock: 72 },
     { name: 'TATA SALT 1KG', rate: 28, purchase: 24, stock: 140 }
@@ -29,20 +29,20 @@ export const SHELVES = {
 
   cosmetics: [
     { name: 'BELLA VITA PERFUME SET', rate: 650, purchase: 250, stock: 199 },
-    { name: 'COMPACT POWDER', rate: 240, purchase: 165, stock: 44 },
+    { name: 'COMPACT POWDER', rate: 240, purchase: 165, stock: -9 },
     { name: 'FACE CREAM 50GM', rate: 210, purchase: 148, stock: 60 },
     { name: 'HAIR SERUM 100ML', rate: 395, purchase: 280, stock: 4 },
     { name: 'KAJAL STICK', rate: 95, purchase: 58, stock: 120 },
     { name: 'LIPSTICK MATTE', rate: 280, purchase: 190, stock: -21 },
     { name: 'NAIL PAINT REMOVER', rate: 85, purchase: 52, stock: 88 },
-    { name: 'SHAMPOO 340ML', rate: 310, purchase: 236, stock: 54 },
+    { name: 'SHAMPOO 340ML', rate: 310, purchase: 236, stock: 8 },
     { name: 'SUNSCREEN SPF 50', rate: 480, purchase: 345, stock: -6 },
     { name: 'TALC POWDER 300GM', rate: 165, purchase: 118, stock: 66 }
   ],
 
   pharmacy: [
     { name: 'AMOXICILLIN 500MG STRIP', rate: 92, purchase: 68, stock: 140 },
-    { name: 'ANTACID SYRUP 200ML', rate: 148, purchase: 109, stock: 52 },
+    { name: 'ANTACID SYRUP 200ML', rate: 148, purchase: 109, stock: -7 },
     { name: 'BANDAGE ROLL 10CM', rate: 45, purchase: 28, stock: 96 },
     { name: 'COUGH SYRUP 100ML', rate: 118, purchase: 86, stock: -18 },
     { name: 'DIGITAL THERMOMETER', rate: 320, purchase: 215, stock: 3 },
@@ -50,7 +50,7 @@ export const SHELVES = {
     { name: 'ORS SACHET', rate: 22, purchase: 14, stock: 240 },
     { name: 'PARACETAMOL 650MG STRIP', rate: 32, purchase: 21, stock: 180 },
     { name: 'SANITIZER 500ML', rate: 190, purchase: 132, stock: -4 },
-    { name: 'VITAMIN C TABLETS', rate: 210, purchase: 155, stock: 58 }
+    { name: 'VITAMIN C TABLETS', rate: 210, purchase: 155, stock: 9 }
   ],
 
   hardware: [
@@ -58,10 +58,10 @@ export const SHELVES = {
     { name: 'ALUMINIUM LADDER 6FT', rate: 3450, purchase: 2700, stock: 8 },
     { name: 'CEMENT BAG 50KG', rate: 420, purchase: 362, stock: 220 },
     { name: 'DRILL BIT SET', rate: 760, purchase: 540, stock: 2 },
-    { name: 'ENAMEL PAINT 4L', rate: 1290, purchase: 1010, stock: 34 },
+    { name: 'ENAMEL PAINT 4L', rate: 1290, purchase: 1010, stock: -4 },
     { name: 'MS ANGLE 25MM', rate: 310, purchase: 248, stock: 150 },
     { name: 'PVC PIPE 1 INCH', rate: 265, purchase: 198, stock: 110 },
-    { name: 'SCREW BOX 2 INCH', rate: 180, purchase: 124, stock: 96 },
+    { name: 'SCREW BOX 2 INCH', rate: 180, purchase: 124, stock: 5 },
     { name: 'TMT BAR 12MM', rate: 680, purchase: 580, stock: 320 },
     { name: 'WALL TILES 2X2', rate: 95, purchase: 68, stock: 480 }
   ],
@@ -69,8 +69,8 @@ export const SHELVES = {
   stationery: [
     { name: 'A4 PAPER REAM 500', rate: 340, purchase: 282, stock: -28 },
     { name: 'BALLPOINT PEN BOX', rate: 120, purchase: 78, stock: 140 },
-    { name: 'CHART PAPER PACK', rate: 90, purchase: 58, stock: 85 },
-    { name: 'FILE FOLDER PACK', rate: 185, purchase: 128, stock: 72 },
+    { name: 'CHART PAPER PACK', rate: 90, purchase: 58, stock: 4 },
+    { name: 'FILE FOLDER PACK', rate: 185, purchase: 128, stock: -6 },
     { name: 'GEOMETRY BOX', rate: 165, purchase: 112, stock: 5 },
     { name: 'GLUE STICK', rate: 35, purchase: 21, stock: 190 },
     { name: 'NOTEBOOK 200 PAGE', rate: 65, purchase: 44, stock: 300 },
@@ -80,7 +80,7 @@ export const SHELVES = {
   ],
 
   garments: [
-    { name: 'COTTON KURTA', rate: 850, purchase: 540, stock: 44 },
+    { name: 'COTTON KURTA', rate: 850, purchase: 540, stock: -8 },
     { name: 'DENIM JEANS', rate: 1450, purchase: 920, stock: -11 },
     { name: 'DUPATTA CHIFFON', rate: 420, purchase: 265, stock: 78 },
     { name: 'FORMAL SHIRT', rate: 1100, purchase: 720, stock: -5 },
@@ -88,7 +88,7 @@ export const SHELVES = {
     { name: 'SAREE COTTON', rate: 1250, purchase: 810, stock: 7 },
     { name: 'SCHOOL UNIFORM SET', rate: 980, purchase: 640, stock: 64 },
     { name: 'SOCKS PACK OF 3', rate: 240, purchase: 148, stock: 120 },
-    { name: 'TOWEL LARGE', rate: 520, purchase: 340, stock: 58 },
+    { name: 'TOWEL LARGE', rate: 520, purchase: 340, stock: 6 },
     { name: 'TSHIRT ROUND NECK', rate: 560, purchase: 345, stock: 88 }
   ],
 
@@ -101,23 +101,23 @@ export const SHELVES = {
     { name: 'MASALA CHAI', rate: 15, purchase: 6, stock: 199 },
     { name: 'PANEER ROLL', rate: 90, purchase: 44, stock: -16 },
     { name: 'SAMOSA PIECE', rate: 15, purchase: 7, stock: 9 },
-    { name: 'SPRING ROLL PLATE', rate: 75, purchase: 34, stock: 99 },
+    { name: 'SPRING ROLL PLATE', rate: 75, purchase: 34, stock: -9 },
     { name: 'TANDOORI MOMOS PLATE', rate: 110, purchase: 52, stock: 99 },
-    { name: 'VEG BURGER', rate: 60, purchase: 28, stock: 99 },
+    { name: 'VEG BURGER', rate: 60, purchase: 28, stock: 5 },
     { name: 'WATER BOTTLE 1L', rate: 20, purchase: 13, stock: 120 }
   ],
 
   electronics: [
     { name: 'CEILING FAN 1200MM', rate: 2450, purchase: 1890, stock: 6 },
     { name: 'EARPHONES WIRED', rate: 450, purchase: 280, stock: 70 },
-    { name: 'EXTENSION BOARD 4 SOCKET', rate: 560, purchase: 385, stock: 46 },
+    { name: 'EXTENSION BOARD 4 SOCKET', rate: 560, purchase: 385, stock: -6 },
     { name: 'LED BULB 9W', rate: 110, purchase: 72, stock: 240 },
     { name: 'MIXER GRINDER 750W', rate: 3890, purchase: 3050, stock: -13 },
     { name: 'MOBILE CHARGER 20W', rate: 740, purchase: 510, stock: 56 },
     { name: 'POWER BANK 10000MAH', rate: 1290, purchase: 915, stock: -2 },
     { name: 'TUBE LIGHT 20W', rate: 240, purchase: 168, stock: 90 },
     { name: 'USB CABLE TYPE C', rate: 190, purchase: 112, stock: 150 },
-    { name: 'WIRE BUNDLE 90M', rate: 1850, purchase: 1480, stock: 32 }
+    { name: 'WIRE BUNDLE 90M', rate: 1850, purchase: 1480, stock: 8 }
   ]
 };
 

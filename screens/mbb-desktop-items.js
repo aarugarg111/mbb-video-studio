@@ -2,7 +2,7 @@ import { esc } from '../src/esc.js';
 import { icons } from '../src/icons.js';
 import { formatINR } from '../src/money.js';
 import { isLow } from './items.js';
-import { itemsFor } from './items.js';
+import { itemsFor, lowStockFor } from './items.js';
 import { sidebar, topActions, referralStrip, pendingActions } from './mbb-desktop-chrome.js';
 
 export const name = 'mbb-desktop-items';
@@ -52,7 +52,8 @@ export function render(data, state) {
   /* Measured against a render, in this screen's own pixels: a row is 27 tall
    * and the table shows about 175 of them under its header. */
   const ROW = 27, VISIBLE = 175;
-  const low = all.filter(isLow);
+  /* From the shop, not from the rows that fitted - see lowStockFor. */
+  const low = lowStockFor(data);
   const onlyLow = Number(state?.lowStock ?? 0) > 0;
   const rows = onlyLow ? low : all;
   const room = Math.max(0, rows.length * ROW - VISIBLE);

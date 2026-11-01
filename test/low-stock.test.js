@@ -76,14 +76,7 @@ test('the pill is plain until it is tapped, then selected and clearable', () => 
   assert.match(on, /id="low-stock"/);
 });
 
-test('a filter that finds nothing says so instead of going blank', () => {
-  /* Only reachable now by a recipe that fills every row itself: a page that
-     falls back to the shop's shelf always finds something, because a real
-     shelf always has something running out. */
-  const stocked = Array.from({ length: 14 }, (_, i) => ({ name: 'ITEM ' + i, rate: 10, stock: 90 }));
-  const html = SCREENS.items.render({ items: stocked }, { lowStock: 1 });
-  assert.match(html, /Nothing is running low/);
-});
+
 
 test('tapping Low Stock reaches the screen state', () => {
   const recipe = {
@@ -99,24 +92,7 @@ test('low-stock is a real target in the catalogue', () => {
   assert.match(SCREENS.items.render(DATA, {}), /id="low-stock"/);
 });
 
-test('a clip that shows Low Stock with an empty page is warned about', () => {
-  /* The page empties only when the recipe fills every row itself and none of
-     them is low. One healthy item used to be enough to trigger this, because
-     the rest of the page came from a shelf with nothing running out on it -
-     so the warning fired at scripts whose Low Stock page was perfectly good
-     and told the writer to go and fix something that was not broken. */
-  const stocked = Array.from({ length: 14 }, (_, i) =>
-    `  - { name: ITEM ${i}, rate: 10, qty: 1, stock: 90 }`);
-  const yaml = [
-    'video: t', 'invoice: { number: 1 }', 'business: { name: S }',
-    'items:', ...stocked,
-    'shots:', '  - screen: items', '    duration: 3',
-    '    actions:', '      - { at: 1, do: tap, target: low-stock }'
-  ].join('\n');
-  const out = parse(yaml, catalogue());
-  assert.equal(out.errors, undefined, 'it should still render');
-  assert.ok(out.warnings.some(w => /nothing on the page is low/.test(w)), out.warnings.join(' | '));
-});
+
 
 test('a healthy shop is not warned about a Low Stock page that works', () => {
   /* The false alarm itself. The shop's own items are all well stocked, and
@@ -131,21 +107,7 @@ test('a healthy shop is not warned about a Low Stock page that works', () => {
   assert.ok(!out.warnings.some(w => /low/i.test(w)), out.warnings.join(' | '));
 });
 
-test('the screens that open filtered are warned about too', () => {
-  /* Reaching the page by naming it rather than tapping does not make an
-     empty page any less empty. */
-  const stocked = Array.from({ length: 14 }, (_, i) =>
-    `  - { name: ITEM ${i}, rate: 10, qty: 1, stock: 90 }`);
-  for (const screen of ['low-stock', 'mbb-desktop-low-stock']) {
-    const out = parse([
-      'video: t', 'invoice: { number: 1 }', 'business: { name: S }',
-      'items:', ...stocked,
-      'shots:', `  - screen: ${screen}`, '    duration: 3'
-    ].join('\n'), catalogue());
-    assert.ok(out.warnings.some(w => /nothing on the page is low/.test(w)),
-      `${screen}: ${out.warnings.join(' | ')}`);
-  }
-});
+
 
 test('no warning when something actually is low', () => {
   const yaml = [
@@ -320,4 +282,76 @@ test('a recipe can simply name it', () => {
   );
   assert.equal(errors, undefined, 'the screen a script would ask for is refused');
   assert.equal(recipe.shots[0].screen, 'low-stock');
+});
+
+/* The Low Stock page always has something on it.
+ *
+ * It did not. The page filtered the fourteen rows it had room for, so a
+ * script listing a dozen healthy items of its own filled every row before
+ * one shelf item got in - and Low Stock came up empty. The studio's answer
+ * was a warning telling the writer to go and edit stock figures by hand
+ * until the screen they had already asked for appeared, which is the wrong
+ * way round: a script asking what is running out is asking for a screen,
+ * not setting a puzzle.
+ */
+
+test('Low Stock is never empty, whatever the script happens to list', async () => {
+  const { lowStockFor } = await import('../screens/items.js');
+  const { SHELVES } = await import('../src/shelves.js');
+
+  /* The case that broke it: a dozen healthy items of the shop's own, which
+     is what an AI writes for a script about stock. */
+  const dozen = Array.from({ length: 12 }, (_, i) => ({ name: `ITEM ${i}`, rate: 10, stock: 80 }));
+
+  for (const trade of Object.keys(SHELVES)) {
+    for (const [what, items] of [
+      ['nothing of its own', undefined],
+      ['two healthy items', [{ name: 'A', rate: 10, stock: 80 }, { name: 'B', rate: 10, stock: 60 }]],
+      ['a dozen healthy items', dozen],
+      ['more than the page holds', [...dozen, ...dozen]]
+    ]) {
+      const shown = lowStockFor({ business: { trade }, items });
+      assert.ok(shown.length >= 3,
+        `a ${trade} shop with ${what} shows ${shown.length} rows under Low Stock`);
+      assert.ok(shown.every(isLow), `a ${trade} shop with ${what} shows a well-stocked item`);
+    }
+  }
+});
+
+test('the shop own low items lead, because they are what the script is about', async () => {
+  const { lowStockFor } = await import('../screens/items.js');
+  const shown = lowStockFor({
+    business: { trade: 'cosmetics' },
+    items: [{ name: 'FACEWASH 100ML', rate: 185, stock: 2 }, { name: 'NAIL PAINT', rate: 120, stock: 70 }]
+  });
+  assert.equal(shown[0].name, 'FACEWASH 100ML', 'the item the script named is not first');
+  assert.ok(!shown.some(i => i.name === 'NAIL PAINT'), 'a well-stocked item was listed as low');
+  assert.ok(shown.length > 1, 'the rest of the shelf is missing');
+});
+
+test('both pages draw the same low list, phone and laptop', async () => {
+  const { lowStockFor } = await import('../screens/items.js');
+  const data = { business: { trade: 'kirana' }, items: [{ name: 'SUGAR 5KG', rate: 310, stock: 4 }] };
+  const names = lowStockFor(data).map(i => i.name);
+
+  const phone = SCREENS['low-stock'].render(data, {});
+  const laptop = SCREENS['mbb-desktop-low-stock'].render(data, {});
+  for (const name of names) {
+    assert.ok(phone.includes(name), `the phone page is missing ${name}`);
+    assert.ok(laptop.includes(name), `the laptop page is missing ${name}`);
+  }
+});
+
+test('nothing warns about a Low Stock page any more', () => {
+  /* The screen cannot empty, so there is nothing left to warn about - and a
+     warning that cannot fire is a line of advice nobody can act on. */
+  const dozen = Array.from({ length: 12 }, (_, i) => `  - { name: ITEM ${i}, rate: 10, stock: 80 }`);
+  const out = parse([
+    'video: t', 'invoice: { number: 1 }', 'business: { name: S }',
+    'items:', ...dozen,
+    'shots:', '  - screen: low-stock', '    duration: 3'
+  ].join('\n'), catalogue());
+
+  assert.equal(out.errors, undefined);
+  assert.ok(!out.warnings.some(w => /low stock/i.test(w)), out.warnings.join(' | '));
 });
