@@ -12,6 +12,7 @@ import { TRADES } from './shelves.js';
 import { ASPECTS, DEFAULT_ASPECT, aspectNamed } from './aspect.js';
 import { deviceOf } from './device.js';
 import { SCREENS } from '../screens/index.js';
+import { itemsFor, lowStockItems } from '../screens/items.js';
 
 export const DEFAULT_END_CARD = { duration: 1.6, tagline: 'India ka No.1 Billing App' };
 export const DEFAULT_CTA = { duration: 1.8 };
@@ -572,19 +573,31 @@ export function parse(text, catalogue, options = {}) {
     );
   }
 
-  /* Tapping Low Stock on a list where nothing is low empties the screen on
+  /* Showing Low Stock on a list where nothing is low empties the screen on
    * camera. The clip still renders - the app would do the same - but it is
-   * almost never what the script meant. */
-  const tapsLowStock = recipe.shots.some(shot =>
-    shot.screen === 'items' && (shot.actions ?? []).some(a => a.do === 'tap' && a.target === 'low-stock'));
-  if (tapsLowStock) {
-    const low = recipe.items.filter(i => Number(i.stock ?? 90) <= Number(i.lowAt ?? 10));
-    if (low.length === 0) {
-      warnings.push(
-        'The clip taps Low Stock but no item is low, so the list empties on camera. ' +
-        'Give an item a smaller stock, or a lowAt above its stock.'
-      );
-    }
+   * almost never what the script meant.
+   *
+   * Asked of the page rather than of the recipe. This used to count only the
+   * recipe's OWN items, which was right while the rest of the page came from
+   * a shelf with nothing running out on it. Now that a shelf has three or
+   * four, a script with healthy items of its own draws a perfectly good Low
+   * Stock page - and the warning fired at every single one of them, telling
+   * the writer to go and fix something that was not broken.
+   *
+   * It also now covers the screens that open already filtered, and the
+   * laptop's. A page that empties empties whichever way it was reached. */
+  const FILTERED = new Set(['low-stock', 'mbb-desktop-low-stock']);
+  const FILTERABLE = new Set(['items', 'mbb-desktop-items', ...FILTERED]);
+  const showsLowStock = recipe.shots.some(shot =>
+    FILTERED.has(shot.screen) || (
+      FILTERABLE.has(shot.screen)
+      && (shot.actions ?? []).some(a => a.do === 'tap' && a.target === 'low-stock')
+    ));
+  if (showsLowStock && lowStockItems(itemsFor(recipe)).length === 0) {
+    warnings.push(
+      'The clip shows Low Stock but nothing on the page is low, so the list empties ' +
+      'on camera. Give an item a smaller stock, or a lowAt above its stock.'
+    );
   }
 
   const lastWhatsApp = recipe.shots.map(s => s.screen).lastIndexOf('wa-chat');
