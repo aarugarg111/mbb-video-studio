@@ -231,3 +231,57 @@ test('a negative stock is drawn in red, like every other low one', () => {
   );
   assert.match(html, /class="q low">-16\.0</, 'an oversold item is not marked low');
 });
+
+/* Asking for Low Stock is enough.
+ *
+ * There was no such screen: the only way to the filtered page was to film
+ * `items` and tap `low-stock`. So a script that asked what was running out
+ * got the ordinary stock list - the model wrote `screen: items` and often no
+ * tap at all - and even when it did write one, the first second and a half
+ * of the shot was the unfiltered page. Aryan hit this twice.
+ */
+
+test('the low-stock screen opens already filtered', () => {
+  const html = SCREENS['low-stock'].render(DATA, {});
+  assert.match(html, /class="fp sel"/, 'it opened with the filter off');
+  assert.ok(!html.includes('WHITE CEMENT 5KG'), 'a well-stocked item is on the filtered page');
+  assert.ok(html.includes('CEMENT OPC 50KG'), 'a low item is missing from it');
+});
+
+test('tapping the pill on that screen clears the filter, as its X does', () => {
+  const off = SCREENS['low-stock'].render(DATA, { lowStock: 0 });
+  assert.doesNotMatch(off, /class="fp sel"/);
+  assert.ok(off.includes('WHITE CEMENT 5KG'), 'clearing it did not bring the rest back');
+});
+
+test('it is the Items page, not a second copy of it', () => {
+  /* Two copies would drift, and the two pages would stop agreeing about
+     where a row is - which is the kind of thing nothing reports. */
+  const items = SCREENS.items;
+  const low = SCREENS['low-stock'];
+  assert.deepEqual(low.targets, items.targets);
+  assert.deepEqual(low.scrollingTargets, items.scrollingTargets);
+  assert.equal(low.render(DATA, { lowStock: 1 }), items.render(DATA, { lowStock: 1 }),
+    'the same state draws two different pages');
+});
+
+test('a laptop clip about running out is still about running out', async () => {
+  /* The screen a recipe gets when the studio is told to film on a laptop. */
+  const { screenOnShape } = await import('../src/shape.js');
+  assert.equal(screenOnShape('low-stock', 'laptop'), 'mbb-desktop-low-stock');
+  assert.equal(screenOnShape('mbb-desktop-low-stock', 'phone'), 'low-stock');
+
+  const html = SCREENS['mbb-desktop-low-stock'].render(DATA, {});
+  assert.ok(html.includes('CEMENT OPC 50KG'), 'the laptop page lost the low item');
+  assert.ok(!html.includes('WHITE CEMENT 5KG'), 'the laptop page opened unfiltered');
+});
+
+test('a recipe can simply name it', () => {
+  const { recipe, errors } = parse(
+    'video: t\nitems: [{ name: SUGAR 5KG, rate: 310, stock: 4 }]\n'
+    + 'shots:\n  - screen: low-stock\n    duration: 3\n',
+    catalogue(), {}
+  );
+  assert.equal(errors, undefined, 'the screen a script would ask for is refused');
+  assert.equal(recipe.shots[0].screen, 'low-stock');
+});

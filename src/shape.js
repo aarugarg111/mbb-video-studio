@@ -29,6 +29,9 @@ const ON_A_LAPTOP = {
   'share-sheet': 'mbb-desktop-invoice',
   parties: 'mbb-desktop-parties',
   items: 'mbb-desktop-items',
+  /* A laptop has no separate low-stock page; it is the Items page with the
+     filter on, which mbb-desktop-items already does from its own state. */
+  'low-stock': 'mbb-desktop-low-stock',
   'create-bill': 'mbb-desktop-create-invoice',
   'create-invoice': 'mbb-desktop-create-invoice',
   'invoice-created': 'mbb-desktop-invoice',
@@ -52,6 +55,7 @@ const ON_A_PHONE = {
   'mbb-desktop-create-item': 'create-item',
   'mbb-desktop-parties': 'parties',
   'mbb-desktop-items': 'items',
+  'mbb-desktop-low-stock': 'low-stock',
   'mbb-desktop-create-invoice': 'create-invoice',
   'mbb-desktop-invoice': 'invoice-created',
   'mbb-desktop-purchase': 'create-purchase',

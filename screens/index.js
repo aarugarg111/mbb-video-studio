@@ -4,6 +4,8 @@ import * as createInvoice from './create-invoice.js';
 import * as invoiceCreated from './invoice-created.js';
 import * as themeStore from './theme-store.js';
 import * as items from './items.js';
+import * as lowStock from './low-stock.js';
+import * as mbbDesktopLowStock from './mbb-desktop-low-stock.js';
 import * as parties from './parties.js';
 import * as scanBills from './scan-bills.js';
 import * as scanCamera from './scan-camera.js';
@@ -55,6 +57,8 @@ export const SCREENS = {
   [invoiceCreated.name]: invoiceCreated,
   [themeStore.name]: themeStore,
   [items.name]: items,
+  [lowStock.name]: lowStock,
+  [mbbDesktopLowStock.name]: mbbDesktopLowStock,
   [parties.name]: parties,
   [scanBills.name]: scanBills,
   [scanCamera.name]: scanCamera,

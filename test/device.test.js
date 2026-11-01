@@ -30,7 +30,8 @@ test('every screen built before this one is unchanged', () => {
     [
       'mbb-desktop-create-invoice', 'mbb-desktop-create-item', 'mbb-desktop-create-party',
       'mbb-desktop-dashboard', 'mbb-desktop-invoice',
-      'mbb-desktop-items', 'mbb-desktop-parties', 'mbb-desktop-purchase',
+      'mbb-desktop-items', 'mbb-desktop-low-stock',
+      'mbb-desktop-parties', 'mbb-desktop-purchase',
       'mbb-desktop-reports', 'mbb-desktop-sales-list',
       'mbb-desktop-scan', 'mbb-desktop-scan-done', 'mbb-desktop-scan-reading',
       'mbb-desktop-theme-store',
