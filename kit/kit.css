@@ -352,6 +352,18 @@
 .fpills .fp { height: 36px; padding: 0 13px; border-radius: 999px; background: var(--mbb-pill-grey); display: flex; align-items: center; gap: 8px; font-size: 10.5px; font-weight: 500; color: var(--mbb-ink); }
 .fpills .fp .on { color: var(--mbb-primary-light); }
 .itlist { padding: 11px 17px 0; }
+/* The promo strip at the top of the Items list. It scrolls with the list,
+   as it does in the app - it is part of the page, not part of the header.
+
+   The right-hand third is empty on purpose. The app puts an illustration
+   there; it is FloBiz marketing artwork and is not redrawn here, so the
+   text keeps to the left and the space stays blank rather than being filled
+   with an imitation of it. */
+.ipromo { position: relative; margin: 0 2px 11px; padding: 13px 15px 14px; border-radius: 8px; background: var(--mbb-item-promo); color: var(--mbb-item-promo-ink); }
+.ipromo-t { font-size: 11.5px; font-weight: 700; line-height: 1.45; max-width: 205px; }
+.ipromo-hi { color: var(--mbb-item-promo-hi); }
+.ipromo-btn { display: inline-block; margin-top: 9px; padding: 5px 11px; border-radius: 6px; background: var(--mbb-item-promo-btn); color: var(--mbb-item-promo-btn-ink); font-size: 10px; font-weight: 700; }
+.ipromo-x { position: absolute; top: 7px; right: 8px; width: 15px; height: 15px; border-radius: 999px; background: var(--mbb-surface); color: var(--mbb-ink-muted); display: flex; align-items: center; justify-content: center; }
 .itcard { position: relative; display: flex; gap: 14px; height: 83px; box-sizing: border-box; padding: 12px 14px 0 14px; margin-bottom: 11px; background: var(--mbb-surface); border-radius: 4px; box-shadow: 0 1px 4px var(--mbb-card-shadow); }
 .itcard .av { flex: none; width: 30px; height: 30px; margin-top: 2px; border-radius: 4px; background: var(--mbb-avatar-grey); color: var(--mbb-avatar-letter); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; }
 .itcard .info { flex: 1; min-width: 0; }

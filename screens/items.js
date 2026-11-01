@@ -10,11 +10,14 @@ export const name = 'items';
 export const targets = {
   'create-new-item': { x: 127, y: 744 },
   'bulk-action': { x: 278, y: 744 },
-  'item-row-0': { x: 195, y: 159 },
-  'item-row-1': { x: 195, y: 253 },
-  'item-row-2': { x: 195, y: 347 },
-  'item-row-3': { x: 195, y: 441 },
-  'item-row-4': { x: 195, y: 535 },
+  /* RE-MEASURED after the promo strip was added above the list: it pushed
+     every row down by 105 of this screen's pixels. No recipe taps a row, so
+     nothing was aimed at the old places - but a zoom would have been. */
+  'item-row-0': { x: 195, y: 264 },
+  'item-row-1': { x: 195, y: 358 },
+  'item-row-2': { x: 195, y: 452 },
+  'item-row-3': { x: 195, y: 546 },
+  'item-row-4': { x: 195, y: 640 },
   'low-stock': { x: 56, y: 73 }
 };
 
@@ -66,6 +69,24 @@ export function itemsFor(data) {
   return [...own, ...shelfFor(data)].slice(0, ROWS);
 }
 
+/* The strip across the top of the list, offering to read items off a bill.
+ *
+ * It is in the app's own Items page and it scrolls with the list, so it is
+ * drawn here rather than in the header. Its right-hand third is left empty:
+ * the app puts an illustration there, that illustration is FloBiz marketing
+ * artwork, and an imitation of it in a public repo is worse than a gap.
+ *
+ * MEASURED from a render - test/low-stock.test.js measures it again, because
+ * the list scrolls past it and a wrong height is a list that stops short. */
+export const PROMO_HEIGHT = 104;
+
+const PROMO = `
+      <div class="ipromo">
+        <div class="ipromo-t">Instantly add items <span class="ipromo-hi">with just<br>a click of your bill</span></div>
+        <div class="ipromo-btn">Try Now &#8594;</div>
+        <span class="ico ipromo-x">${icons.close(10)}</span>
+      </div>`;
+
 /* A shop's shelf is longer than a phone. */
 export const scrolls = true;
 
@@ -82,7 +103,10 @@ export function render(data, state) {
   const CARD = 94, VISIBLE = 626;
   const filtering = Number(state?.lowStock ?? 0) > 0;
   const items = filtering ? lowStockItems(all) : all;
-  const room = Math.max(0, items.length * CARD - VISIBLE);
+  /* The promo strip scrolls with the list, so it is part of what there is to
+   * scroll past. Left out of this, a short list would refuse to scroll far
+   * enough to clear it. */
+  const room = Math.max(0, items.length * CARD + PROMO_HEIGHT - VISIBLE);
   const scroll = Math.min(room, Math.max(0, Number(state?.scroll ?? 0)));
 
   const row = (item, i) => {
@@ -116,6 +140,7 @@ export function render(data, state) {
   </div>
   <div class="itscroll">
   <div class="itlist" style="transform: translateY(${(-scroll).toFixed(1)}px)">
+    ${PROMO}
     ${items.length
       ? items.map(row).join('')
       : `<div class="itempty">Nothing is running low.</div>`}

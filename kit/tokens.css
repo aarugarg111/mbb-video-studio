@@ -198,6 +198,15 @@
   --mbb-party-promo:      #38332C;  /* SAMPLED - the dark promo banner   */
   --mbb-party-promo-btn:  #FEFBE1;  /* SAMPLED - its cream button        */
 
+  /* The "add items from a bill" strip across the Items page. SAMPLED from
+     the app, except the illustration beside it, which is FloBiz artwork and
+     is deliberately not redrawn - the strip is interface, the picture is not. */
+  --mbb-item-promo:        #1B3B8F;  /* the deep blue ground       */
+  --mbb-item-promo-ink:    #FFFFFF;
+  --mbb-item-promo-hi:     #F2B14B;  /* "with just" in gold        */
+  --mbb-item-promo-btn:    #FFFFFF;
+  --mbb-item-promo-btn-ink: #1B3B8F;
+
   --mbb-store-sheet-top:    #F4ECF1;  /* SAMPLED - blush at the sheet's top edge, fades to white */
   --mbb-store-maroon:       #511E38;  /* SAMPLED - Unlock Themes button            */
   --mbb-store-chip:         #F5EAF0;  /* SAMPLED - the chosen variant chip fill     */

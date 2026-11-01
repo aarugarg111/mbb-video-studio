@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { rawColoursIn } from '../src/colour-guard.js';
 import { SCREENS, catalogue } from '../screens/index.js';
 import { deviceOf } from '../src/device.js';
-import { itemsFor } from '../screens/items.js';
+import { itemsFor, lowStockItems } from '../screens/items.js';
 import { SCANNED } from '../screens/mbb-desktop-chrome.js';
 
 const DESKTOP = ['mbb-desktop-parties', 'mbb-desktop-items', 'mbb-desktop-create-invoice'];
@@ -83,11 +83,27 @@ test('Parties totals what it lists, split by who owes whom', () => {
   assert.ok(html.includes('Customer') && html.includes('Supplier'));
 });
 
-test('Items counts what is low from the recipe own stock', () => {
+test('Items counts every low row on the page, the recipe own included', () => {
   const html = SCREENS['mbb-desktop-items'].render(DATA, {});
-  /* Both recipe items are below the default low level of 10. */
   assert.ok(html.includes('Low Stock'));
-  assert.match(html, /Low Stock<\/div>\s*<div class="mb-stat-v">2</);
+
+  /* Counted rather than pinned. This used to assert "2" - the recipe's own
+     two items - which was only true while the rest of the page came from a
+     shelf with nothing running out on it. A real shelf has three or four, so
+     the number moved and this failed for being out of date rather than for
+     anything being wrong. What it is actually for is that the figure at the
+     top agrees with the rows underneath it. */
+  const shown = lowStockItems(itemsFor(DATA));
+  const counted = /Low Stock<\/div>\s*<div class="mb-stat-v">(\d+)</.exec(html);
+  assert.ok(counted, 'the Low Stock figure is not on the page');
+  assert.equal(Number(counted[1]), shown.length,
+    'the figure at the top disagrees with the rows below it');
+
+  /* And the recipe's own low items are among them, which is what a script
+     about running out of sugar is actually about. */
+  for (const item of DATA.items.filter(i => Number(i.stock) <= 10)) {
+    assert.ok(shown.some(s => s.name === item.name), `${item.name} was not counted`);
+  }
 });
 
 test('tapping Low Stock narrows the table', () => {
