@@ -118,6 +118,23 @@ export const SHELVES = {
     { name: 'TUBE LIGHT 20W', rate: 240, purchase: 168, stock: 90 },
     { name: 'USB CABLE TYPE C', rate: 190, purchase: 112, stock: 150 },
     { name: 'WIRE BUNDLE 90M', rate: 1850, purchase: 1480, stock: 8 }
+  ],
+
+  /* A krishi kendra: fertiliser, seed, spray and feed. One of the commonest
+   * shops on a small-town main road, and asking for it outright used to be
+   * refused - "trade must be one of ..." - which stopped the clip rendering
+   * at all rather than filling it with the wrong shelf. */
+  agro: [
+    { name: 'CATTLE FEED 50KG', rate: 1150, purchase: 960, stock: 64 },
+    { name: 'DAP FERTILISER 50KG', rate: 1350, purchase: 1240, stock: -6 },
+    { name: 'DRIP PIPE 100M', rate: 2100, purchase: 1680, stock: 34 },
+    { name: 'GROWTH PROMOTER 500ML', rate: 560, purchase: 410, stock: 48 },
+    { name: 'HYBRID SEED PACKET', rate: 450, purchase: 320, stock: 4 },
+    { name: 'KNAPSACK SPRAYER 16L', rate: 1890, purchase: 1450, stock: 22 },
+    { name: 'NEEM OIL 1L', rate: 380, purchase: 265, stock: -3 },
+    { name: 'PESTICIDE 1L', rate: 780, purchase: 590, stock: -2 },
+    { name: 'UREA 45KG', rate: 290, purchase: 266, stock: 3 },
+    { name: 'ZINC SULPHATE 5KG', rate: 420, purchase: 310, stock: 90 }
   ]
 };
 
@@ -151,6 +168,13 @@ const SIGNS = {
   food: ['momos', 'momo', 'samosa', 'chowmein', 'roll', 'plate', 'thali',
     'biryani', 'burger', 'pizza', 'sandwich', 'dosa', 'idli', 'paratha',
     'restaurant', 'cafe', 'dhaba', 'stall', 'canteen', 'bhojnalaya'],
+  /* 'oil' and 'feed' are left out on purpose: neem OIL is also cooking oil
+     and cattle FEED is also a word in half the kirana shelf. A word that
+     belongs to two trades decides neither. */
+  agro: ['urea', 'dap', 'fertiliser', 'fertilizer', 'khad', 'seed', 'seeds',
+    'beej', 'pesticide', 'insecticide', 'herbicide', 'sprayer', 'npk',
+    'zinc', 'neem', 'manure', 'compost', 'agro', 'krishi', 'kisan',
+    'agriculture', 'agri', 'nursery', 'cattle', 'fodder'],
   kirana: ['dal', 'atta', 'rice', 'chawal', 'besan', 'salt', 'namak', 'sugar',
     'cheeni', 'oil', 'tel', 'masala', 'biscuit', 'rusk', 'tea', 'chai',
     'kirana', 'grocery', 'provision', 'namkeen', 'snacks', 'flour']

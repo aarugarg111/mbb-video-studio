@@ -355,3 +355,61 @@ test('nothing warns about a Low Stock page any more', () => {
   assert.equal(out.errors, undefined);
   assert.ok(!out.warnings.some(w => /low stock/i.test(w)), out.warnings.join(' | '));
 });
+
+/* "Low Stock - agro products, 5 items."
+ *
+ * The page drew the five that were asked for and then five groceries
+ * underneath them: one shop stocking two trades, which is the bug this
+ * studio has now had twice - once on the ordinary Items page and once here.
+ * A script that names enough gets what it named and nothing else.
+ */
+
+test('a script that names enough low items gets those and nothing else', async () => {
+  const { lowStockFor } = await import('../screens/items.js');
+  const named = [
+    { name: 'UREA 45KG', rate: 290, stock: 3 },
+    { name: 'DAP FERTILISER 50KG', rate: 1350, stock: -6 },
+    { name: 'HYBRID SEED PACKET', rate: 450, stock: 4 },
+    { name: 'PESTICIDE 1L', rate: 780, stock: -2 },
+    { name: 'CATTLE FEED 50KG', rate: 1150, stock: 7 }
+  ];
+  const shown = lowStockFor({ business: { name: 'KISAN AGRO CENTRE' }, items: named });
+
+  assert.deepEqual(shown.map(i => i.name), named.map(i => i.name),
+    'the page added stock the script never mentioned');
+});
+
+test('a script that names a few is topped up from its own trade, not somebody else\'s', async () => {
+  const { lowStockFor } = await import('../screens/items.js');
+  const shown = lowStockFor({
+    business: { name: 'KISAN AGRO CENTRE' },
+    items: [{ name: 'UREA 45KG', rate: 290, stock: 3 }]
+  });
+
+  assert.ok(shown.length >= 3, 'one item left the page nearly empty');
+  assert.equal(shown[0].name, 'UREA 45KG', 'the named item is not first');
+  /* The words that gave the original bug away, and must not come back. */
+  assert.ok(!shown.some(i => /\b(DAL|BESAN|ATTA|COLGATE|BOURNVITA)\b/.test(i.name)),
+    `a grocer's stock reached an agro shop: ${shown.map(i => i.name).join(', ')}`);
+});
+
+test('a krishi kendra is a trade the studio knows', async () => {
+  const { TRADES, tradeOf, SHELVES } = await import('../src/shelves.js');
+
+  /* Asking for it outright used to be refused - "trade must be one of ..." -
+     which stopped the clip rendering at all. */
+  assert.ok(TRADES.includes('agro'));
+  const { errors } = parse(
+    'video: t\nbusiness: { name: X, trade: agro }\nshots:\n  - screen: low-stock\n    duration: 2\n',
+    catalogue(), {}
+  );
+  assert.equal(errors, undefined, 'agro is still refused');
+
+  /* And it is recognised from what the shop sells, or from its name. */
+  assert.equal(tradeOf({ items: [{ name: 'UREA 45KG' }, { name: 'DAP FERTILISER 50KG' }] }), 'agro');
+  assert.equal(tradeOf({ business: { name: 'KISAN KRISHI AGRO CENTRE' } }), 'agro');
+  /* Without stealing anybody else's: neem OIL is also cooking oil, and
+     cattle FEED is a word in half the kirana shelf. */
+  assert.equal(tradeOf({ items: [{ name: 'SUNFLOWER OIL 1L' }, { name: 'TATA SALT 1KG' }, { name: 'ARHAR DAL' }] }), 'kirana');
+  assert.ok(SHELVES.agro.length >= 8);
+});

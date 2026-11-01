@@ -79,11 +79,21 @@ export function itemsFor(data) {
  * which told the writer to go and edit stock figures by hand to get the
  * screen they had already asked for.
  *
- * The shop's own low items lead, because those are the ones the script is
- * about; what is running out on the rest of its shelf follows. */
+ * The shop's own low items lead, and the shelf only makes up the numbers.
+ * It used to be added whatever the script had said, so "Low Stock - agro
+ * products, five items" drew the five that were asked for and then five
+ * groceries underneath them: the same shop stocking two trades, which is a
+ * bug this studio has now had twice. A script that names enough gets what it
+ * named and nothing else. */
+const MIN_LOW_ROWS = 5;
+
 export function lowStockFor(data) {
   const own = (Array.isArray(data?.items) ? data.items : []).filter(isLow);
-  return [...own, ...shelfFor(data).filter(isLow)].slice(0, ROWS);
+  if (own.length >= MIN_LOW_ROWS) return own.slice(0, ROWS);
+  /* Short of a screenful, so the rest of the shop's own shelf tops it up -
+   * never past the minimum, because padding beyond that is inventing stock
+   * nobody asked about. */
+  return [...own, ...shelfFor(data).filter(isLow)].slice(0, MIN_LOW_ROWS);
 }
 
 /* The strip across the top of the list, offering to read items off a bill.

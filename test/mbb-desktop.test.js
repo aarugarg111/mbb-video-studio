@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { rawColoursIn } from '../src/colour-guard.js';
 import { SCREENS, catalogue } from '../screens/index.js';
 import { deviceOf } from '../src/device.js';
-import { itemsFor, lowStockItems } from '../screens/items.js';
+import { itemsFor, lowStockFor } from '../screens/items.js';
 import { SCANNED } from '../screens/mbb-desktop-chrome.js';
 
 const DESKTOP = ['mbb-desktop-parties', 'mbb-desktop-items', 'mbb-desktop-create-invoice'];
@@ -93,7 +93,7 @@ test('Items counts every low row on the page, the recipe own included', () => {
      the number moved and this failed for being out of date rather than for
      anything being wrong. What it is actually for is that the figure at the
      top agrees with the rows underneath it. */
-  const shown = lowStockItems(itemsFor(DATA));
+  const shown = lowStockFor(DATA);
   const counted = /Low Stock<\/div>\s*<div class="mb-stat-v">(\d+)</.exec(html);
   assert.ok(counted, 'the Low Stock figure is not on the page');
   assert.equal(Number(counted[1]), shown.length,
