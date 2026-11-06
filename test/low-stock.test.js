@@ -257,7 +257,23 @@ test('it is the Items page, not a second copy of it', () => {
      where a row is - which is the kind of thing nothing reports. */
   const items = SCREENS.items;
   const low = SCREENS['low-stock'];
-  assert.deepEqual(low.targets, items.targets);
+
+  /* Every target is the Items page's own, with ONE measured exception: this
+     page opens filtered, a filtered Low Stock pill carries an X to clear it,
+     and a wider pill has a different middle. Sharing that one coordinate put
+     the ring 12px left of the pill it was aimed at. Everything else is the
+     same element in the same place and stays shared. */
+  const MEASURED_HERE = ['low-stock'];
+  for (const [name, at] of Object.entries(items.targets)) {
+    if (MEASURED_HERE.includes(name)) {
+      assert.notDeepEqual(low.targets[name], at,
+        `${name} is listed as measured here but matches Items - share it instead`);
+      continue;
+    }
+    assert.deepEqual(low.targets[name], at, `${name} has been copied rather than shared`);
+  }
+  assert.deepEqual(Object.keys(low.targets).sort(), Object.keys(items.targets).sort(),
+    'the two pages should offer the same things to tap');
   assert.deepEqual(low.scrollingTargets, items.scrollingTargets);
   assert.equal(low.render(DATA, { lowStock: 1 }), items.render(DATA, { lowStock: 1 }),
     'the same state draws two different pages');

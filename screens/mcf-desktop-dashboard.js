@@ -28,9 +28,9 @@ export const focus = { x: 410, y: 203 };
 
 /* Coordinates are in the desktop's 720x405 space and are MEASURED. */
 export const targets = {
-  'call-personally': { x: 308, y: 111 },
+  'call-personally': { x: 308, y: 191 },
   'setup-followups': { x: 433, y: 192 },
-  'add-contact': { x: 371, y: 275 },
+  'add-contact': { x: 371, y: 307 },
   'outstanding': { x: 597, y: 114 },
   'nav-parties': { x: 164, y: 77 },
   'nav-automations': { x: 164, y: 129 },

@@ -10,9 +10,9 @@ export const targets = {
   'call': { x: 72, y: 85 },
   'legal': { x: 195, y: 85 },
   'share': { x: 318, y: 85 },
-  'pause-calls': { x: 336, y: 461 },
-  'add-automation': { x: 343, y: 535 },
-  'tab-whatsapp': { x: 154, y: 341 }
+  'pause-calls': { x: 336, y: 477 },
+  'add-automation': { x: 343, y: 551 },
+  'tab-whatsapp': { x: 154, y: 357 }
 };
 
 /* Tapping the toggle pauses the calls - the beat a collections script is

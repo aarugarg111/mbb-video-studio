@@ -36,12 +36,12 @@ export function render(data, state) {
   </div>
 
   <div class="fl">Item Name<span class="req">*</span></div>
-  <div class="inp" id="item-name-field"><span class="${typed ? '' : 'muted'}">${typed ? esc(typed) + '<span class="caret"></span>' : ''}</span></div>
+  <div class="inp" id="item-name"><span class="${typed ? '' : 'muted'}">${typed ? esc(typed) + '<span class="caret"></span>' : ''}</span></div>
 
   <div class="hsnrow">
     <div class="hsn">
       <div class="fl">HSN</div>
-      <div class="inp" id="hsn-field"><span class="grow muted">Ex: 6704</span><span class="ico muted">${icons.search(20)}</span></div>
+      <div class="inp" id="hsn"><span class="grow muted">Ex: 6704</span><span class="ico muted">${icons.search(20)}</span></div>
     </div>
     <div class="ityp">
       <div class="fl">Item Type</div>

@@ -42,7 +42,7 @@ export function render(data, state) {
     const control = onBill(i)
       ? `<div class="editbtn">EDIT</div>
          <div class="stepper" style="opacity: ${Math.max(p, 0.4).toFixed(3)}"><span class="cell">${icons.minus(15)}</span><span class="qty">${esc(item.qty)}</span><span class="cell">${icons.plus(15)}</span></div>`
-      : `<div class="addbtn">ADD ${icons.plus(13)}</div>`;
+      : `<div class="addbtn" id="add-item-${i}">ADD ${icons.plus(13)}</div>`;
     return `
       <div class="irow">
         <div class="av" style="background: ${TINTS[i % TINTS.length]}">${esc(String(item.name || '?').trim().charAt(0).toUpperCase())}</div>
@@ -61,7 +61,7 @@ export function render(data, state) {
 <div class="screen" style="background: var(--mbb-page)">
   <div class="isearch">
     <span class="ico">${icons.back(24)}</span>
-    <div class="field" id="item-search-field">
+    <div class="field" id="item-search">
       <span class="ico muted">${icons.search(20)}</span>
       <span class="grow ${typed ? '' : 'muted'}">${typed ? esc(typed) + '<span class="caret"></span>' : 'Search by item name'}</span>
       <span class="ico muted">${icons.close(18)}</span>
@@ -85,7 +85,7 @@ export function render(data, state) {
       <div class="a">Add more details</div>
       <div class="b">Additional charges, Round off...</div>
     </div>
-    <button class="genbtn${count > 0 ? '' : ' off'}"${count > 0 ? '' : ' disabled'}>Generate Bill</button>
+    <button class="genbtn${count > 0 ? '' : ' off'}" id="generate-bill"${count > 0 ? '' : ' disabled'}>Generate Bill</button>
   </div>
 </div>`;
 }

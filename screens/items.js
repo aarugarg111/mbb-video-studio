@@ -174,8 +174,8 @@ export function render(data, state) {
   </div>
   </div>
   <div class="floatbtns">
-    <div class="fb create"><span class="ico">${icons.plusCircle(20)}</span>Create New Item</div>
-    <div class="fb bulk"><span class="ico">${icons.folderUp(20)}</span>Bulk Action</div>
+    <div class="fb create" id="create-new-item"><span class="ico">${icons.plusCircle(20)}</span>Create New Item</div>
+    <div class="fb bulk" id="bulk-action"><span class="ico">${icons.folderUp(20)}</span>Bulk Action</div>
   </div>
   <div class="tabnav">
     ${NAV.map(([label, ic], i) => `<div class="${i === 2 ? 'on' : ''}"><span class="ico">${icons[ic](22)}</span>${label}</div>`).join('')}

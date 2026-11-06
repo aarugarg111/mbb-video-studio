@@ -21,8 +21,8 @@ export const targets = {
   'theme-3': { x: 335, y: 334 },
   'theme-4': { x: 55, y: 451 },
   'theme-5': { x: 148, y: 451 },
-  'variant-1': { x: 48, y: 532 },
-  'variant-2': { x: 124, y: 532 },
+  'variant-1': { x: 56, y: 415 },
+  'variant-2': { x: 149, y: 415 },
   unlock: { x: 195, y: 796 },
   close: { x: 364, y: 260 }
 };
@@ -99,10 +99,10 @@ export function render(data, state) {
       <span class="ico tstore">${icons.store(24)}</span>
       <span class="ttl">Theme Store</span>
       <span class="ico tinfo">${icons.info(20)}</span>
-      <span class="ico tx">${icons.close(24)}</span>
+      <span class="ico tx" id="close">${icons.close(24)}</span>
     </div>
     <div class="tgrid">${rows.join('')}</div>
-    <button class="tunlock">Unlock Themes</button>
+    <button class="tunlock" id="unlock">Unlock Themes</button>
   </div>
 </div>`;
 }

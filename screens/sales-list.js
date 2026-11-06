@@ -20,10 +20,10 @@ export const targets = {
   'change-range': { x: 349, y: 134 },
   'sort': { x: 336, y: 36 },
   'filter-sales': { x: 92, y: 85 },
-  'bill-row-0': { x: 195, y: 211 },
-  'share-link': { x: 295, y: 482 },
-  'received-payment': { x: 97, y: 781 },
-  'new-bill': { x: 299, y: 781 }
+  'bill-row-0': { x: 195, y: 230 },
+  'share-link': { x: 295, y: 522 },
+  'received-payment': { x: 109, y: 745 },
+  'new-bill': { x: 293, y: 745 }
 };
 
 /* This screen's list can be scrolled. A day of sixty bills shows six at a

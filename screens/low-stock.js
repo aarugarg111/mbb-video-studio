@@ -21,7 +21,15 @@ export const name = 'low-stock';
  * rows, same promo strip, same measurements. A second copy of that would
  * drift, and the two pages would stop agreeing about where a row is.
  */
-export const targets = items.targets;
+/* The Items page's own targets, with one exception. The Low Stock pill is
+ * WIDER here than there: this page opens filtered, and a filtered pill carries
+ * an X to clear it. A wider pill has a different middle, so the coordinate
+ * inherited from Items put the ring 12px left of where this pill actually is -
+ * near enough to look deliberate, far enough to miss the X it is aimed at.
+ *
+ * MEASURED on this screen. Everything else really is the same element in the
+ * same place, and is shared rather than copied. */
+export const targets = { ...items.targets, 'low-stock': { x: 68, y: 74 } };
 export const scrolls = items.scrolls;
 export const scrollingTargets = items.scrollingTargets;
 

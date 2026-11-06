@@ -100,10 +100,13 @@ export function render(data, state) {
     ${recent.map(b => txn(b.party, `Sales Invoice #${b.no}`, b.when, formatINR(b.amount), b.paid)).join('')}
   </div>
 
+  <!-- These two carry ids so the studio can find them. Their coordinates
+       were written by hand against a screenshot, which meant nothing could
+       re-measure them and nothing would notice if the row moved. -->
   <div class="fab-row">
-    <span class="fab-dark">Received Payment</span>
+    <span class="fab-dark" id="received-payment">Received Payment</span>
     <span class="fab-plus">+</span>
-    <span class="fab-primary">+ Bill / Invoice</span>
+    <span class="fab-primary" id="create-invoice-cta">+ Bill / Invoice</span>
   </div>
 
   <div class="bottomnav">

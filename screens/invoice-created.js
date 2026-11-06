@@ -8,7 +8,10 @@ import { themeArtUrl, themeStrength } from '../src/themes.js';
 export const name = 'invoice-created';
 
 export const targets = {
-  share: { x: 314, y: 655 },
+  /* MEASURED on the Share action itself, which carries an id now. It was
+     placed by hand at y:655 - 52px high, so the ring sat on the bottom edge
+     of the bill rather than on the button underneath it. */
+  share: { x: 314, y: 707 },
   done: { x: 195, y: 794 }
 };
 
@@ -98,13 +101,17 @@ export function render(data, state) {
 
   ${billMarkup(data, state)}
 
+  <!-- Each action is named after itself, so the one a recipe taps is the one
+       the studio can measure. Share is the only one a recipe uses today, and
+       it had no element behind it at all - its coordinate was placed by hand
+       and nothing could tell whether it still pointed at the button. -->
   <div class="acts">
     ${actions.map(([label, icon]) => `
-      <div class="a"><span class="ico">${icon(26)}</span><span class="l">${label}</span></div>`).join('')}
+      <div class="a" id="${label.toLowerCase()}"><span class="ico">${icon(26)}</span><span class="l">${label}</span></div>`).join('')}
   </div>
 
   <div style="position: absolute; left: 16px; right: 16px; bottom: 26px">
-    <button class="btn">Done</button>
+    <button class="btn" id="done">Done</button>
   </div>
 </div>`;
 }
