@@ -598,6 +598,10 @@
 .cpbreak { margin: 9px 0; padding: 9px 11px; border-radius: 5px; background: var(--mbb-strip-grey); }
 .cpbreak div { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--mbb-ink-muted); padding: 2px 0; }
 .cprow-add { display: flex; align-items: center; justify-content: flex-end; gap: 7px; margin: 0 2px 12px; font-size: 11.5px; font-weight: 500; color: var(--mbb-primary); }
+/* The row is full width and pushes its content to the right edge, so the
+   middle of the row is blank. The tap target is this - the plus and the
+   words - or the ring is drawn in the empty half beside them. */
+.cprow-pick { display: inline-flex; align-items: center; gap: 7px; }
 .cpround { display: flex; align-items: center; gap: 10px; }
 .cpround .mute { color: var(--mbb-ink-muted); }
 .cplbl { font-size: 11.5px; }
@@ -1486,6 +1490,10 @@
 .mb-share-k { font-size: 8px; color: var(--dsk-muted); margin-bottom: 5px; }
 .mb-share-i { display: flex; align-items: center; gap: 7px; padding: 6px 7px; border-radius: 6px; font-size: 9px; font-weight: 600; }
 .mb-share-i:first-of-type { background: var(--dsk-panel); }
+/* The part of a share row a person would point at: the icon and the word,
+   not the full width of the menu behind them. The tap target is measured on
+   this, so the ring lands on the option rather than in the space beside it. */
+.mb-share-pick { display: inline-flex; align-items: center; gap: 7px; }
 
 /* The firmest tone reads as a warning rather than as one more chip, and says
    what it actually does - a legal notice is not a louder reminder. */

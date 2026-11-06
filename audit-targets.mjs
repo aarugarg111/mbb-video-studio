@@ -147,8 +147,38 @@ for (const [device, wanted] of Object.entries(byDevice)) {
       if (!r.width || !r.height) return { sizeless: true };
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
+
+      /* Where this target's INK is - its icons and its words - as opposed to
+         where its BOX is. A menu row is as wide as the menu and its contents
+         sit at the left, so the middle of the box is blank, and a ring drawn
+         there lands beside the thing the target names rather than on it.
+         That is what "the tap is somewhere else" turned out to mean on the
+         share menu: the coordinate was right, the element was right, and the
+         ring was still pressing nothing. */
+      let ink = null;
+      const add = box2 => {
+        if (!box2 || !box2.width || !box2.height) return;
+        ink = ink
+          ? { left: Math.min(ink.left, box2.left), top: Math.min(ink.top, box2.top),
+              right: Math.max(ink.right, box2.right), bottom: Math.max(ink.bottom, box2.bottom) }
+          : { left: box2.left, top: box2.top, right: box2.right, bottom: box2.bottom };
+      };
+      for (const node of el.childNodes) {
+        if (node.nodeType === 1) add(node.getBoundingClientRect());
+        else if (node.nodeType === 3 && node.textContent.trim()) {
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          add(range.getBoundingClientRect());
+        }
+      }
+      /* No children at all - an empty box, or one drawn entirely by its own
+         background. Its middle is then the best answer there is. */
+      const onInk = !ink ||
+        (cx >= ink.left && cx <= ink.right && cy >= ink.top && cy <= ink.bottom);
+
       const at = document.elementFromPoint(cx, cy);
       return {
+        onInk,
         x: Math.round((cx - vp.left) * (box.width / vp.width)),
         y: Math.round((cy - vp.top) * (box.height / vp.height)),
         /* elementFromPoint answers nothing for a point outside the picture.
@@ -188,6 +218,13 @@ for (const [device, wanted] of Object.entries(byDevice)) {
       findings.push({
         kind: 'COVERED', screen, target, note: `"${seen.by}" is on top of it`
       });
+    } else if (!seen.onInk) {
+      findings.push({
+        kind: 'EMPTY', screen, target,
+        note: 'the middle of this target is blank - the ring lands beside its ' +
+              'icon and words rather than on them. Put the id on the part a ' +
+              'person would say they were pointing at.'
+      });
     }
   }
   await page.close();
@@ -196,7 +233,7 @@ for (const [device, wanted] of Object.entries(byDevice)) {
 await browser.close();
 await new Promise(resolve => server.close(resolve));
 
-const order = ['MISSING', 'COVERED', 'DRIFT', 'OFFFRAME'];
+const order = ['MISSING', 'COVERED', 'EMPTY', 'DRIFT', 'OFFFRAME'];
 findings.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind)
   || a.screen.localeCompare(b.screen));
 return { findings, checked };

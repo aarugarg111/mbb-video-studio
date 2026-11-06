@@ -47,6 +47,28 @@ const CROPPED_BY_THE_FRAME = [
   'mbb-desktop-scan / create-sales-invoice'
 ];
 
+/* Targets whose middle is blank, where that is the right answer anyway.
+ *
+ * The check behind EMPTY asks whether the tap point lands on the target's own
+ * icons and words. It found the share menu, where a 132px-wide row held about
+ * 60px of content at its left and the ring was drawn in the gap beside it, and
+ * the purchase form's "+ Additional Charges", whose words sit at the right
+ * edge of a full-width row and whose ring was 115px away from them.
+ *
+ * These six are the other kind: a control that draws its OWN surface - a
+ * toggle, a text field, a card in a list. The box is the button, a person
+ * pressing it would say they pressed the middle of it, and the ink sitting to
+ * one side is the label on a thing rather than the thing. Listed so a new one
+ * still fails. */
+const THE_BOX_IS_THE_BUTTON = [
+  'create-bill / party-field',     // a form field; you tap the field
+  'wa-attach / caption',           // the caption bar, likewise
+  'mcf-party / pause-calls',       // a toggle switch; its knob is at one end
+  'mcf-desktop / party-pick-0',    // a card with its own background
+  'mcf-desktop / party-pick-1',
+  'share-sheet / contact-1'        // a contact row, tappable across its width
+];
+
 test('every tap target is where its screen says it is', async (t) => {
   t.diagnostic('this launches a browser and checks all of them; it is slow');
 
@@ -54,8 +76,11 @@ test('every tap target is where its screen says it is', async (t) => {
   assert.ok(checked > 200, `only ${checked} targets were checked - the audit found almost nothing to look at`);
 
   const named = f => `${f.screen} / ${f.target}`;
-  const real = findings.filter(f =>
-    f.kind !== 'OFFFRAME' || !CROPPED_BY_THE_FRAME.includes(named(f)));
+  const excused = {
+    OFFFRAME: CROPPED_BY_THE_FRAME,
+    EMPTY: THE_BOX_IS_THE_BUTTON
+  };
+  const real = findings.filter(f => !(excused[f.kind] ?? []).includes(named(f)));
 
   assert.deepEqual(
     real.map(f => `${f.kind}  ${named(f)} - ${f.note}`), [],
@@ -67,11 +92,14 @@ test('every tap target is where its screen says it is', async (t) => {
 
   /* The reverse: a screen that was fixed should not leave a name here
      forever, quietly excusing a real fault that turns up later under it. */
-  const stillCropped = findings.filter(f => f.kind === 'OFFFRAME').map(named);
-  for (const name of CROPPED_BY_THE_FRAME) {
-    assert.ok(
-      stillCropped.includes(name),
-      `${name} is no longer outside the frame - take it out of CROPPED_BY_THE_FRAME`
-    );
+  for (const [kind, names] of Object.entries(excused)) {
+    const still = findings.filter(f => f.kind === kind).map(named);
+    for (const name of names) {
+      assert.ok(
+        still.includes(name),
+        `${name} is no longer ${kind} - take it off the list rather than leaving it ` +
+        'there to excuse a real fault that turns up under it later'
+      );
+    }
   }
 });

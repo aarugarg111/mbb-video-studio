@@ -6,8 +6,10 @@ export const name = 'create-purchase';
 /* Measured against a render. */
 export const targets = {
   'create-purchase': { x: 195, y: 781 },
-  'additional-charges': { x: 195, y: 183 },
-  'discount': { x: 195, y: 383 }
+  /* MEASURED on the plus and the words, which sit at the row's right edge -
+     the row itself is full width and its middle is blank. */
+  'additional-charges': { x: 310, y: 182 },
+  'discount': { x: 338, y: 382 }
 };
 
 /* What the scan produced, ready to be saved (reference/frames/scan-t86.png).
@@ -27,7 +29,7 @@ export function render(data, state) {
   const half = (rateOf(items) / 2).toFixed(1);
 
   const plus = (label, id) => `
-    <div class="cprow-add"${id ? ` id="${id}"` : ''}><span class="ico">${icons.plus(17)}</span>${label}</div>`;
+    <div class="cprow-add"><span class="cprow-pick"${id ? ` id="${id}"` : ''}><span class="ico">${icons.plus(17)}</span>${label}</span></div>`;
 
   return `
 <div class="screen cpscreen">

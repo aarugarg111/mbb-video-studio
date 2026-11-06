@@ -30,7 +30,8 @@ export const targets = {
   'create-sales-invoice': { x: 63, y: 46 },
   'record-payment': { x: 665, y: 93 },
   'share': { x: 357, y: 93 },
-  'share-whatsapp': { x: 375, y: 140 },
+  /* On the icon and the word, not the middle of the row behind them. */
+  'share-whatsapp': { x: 349, y: 140 },
   'download-pdf': { x: 187, y: 93 },
   'theme-store': { x: 423, y: 55 }
 };
@@ -176,7 +177,14 @@ export function render(data, state) {
       ${sharing ? `
       <div class="mb-sharemenu">
         <div class="mb-share-k">Share this invoice</div>
-        <div class="mb-share-i" id="share-whatsapp"><span class="ico">${icons.whatsapp(12)}</span>WhatsApp</div>
+        <!-- The id is on the icon and the word, NOT on the row around them.
+             A menu row is as wide as the menu; its contents are about half
+             that and sit at the left. Measured on the row, the tap point came
+             out at the row's middle - a ring drawn in the blank space beside
+             WhatsApp rather than on it, which reads as pressing nothing. The
+             element a target names has to be the part a person would say they
+             were pointing at. -->
+        <div class="mb-share-i"><span class="mb-share-pick" id="share-whatsapp"><span class="ico">${icons.whatsapp(12)}</span>WhatsApp</span></div>
         <div class="mb-share-i"><span class="ico">${icons.share(12)}</span>Email</div>
         <div class="mb-share-i"><span class="ico">${icons.linkChain(12)}</span>Copy link</div>
       </div>` : ''}
