@@ -154,11 +154,24 @@ function targetOnShape(target, screen, shape, catalogue) {
  * is built to reach. */
 const NOT_ON_A_LAPTOP = new Set(['wa-attach']);
 
+/* EXPORTED, and called from src/recipe.js on every recipe - not only when a
+ * shape is being recast.
+ *
+ * It lived in here alone and recastShape returns early when the studio has not
+ * been told a shape, which is the usual setting. So a shot list that wrote
+ * "mbb-desktop-invoice, tap share" and then "mbb-desktop-invoice, tap
+ * share-whatsapp" - the obvious way to write two taps on one screen, and what
+ * the model does write - was left as two shots. A shot's screen state starts
+ * fresh, so the share menu opened at the end of the first shot and was GONE
+ * for the whole of the second: the menu never appeared to open, and the ring
+ * for WhatsApp landed on the bill behind where it should have been. Joining
+ * them is what makes the second tap land on what the first tap opened.
+ */
 /* Two shots of one screen in a row read as a cut to nowhere - the picture does
  * not change, so the viewer thinks the video has stalled. They only appear
  * because two phone screens became one laptop screen, so they are joined back
  * into a single longer shot with the later shot's actions moved along. */
-function joinRepeats(shots) {
+export function joinRepeats(shots) {
   const joined = [];
   for (const shot of shots) {
     const last = joined[joined.length - 1];

@@ -11,7 +11,7 @@ import { defaultInvoice } from './invoice.js';
 import { TRADES } from './shelves.js';
 import { ASPECTS, DEFAULT_ASPECT, aspectNamed } from './aspect.js';
 import { deviceOf } from './device.js';
-import { foldLaptopShare } from './shape.js';
+import { foldLaptopShare, joinRepeats } from './shape.js';
 import { SCREENS } from '../screens/index.js';
 import { itemsFor, lowStockItems } from '../screens/items.js';
 
@@ -635,6 +635,12 @@ export function parse(text, catalogue, options = {}) {
    * went ahead and rendered a tap on Share followed by a phone screen, with
    * the laptop's own menu never on camera. See src/shape.js. */
   const { recipe: tidied, folded } = foldLaptopShare(recipe);
+  /* And two shots of one screen become one shot. A screen's state starts
+   * fresh each shot, so a menu opened by a tap at the end of one shot is shut
+   * again by the start of the next - which is how "tap Share, then tap
+   * WhatsApp", written as two shots, produced a clip whose menu never opened.
+   * See src/shape.js. */
+  tidied.shots = joinRepeats(tidied.shots);
   if (folded.length > 0) {
     warnings.push(
       `The laptop's share happens on the invoice itself, so ${folded.join(' and ')} ` +

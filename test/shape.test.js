@@ -335,3 +335,66 @@ test('a phone clip keeps its own share sheet', async () => {
   assert.deepEqual(recipe.shots.map(s => s.screen), ['invoice-created', 'share-sheet']);
   assert.deepEqual(folded, []);
 });
+
+/* The fault that survived four rounds of fixing the renderer.
+ *
+ * "Tap Share, then tap WhatsApp" is naturally written as two shots of one
+ * screen, and that is what the model writes. A shot's screen state starts
+ * fresh, so the menu opened by the tap at the end of the first shot was shut
+ * again by the start of the second: on camera the menu never opened, and the
+ * ring aimed at WhatsApp landed on the bill behind where the menu should have
+ * been. Every coordinate was right. Every test passed.
+ *
+ * joinRepeats already existed to join two shots of one screen, and it was
+ * reachable only through recastShape - which returns early unless the studio
+ * has been told a shape, and usually it has not. */
+test('two shots of one screen become one, so a menu outlives the cut', async () => {
+  const { parse } = await import('../src/recipe.js');
+  const { scrollables } = await import('../screens/index.js');
+  const { stateAt } = await import('../src/timeline.js');
+
+  const text = [
+    'video: t',
+    'business:',
+    '  name: SHREE KIRANA STORE',
+    'party:',
+    '  name: RAKESH KUMAR TRADERS',
+    'items:',
+    '  - { name: SUGAR 5KG, rate: 230, qty: 2 }',
+    'shots:',
+    '  - screen: mbb-desktop-invoice',
+    '    duration: 3.0',
+    '    actions:',
+    '      - { at: 1.6, do: tap, target: share }',
+    '  - screen: mbb-desktop-invoice',
+    '    duration: 3.0',
+    '    actions:',
+    '      - { at: 1.0, do: tap, target: share-whatsapp }',
+    ''
+  ].join('\n');
+
+  const { recipe, errors } = parse(text, CAT, { scrollable: scrollables() });
+  assert.equal(errors, undefined, 'the recipe should be valid');
+
+  assert.equal(recipe.shots.length, 1, 'one screen, one shot');
+  assert.equal(recipe.shots[0].duration, 6.0);
+  /* The second tap moved along by the first shot's length, so it still
+     happens when it was written to happen. */
+  assert.deepEqual(recipe.shots[0].actions.map(a => `${a.target}@${a.at}`),
+    ['share@1.6', 'share-whatsapp@4']);
+
+  /* What the camera sees: the menu is open when the WhatsApp ring lands on
+     it, which is the whole beat. */
+  const menuAt = t => SCREENS['mbb-desktop-invoice']
+    .render(recipe, stateAt(recipe, t).screenState).includes('mb-sharemenu');
+
+  assert.ok(!menuAt(1.0), 'shut before Share is pressed');
+  assert.ok(menuAt(2.0), 'open once Share is pressed');
+  assert.ok(menuAt(3.2), 'still open across what used to be a shot boundary');
+  assert.ok(menuAt(4.2), 'still open while WhatsApp is being pressed');
+
+  const ring = stateAt(recipe, 4.2).ripple;
+  assert.ok(ring, 'the WhatsApp tap should be drawing a ring at 4.2s');
+  const whatsapp = SCREENS['mbb-desktop-invoice'].targets['share-whatsapp'];
+  assert.deepEqual({ x: ring.x, y: ring.y }, whatsapp, 'and it is on the WhatsApp row');
+});
