@@ -212,3 +212,61 @@ export function recastShape(recipe, shape, catalogue = {}) {
      the customer's chat become consecutive, as they should be. */
   return { recipe: { ...recipe, shots: joinRepeats(shots.filter(Boolean)) }, dropped };
 }
+
+/* The laptop share, written as the phone's by mistake.
+ *
+ * The model is told the sharing sequence and it is a phone sequence:
+ * invoice-created, share-sheet, wa-attach, wa-chat. When the clip is a laptop
+ * one it writes mbb-desktop-invoice for the first shot - correctly - and then
+ * reaches for share-sheet for the second, because that is what the rule says
+ * comes next. The result taps Share on the laptop and CUTS TO A PHONE, and the
+ * laptop's own share menu - the thing the tap just opened - is never seen.
+ *
+ * recastShape fixes this when the studio knows the shape, because share-sheet
+ * collapses onto mbb-desktop-invoice and the two shots join. But the picker is
+ * often left on "let the script decide", and then nothing recasts anything and
+ * the clip renders exactly as written: a laptop, a tap, and a phone.
+ *
+ * So this runs on every path, picker or no picker. A phone share screen
+ * directly after the laptop invoice is folded back into it, and its contact
+ * tap becomes the menu's WhatsApp row - which is the same button, because the
+ * laptop puts the choice in a menu instead of a sheet.
+ */
+const LAPTOP_INVOICE = 'mbb-desktop-invoice';
+const PHONE_SHARE_STEPS = new Set(['share-sheet', 'wa-attach']);
+
+export function foldLaptopShare(recipe) {
+  if (!recipe || !Array.isArray(recipe.shots)) return { recipe, folded: [] };
+
+  const folded = [];
+  const shots = [];
+
+  for (const shot of recipe.shots) {
+    const last = shots[shots.length - 1];
+    const stray = last && last.screen === LAPTOP_INVOICE && PHONE_SHARE_STEPS.has(shot.screen);
+    if (!stray) {
+      shots.push({ ...shot, actions: shot.actions ? [...shot.actions] : undefined });
+      continue;
+    }
+
+    folded.push(shot.screen);
+    const offset = last.duration;
+    const moved = (shot.actions ?? [])
+      .map(action => {
+        if (!action?.target) return action;
+        /* The sheet's contact row and the menu's WhatsApp row are the same
+           choice. Everything else on the sheet - Send, the caption box - is a
+           step the laptop does not have, so it goes rather than being aimed
+           at something that happens to be nearby. */
+        if (action.target === 'contact-0') return { ...action, target: 'share-whatsapp' };
+        return null;
+      })
+      .filter(Boolean)
+      .map(a => ({ ...a, at: Number((Number(a.at) + offset).toFixed(3)) }));
+
+    last.actions = [...(last.actions ?? []), ...moved];
+    last.duration = Number((last.duration + shot.duration).toFixed(3));
+  }
+
+  return { recipe: { ...recipe, shots }, folded };
+}

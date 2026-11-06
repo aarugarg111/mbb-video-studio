@@ -282,3 +282,56 @@ test('a phone share is left alone', () => {
   assert.deepEqual(recipe.shots.map(s => s.screen), ['wa-attach', 'wa-chat']);
   assert.deepEqual(dropped, []);
 });
+
+/* The fault as it actually reached a video: the model wrote the laptop
+ * invoice, tapped Share on it, and then cut to the PHONE's share sheet,
+ * because the sharing rule it was given is a phone sequence. On camera the
+ * Share button was pressed and the picture became a phone - the laptop's own
+ * menu, the thing the tap had just opened, was never seen.
+ *
+ * The shape picker did not catch it because the picker was never set: with no
+ * shape asked for, nothing recasts anything and the clip renders as written.
+ * So the repair runs on every path, not only when recasting. */
+test('a laptop that reaches for the phone share sheet is put back', async () => {
+  const { foldLaptopShare } = await import('../src/shape.js');
+
+  const written = {
+    video: 't',
+    shots: [
+      { screen: 'mbb-desktop-invoice', duration: 3.0, actions: [{ at: 1.6, do: 'tap', target: 'share' }] },
+      { screen: 'share-sheet', duration: 3.0, actions: [
+        { at: 1.0, do: 'tap', target: 'contact-0' },
+        { at: 2.2, do: 'tap', target: 'send' }] },
+      { screen: 'wa-chat', duration: 2.6, actions: [] }
+    ]
+  };
+
+  const { recipe, folded } = foldLaptopShare(written);
+  assert.deepEqual(recipe.shots.map(s => s.screen), ['mbb-desktop-invoice', 'wa-chat']);
+  assert.deepEqual(folded, ['share-sheet']);
+
+  const shot = recipe.shots[0];
+  assert.equal(shot.duration, 6.0, 'the folded shot carries both durations');
+  assert.deepEqual(shot.actions.map(a => a.target), ['share', 'share-whatsapp'],
+    'the contact row becomes the menu row - same choice, different interface');
+  /* Moved along by the first shot's length, so the menu is open before the
+     option in it is chosen. */
+  assert.equal(shot.actions[1].at, 4.0);
+  /* "Send" has no laptop step and is left out rather than aimed at whatever
+     happens to be nearby. */
+  assert.ok(!shot.actions.some(a => a.target === 'send'));
+});
+
+test('a phone clip keeps its own share sheet', async () => {
+  const { foldLaptopShare } = await import('../src/shape.js');
+  const phone = {
+    video: 't',
+    shots: [
+      { screen: 'invoice-created', duration: 3.0, actions: [{ at: 1.6, do: 'tap', target: 'share' }] },
+      { screen: 'share-sheet', duration: 3.0, actions: [{ at: 1.0, do: 'tap', target: 'contact-0' }] }
+    ]
+  };
+  const { recipe, folded } = foldLaptopShare(phone);
+  assert.deepEqual(recipe.shots.map(s => s.screen), ['invoice-created', 'share-sheet']);
+  assert.deepEqual(folded, []);
+});

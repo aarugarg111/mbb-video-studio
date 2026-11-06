@@ -11,6 +11,7 @@ import { defaultInvoice } from './invoice.js';
 import { TRADES } from './shelves.js';
 import { ASPECTS, DEFAULT_ASPECT, aspectNamed } from './aspect.js';
 import { deviceOf } from './device.js';
+import { foldLaptopShare } from './shape.js';
 import { SCREENS } from '../screens/index.js';
 import { itemsFor, lowStockItems } from '../screens/items.js';
 
@@ -627,5 +628,20 @@ export function parse(text, catalogue, options = {}) {
   }
 
   if (errors.length > 0) return { errors, warnings };
-  return { recipe, warnings };
+
+  /* A laptop clip that reached for the phone's share sheet is repaired rather
+   * than reported. The warning about mixing shapes was already here and it was
+   * not enough: it told the writer the clip cut to a phone, while the studio
+   * went ahead and rendered a tap on Share followed by a phone screen, with
+   * the laptop's own menu never on camera. See src/shape.js. */
+  const { recipe: tidied, folded } = foldLaptopShare(recipe);
+  if (folded.length > 0) {
+    warnings.push(
+      `The laptop's share happens on the invoice itself, so ${folded.join(' and ')} ` +
+      `${folded.length > 1 ? 'were' : 'was'} folded into it. Tapping Share there opens the menu ` +
+      `and WhatsApp is chosen from it - cutting to the phone's share sheet would have hidden ` +
+      `the menu the tap just opened.`
+    );
+  }
+  return { recipe: tidied, warnings };
 }
