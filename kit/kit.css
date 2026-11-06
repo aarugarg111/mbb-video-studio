@@ -255,6 +255,10 @@
 .acts .a { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--mbb-primary); font-size: 11px; font-weight: 500; }
 .acts .a span.l { color: var(--mbb-ink); }
 
+/* How big the ring is belongs to the device, not to the stylesheet: a laptop's
+   toolbar buttons are a quarter the height of a phone's. Both renderers set
+   width and height inline from src/device.js - the size below is only what an
+   old frame without one falls back to. */
 .ripple {
   position: absolute;
   width: 84px; height: 84px;

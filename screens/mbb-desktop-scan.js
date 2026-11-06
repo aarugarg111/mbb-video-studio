@@ -48,6 +48,11 @@ export const tapEffects = {
   'read-bill': { reading: 1 }
 };
 
+/* Browse Files is a button of the empty dropzone, and choosing a file is what
+ * replaces that dropzone with the file. It has to outlive its own ring. See
+ * src/timeline.js. */
+export const dismisses = ['browse-files'];
+
 export function render(data, state) {
   const source = state?.source ?? '';
   const picked = source === 'file' || source === 'phone';

@@ -71,6 +71,16 @@ export const tapEffects = {
   activate: { followup: 0, live: 1 }
 };
 
+/* Taps that hide the thing being tapped, so the sheet waits for the ring.
+ *
+ * Set Up Automation is still in the page after it is pressed, but the sheet
+ * it opens brings a scrim down over the whole screen and the button is behind
+ * it - the ring was drawn on the dimmed layer rather than on the button.
+ * Continue replaces step one with step two and Activate closes the sheet
+ * altogether, so those two are gone on the frame they are pressed.
+ * See src/timeline.js. */
+export const dismisses = ['setup-automation', 'continue', 'activate'];
+
 /* myBillBook's own rail, trimmed to what fits at this width. AI Collections is
  * the lit one, because that is how this page is reached. */
 const HOST_NAV = [

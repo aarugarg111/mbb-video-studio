@@ -16,6 +16,7 @@
 import { clamp01, easeOut, ramp } from './ease.js';
 import { summarise } from './money.js';
 import { SCREENS } from '../screens/index.js';
+import { ringRadiusFor } from './device.js';
 
 export const TRANSITION_SECONDS = 0.25;
 
@@ -207,9 +208,26 @@ export function stateAt(recipe, t) {
             );
           }
           /* Some taps change the screen: a tab, a toggle. Each screen declares
-           * what its own taps do, and the change lands with the ring. */
+           * what its own taps do, and the change lands with the ring.
+           *
+           * Unless the tap is on something its own effect takes away. Tapping
+           * WhatsApp in the share menu closes the share menu; tapping Add to
+           * Bill closes the item picker it is a button of. Landing those with
+           * the ring meant the menu vanished on the frame the ring appeared,
+           * so the ring was left expanding over the bill behind it - a clip
+           * that pressed Share, opened the menu, and then appeared to click
+           * an empty space on the invoice. Nothing in the footage said which
+           * option had been chosen, which is the whole beat.
+           *
+           * So a screen names those taps in `dismisses`, and their effect
+           * waits for the ring to finish. The ring is seen on the option, the
+           * option is seen being pressed, and THEN it closes - which is also
+           * the order a person watching would expect. */
           const effect = SCREENS[s.screen].tapEffects?.[action.target];
-          if (effect && at >= action.at) Object.assign(screenState, effect);
+          const lands = SCREENS[s.screen].dismisses?.includes(action.target)
+            ? action.at + RIPPLE_SECONDS
+            : action.at;
+          if (effect && at >= lands) Object.assign(screenState, effect);
           /* A tap on a sheet's close button slides the sheet back down. */
           if (SCREENS[s.screen].closes?.includes(action.target)) {
             screenState.sheet *= 1 - easeOut(ramp(at, action.at, SHEET_CLOSE_SECONDS));
@@ -220,7 +238,14 @@ export function stateAt(recipe, t) {
           const progress = (at - action.at) / RIPPLE_SECONDS;
           if (progress >= 0 && progress <= 1) {
             const point = pointOf(action.target);
-            ripple = { x: point.x, y: point.y, progress: clamp01(progress) };
+            /* The ring's size travels with it, because it depends on which
+               device this screen is and only here is that known. Both
+               renderers draw what they are given rather than each keeping
+               their own 42. */
+            ripple = {
+              x: point.x, y: point.y, progress: clamp01(progress),
+              r: ringRadiusFor(SCREENS[s.screen])
+            };
           }
           break;
         }

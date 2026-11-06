@@ -36,15 +36,19 @@ export const focus = { x: 360, y: 203, scale: 1 };
 
 /* Coordinates are in the desktop's 720x405 space and are MEASURED. */
 export const targets = {
-  'add-item': { x: 285, y: 207 },
+  /* RE-MEASURED. Mira's panel had been rebuilt since these were taken and
+     nothing said so: Upload was out by 54 of this screen's pixels and Proceed
+     by 72, which is most of the height of a button. The ring was landing on
+     the panel near them rather than on either. */
+  'add-item': { x: 296, y: 204 },
   'item-search': { x: 261, y: 94 },
   'add-item-0': { x: 585, y: 163 },
   'add-item-1': { x: 585, y: 195 },
   'add-to-bill': { x: 572, y: 363 },
   'save': { x: 691, y: 19 },
-  'add-party': { x: 195, y: 87 },
-  'upload': { x: 64, y: 185 },
-  'proceed': { x: 64, y: 258 }
+  'add-party': { x: 212, y: 87 },
+  'upload': { x: 75, y: 131 },
+  'proceed': { x: 75, y: 186 }
 };
 
 /* "+ Add Item" opens the picker and "Add to Bill" closes it over a filled
@@ -55,6 +59,18 @@ export const tapEffects = {
   'upload': { filled: 1, picker: 0 },
   'proceed': { filled: 1, picker: 0 }
 };
+
+/* Taps that hide the thing being tapped, so the picker waits for the ring.
+ *
+ * "+ Add Item" is not removed by opening the picker - it is still in the page
+ * - but the picker is laid over the middle of the screen and the button is
+ * underneath it. The ring was drawn in the middle of an open dialog, pointing
+ * at nothing. Add to Bill is the other way round: it IS a button of the picker
+ * it closes, so the ring was left on the filled table behind it.
+ *
+ * Upload and Proceed close the picker too, but they are Mira's buttons in the
+ * panel beside it and are still in view afterwards. See src/timeline.js. */
+export const dismisses = ['add-item', 'add-to-bill'];
 
 export function render(data, state) {
   const inv = invoiceOf(data ?? {});

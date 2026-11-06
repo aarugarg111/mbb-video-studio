@@ -49,6 +49,18 @@ export const tapEffects = {
   'proceed': { filled: 1, picker: 0 }
 };
 
+/* Taps that hide the thing being tapped, so the picker waits for the ring.
+ *
+ * "+ Add Item" is not removed by opening the picker - it is still in the page
+ * - but the picker is laid over the middle of the screen and the button is
+ * underneath it. The ring was drawn in the middle of an open dialog, pointing
+ * at nothing. Add to Bill is the other way round: it IS a button of the picker
+ * it closes, so the ring was left on the filled table behind it.
+ *
+ * Upload and Proceed close the picker too, but they are Mira's buttons in the
+ * panel beside it and are still in view afterwards. See src/timeline.js. */
+export const dismisses = ['add-item', 'add-to-bill'];
+
 export function render(data, state) {
   const filled = Number(state?.filled ?? 0) > 0;
   const picker = Number(state?.picker ?? 0) > 0;

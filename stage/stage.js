@@ -74,10 +74,13 @@ window.setTime = function setTime(t) {
   );
 
   if (frame.ripple) {
-    const { x, y, progress } = frame.ripple;
+    /* The ring's radius comes with the frame - it is the screen's device that
+       decides it, and src/timeline.js is where the screen is known. */
+    const { x, y, progress, r } = frame.ripple;
     const scale = (0.45 + 0.85 * (1 - Math.pow(1 - progress, 3))).toFixed(3);
     layers.push(
-      `<div class="ripple" style="left: ${x - 42}px; top: ${y - 42}px; ` +
+      `<div class="ripple" style="left: ${x - r}px; top: ${y - r}px; ` +
+      `width: ${r * 2}px; height: ${r * 2}px; ` +
       `opacity: ${(1 - progress).toFixed(3)}; transform: scale(${scale})"></div>`
     );
   }

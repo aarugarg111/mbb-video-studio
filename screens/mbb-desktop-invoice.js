@@ -111,6 +111,11 @@ export const tapEffects = {
   'share-whatsapp': { sharing: 0 }
 };
 
+/* Tapping WhatsApp closes the menu WhatsApp is in, so the menu has to outlive
+ * its own ring - otherwise the ring is left expanding over the bill behind it
+ * and the clip never shows which option was chosen. See src/timeline.js. */
+export const dismisses = ['share-whatsapp'];
+
 export function render(data, state) {
   const sums = summarise(data?.items ?? []);
   const inv = invoiceOf(data ?? {});

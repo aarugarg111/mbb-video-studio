@@ -55,6 +55,26 @@ export function viewportFor(screen) {
   return DEVICES[deviceOf(screen)];
 }
 
+/* How big the tap ring is drawn, in the screen's own pixels.
+ *
+ * It was one size for both, because every screen used to be a phone. A phone
+ * is pressed with a thumb and its buttons are built for one: a 42 ring over a
+ * 48-tall button reads as a finger landing. A laptop is clicked with a
+ * pointer, and its toolbar buttons are 26 tall and sit a few pixels apart - so
+ * the same ring reached the button either side of the one being pressed, and a
+ * clip that tapped Share looked like it had pressed Print PDF, Share and the
+ * bill at once. The ring has to stay inside the gap between two targets, or it
+ * stops saying which one was pressed.
+ *
+ * ONE number for both renderers. It was written as a bare 42 in stage.js, in
+ * render.ts and again in kit.css, and three copies of a constant is how the
+ * two render paths drift apart. */
+export const RING_RADIUS = { phone: 42, desktop: 26 };
+
+export function ringRadiusFor(screen) {
+  return RING_RADIUS[deviceOf(screen)];
+}
+
 /* The address shown in the frame's URL bar. Only a desktop screen has one -
  * it is a browser - and it is the screen's own business what it says. */
 export function urlFor(screen) {
