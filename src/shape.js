@@ -139,6 +139,21 @@ function targetOnShape(target, screen, shape, catalogue) {
   return moved && buttons.includes(moved) ? moved : null;
 }
 
+/* Shots that have no business in a laptop clip at all.
+ *
+ * wa-attach is the phone's own send sheet - the caption box WhatsApp puts up
+ * on a handset before a file goes. A laptop sharing a bill never shows it: it
+ * hands the invoice to WhatsApp and that is the end of the owner's part. Left
+ * in, a laptop clip cut from the share menu straight to a phone's attach
+ * sheet, which says the owner picked his phone up and finished the job there -
+ * the opposite of what a video about billing from the counter PC is for.
+ *
+ * wa-chat is deliberately NOT here, and the difference is whose phone it is.
+ * The attach sheet is the sender's. The chat is the CUSTOMER'S, receiving what
+ * was sent - true whichever machine sent it, and the payoff the whole sequence
+ * is built to reach. */
+const NOT_ON_A_LAPTOP = new Set(['wa-attach']);
+
 /* Two shots of one screen in a row read as a cut to nowhere - the picture does
  * not change, so the viewer thinks the video has stalled. They only appear
  * because two phone screens became one laptop screen, so they are joined back
@@ -172,6 +187,10 @@ export function recastShape(recipe, shape, catalogue = {}) {
   const dropped = [];
 
   const shots = recipe.shots.map(shot => {
+    if (shape === 'laptop' && NOT_ON_A_LAPTOP.has(shot.screen)) {
+      dropped.push(`the ${shot.screen} shot`);
+      return null;
+    }
     const screen = screenOnShape(shot.screen, shape);
     if (screen === shot.screen) return shot;
 
@@ -188,5 +207,8 @@ export function recastShape(recipe, shape, catalogue = {}) {
     return { ...shot, screen, ...(shot.actions ? { actions } : {}) };
   });
 
-  return { recipe: { ...recipe, shots: joinRepeats(shots) }, dropped };
+  /* A dropped shot leaves a hole in the list, and joinRepeats reads the one
+     before and after as neighbours - which is the point: the share menu and
+     the customer's chat become consecutive, as they should be. */
+  return { recipe: { ...recipe, shots: joinRepeats(shots.filter(Boolean)) }, dropped };
 }

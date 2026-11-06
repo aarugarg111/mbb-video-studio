@@ -227,3 +227,58 @@ test('adding a party, and theming a bill, work in both shapes', () => {
   assert.equal(screenOnShape('mbb-desktop-create-party', 'phone'), 'create-party');
   assert.equal(screenOnShape('mbb-desktop-theme-store', 'phone'), 'theme-store');
 });
+
+/* Sharing a bill is the one flow where the two shapes are genuinely different
+ * products, not the same page at two widths. The phone opens a share sheet,
+ * picks a contact, composes a caption and sends. The laptop opens a menu on
+ * the invoice itself and picks WhatsApp, and that is the whole of it.
+ *
+ * Recast without knowing that, a laptop clip cut from the share menu to a
+ * PHONE's attach sheet - which tells the viewer the owner gave up on the
+ * computer and finished the job on his handset, in a video whose point is
+ * that he did not have to. */
+test('a laptop share is the laptop share, not the phone one', () => {
+  const phone = {
+    video: 't',
+    shots: [
+      { screen: 'invoice-created', duration: 3.2, actions: [{ at: 2.2, do: 'tap', target: 'share' }] },
+      { screen: 'share-sheet', duration: 3.0, actions: [
+        { at: 1.0, do: 'tap', target: 'contact-0' }, { at: 2.2, do: 'tap', target: 'send' }] },
+      { screen: 'wa-attach', duration: 3.2, actions: [{ at: 2.6, do: 'tap', target: 'send' }] },
+      { screen: 'wa-chat', duration: 2.6, actions: [] }
+    ]
+  };
+
+  const { recipe, dropped } = recastShape(phone, 'laptop', CAT);
+  const screens = recipe.shots.map(s => s.screen);
+
+  assert.deepEqual(screens, ['mbb-desktop-invoice', 'wa-chat'],
+    'the laptop does its sharing on the invoice, then the customer receives it');
+
+  /* Both halves of the menu land in the one shot, in order: the menu has to be
+     open before the option in it can be chosen. */
+  const taps = recipe.shots[0].actions.filter(a => a.do === 'tap').map(a => a.target);
+  assert.deepEqual(taps, ['share', 'share-whatsapp']);
+  const [open, pick] = recipe.shots[0].actions.filter(a => a.do === 'tap');
+  assert.ok(pick.at > open.at, 'the option is chosen after the menu is opened');
+
+  assert.ok(dropped.some(d => d.includes('wa-attach')),
+    'the studio should say the attach sheet was left out, not drop it silently');
+
+  /* The customer's phone stays. It is the payoff, and it is true whichever
+     machine sent the bill. */
+  assert.ok(screens.includes('wa-chat'));
+});
+
+test('a phone share is left alone', () => {
+  const phone = {
+    video: 't',
+    shots: [
+      { screen: 'wa-attach', duration: 3.2, actions: [{ at: 2.6, do: 'tap', target: 'send' }] },
+      { screen: 'wa-chat', duration: 2.6, actions: [] }
+    ]
+  };
+  const { recipe, dropped } = recastShape(phone, 'phone', CAT);
+  assert.deepEqual(recipe.shots.map(s => s.screen), ['wa-attach', 'wa-chat']);
+  assert.deepEqual(dropped, []);
+});
