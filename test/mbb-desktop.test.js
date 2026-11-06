@@ -5,6 +5,7 @@ import { SCREENS, catalogue } from '../screens/index.js';
 import { deviceOf } from '../src/device.js';
 import { itemsFor, lowStockFor } from '../screens/items.js';
 import { SCANNED } from '../screens/mbb-desktop-chrome.js';
+import { formatINR, summarise } from '../src/money.js';
 
 const DESKTOP = ['mbb-desktop-parties', 'mbb-desktop-items', 'mbb-desktop-create-invoice'];
 
@@ -187,4 +188,33 @@ test('a party name that would break the markup is escaped on all three', () => {
   for (const name of DESKTOP) {
     assert.ok(!SCREENS[name].render(nasty, { filled: 1 }).includes('<script>'), name);
   }
+});
+
+/* One invoice, three places that state what is owed: the pill at the top, the
+ * sheet in the middle, and the payment panel down the right. They are drawn by
+ * three different pieces of code and nothing made them agree.
+ *
+ * The sheet is billMarkup(), whose default is a bill settled on the spot -
+ * right for the phone's "invoice created" screen, where the money has just
+ * been taken, and wrong here, where the bill is being looked at afterwards.
+ * The laptop screen did not pass `received`, so an unpaid invoice printed
+ * "Received 740, Balance 0" underneath a pill reading Unpaid, in footage
+ * about billing. */
+test('the laptop invoice agrees with itself about what is owed', () => {
+  const screen = SCREENS['mbb-desktop-invoice'];
+  const owed = summarise(DATA.items).total;
+
+  const unpaid = screen.render(DATA, {});
+  assert.ok(unpaid.includes('Unpaid'), 'an invoice with no payment reads Unpaid');
+  assert.ok(
+    unpaid.includes(`<span>Balance</span><span>${formatINR(owed)}</span>`),
+    'the sheet should show the whole amount still owed while the pill says Unpaid'
+  );
+
+  const paid = screen.render(DATA, { paid: 1 });
+  assert.ok(paid.includes('>Paid<'), 'recording the payment turns the pill over');
+  assert.ok(
+    paid.includes(`<span>Balance</span><span>${formatINR(0)}</span>`),
+    'and the sheet should settle with it'
+  );
 });

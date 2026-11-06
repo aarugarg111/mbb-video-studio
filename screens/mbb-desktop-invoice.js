@@ -163,7 +163,14 @@ export function render(data, state) {
 
     <div class="mb-view-body">
       <div class="mb-paper">
-        <div class="mb-paper-fit" style="transform: scale(${billScale(data).toFixed(3)})">${billMarkup(data ?? {}, { ...state, appear: 1 })}</div>
+        <!-- What has been received has to be told, not left to billMarkup's
+             default of a bill settled on the spot. Without it the sheet read "Received
+             740, Balance 0" while the pill above it said Unpaid and the panel
+             beside it said 740 outstanding: one invoice saying both things in
+             one frame. The phone's own bill-open.js passes it; this screen
+             did not, and the whole point of sharing the markup is that the
+             two cannot disagree. -->
+        <div class="mb-paper-fit" style="transform: scale(${billScale(data).toFixed(3)})">${billMarkup(data ?? {}, { ...state, appear: 1, received })}</div>
       </div>
 
       ${sharing ? `

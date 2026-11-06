@@ -1,0 +1,50 @@
+# A bill sent to the customer on WhatsApp, from the laptop.
+#
+# The phone has told this story since the beginning (recipes/whatsapp-share.yaml)
+# and the laptop never has, although the laptop is where a shop with a counter
+# PC actually bills from. It is also the only clip that exercises the laptop's
+# share menu, which spent a while landing its ring on the invoice behind it.
+#
+# Ten seconds, four beats, because a line of voiceover about sending bills runs
+# eight to ten and a clip that runs out before the sentence does leaves the
+# editor holding a freeze frame.
+#
+# Every name and figure is invented.
+video: desktop-whatsapp-share
+
+business:
+  name: SHREE KIRANA STORE
+  gstin: 09ABCDE1234F1Z5
+  address: Station Road, Lucknow, Uttar Pradesh, 226001
+
+party:
+  name: RAKESH KUMAR TRADERS
+  phone: 98765 43210
+  address: Aminabad, Lucknow, Uttar Pradesh, 226018
+
+invoice:
+  number: 2301
+  theme: none
+
+items:
+  - { name: SUGAR 5KG, rate: 230, qty: 2, gst: 5, unit: PCS, purchase: 198, stock: 46 }
+  - { name: TATA SALT 1KG, rate: 28, qty: 10, gst: 5, unit: PCS, purchase: 24, stock: 8 }
+
+shots:
+  # The day's bills, and the one being sent.
+  - screen: mbb-desktop-sales-list
+    duration: 3.0
+    actions:
+      - { at: 1.4, do: tap, target: bill-row-0 }
+
+  # The bill, then the menu. The zoom is what makes the first half of this
+  # shot worth watching: a laptop window held still for seven seconds is a
+  # screenshot, and the bill is small enough at this size that nobody reads
+  # it unless the camera goes in.
+  - screen: mbb-desktop-invoice
+    duration: 7.4
+    actions:
+      - { at: 0.8, do: zoom, target: bill-items, to: 2.0 }
+      - { at: 2.6, do: zoomOut }
+      - { at: 3.8, do: tap, target: share }
+      - { at: 5.6, do: tap, target: share-whatsapp }
