@@ -56,6 +56,7 @@ import {
   readKey, writeKey, migrateKey, PROVIDER_SLOT
 } from '../lib/providers';
 import { dropImpossible } from '@/lib/possible';
+import { explain } from '@/lib/errors';
 import { runSelfTest, asReport, type Step as CheckStep } from '@/lib/selftest';
 import { Stage } from './studio/stage';
 import { ShotListForm } from './studio/shot-list';
@@ -438,7 +439,14 @@ export default function Page() {
       }
       setStep('done');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'The render failed.');
+      /* Through the explainer, like the AI step above. The render showed
+       * whatever was thrown, so a dropped connection reached somebody as the
+       * browser's bare "Failed to fetch" - three words naming no file, no
+       * step and nothing to do. The explainer has known how to say that in a
+       * sentence all along; this path simply never asked it. */
+      const { message, detail } = explain(e, TEAM_MODE);
+      setError(message || 'The render failed.');
+      setErrorDetail(detail);
       setStep('check');
     } finally {
       setBusy(false);

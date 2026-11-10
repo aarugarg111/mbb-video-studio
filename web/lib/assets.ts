@@ -32,19 +32,40 @@ export function buildFontFaces(base64BySubset: Record<string, string>): string {
   ).join('');
 }
 
-async function fetchBase64(url: string): Promise<string> {
-  const res = await fetch(url);
+/* Every asset request names its file when it goes wrong.
+ *
+ * A bad STATUS already named it. A request that fails at network level -
+ * offline, blocked by an extension, a proxy cutting it off - threw the
+ * browser's bare "Failed to fetch" instead, which contains no URL at all.
+ * That is what came back from the live studio: "Failed to fetch" at the
+ * render stage, naming neither the file, nor the step, nor anything to try,
+ * for any one of six requests.
+ *
+ * The URL is the whole diagnosis, so it goes into the message either way. */
+async function get(url: string): Promise<Response> {
+  let res: Response;
+  try {
+    res = await fetch(url);
+  } catch (err) {
+    throw new Error(
+      `Could not load ${url} - the request did not complete. That is usually this ` +
+      `network, a browser extension blocking it, or being offline. ` +
+      `(${(err as Error)?.message ?? String(err)})`
+    );
+  }
   if (!res.ok) throw new Error(`Could not load ${url} (${res.status}).`);
-  const bytes = new Uint8Array(await res.arrayBuffer());
+  return res;
+}
+
+async function fetchBase64(url: string): Promise<string> {
+  const bytes = new Uint8Array(await (await get(url)).arrayBuffer());
   let binary = '';
   for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
   return btoa(binary);
 }
 
 async function fetchText(url: string): Promise<string> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Could not load ${url} (${res.status}).`);
-  return res.text();
+  return (await get(url)).text();
 }
 
 
@@ -61,7 +82,14 @@ export async function ctaImageExists(): Promise<boolean> {
 
 let cached: Promise<Assets> | null = null;
 
-/* Memoised: several hundred frames must not refetch the fonts. */
+/* Memoised: several hundred frames must not refetch the fonts.
+ *
+ * A FAILED load is forgotten, though. The rejected promise used to stay in
+ * here for the life of the page, so one dropped connection meant every
+ * render afterwards failed with the same stale error - pressing the button
+ * again could not possibly work, and nothing said why. A render that fails
+ * on the network has to be retryable, because that is the whole reason
+ * somebody presses it twice. */
 export function loadAssets(): Promise<Assets> {
   if (cached) return cached;
 
@@ -84,6 +112,10 @@ export function loadAssets(): Promise<Assets> {
       ctaDataUrl: cta ? `data:image/png;base64,${cta}` : null
     };
   })();
+
+  /* Drop it on failure so the next attempt really is an attempt. The catch
+     re-throws: this clears the cache, it does not swallow the error. */
+  cached.catch(() => { cached = null; });
 
   return cached;
 }
