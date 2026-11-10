@@ -219,8 +219,30 @@ export function parse(text, catalogue, options = {}) {
         }
       }
       if (Object.hasOwn(brand, 'endCard')) {
-        const card = brand.endCard ?? {};   // "endCard:" with nothing under it means all defaults
-        if (typeof card !== 'object' || Array.isArray(card)) {
+        /* What "endCard: null" means.
+         *
+         * The briefing and the output schema both tell the model to write
+         * null when the clip should NOT close on a branded line, and this
+         * read null as "all defaults" - so the one value the AI path writes
+         * most got the default card back, plus a warning blaming the recipe
+         * for setting both cta and endCard when it had deliberately set
+         * neither. An empty mapping still means defaults, which is how a
+         * recipe asks for one. */
+        const written = brand.endCard;
+        const card =
+          written == null || written === false ? null
+          : written === true ? {}
+          /* A tagline, or a number of seconds, written on its own. There is
+           * exactly one text field and one numeric one, so neither reading
+           * is ambiguous - and both are what somebody writes before they go
+           * and look the shape up. Refusing them cost a whole recipe. */
+          : typeof written === 'string' ? { tagline: written }
+          : typeof written === 'number' ? { duration: written }
+          : written;
+
+        if (card === null) {
+          recipe.brand.endCard = null;
+        } else if (typeof card !== 'object' || Array.isArray(card)) {
           errors.push('brand.endCard must be a mapping with "duration" and "tagline".');
         } else {
           for (const key of Object.keys(card)) {

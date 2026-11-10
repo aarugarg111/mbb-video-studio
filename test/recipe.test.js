@@ -331,6 +331,44 @@ test('brand: end card defaults duration and tagline', () => {
   assert.equal(recipe.brand.endCard.tagline, 'India ka No.1 Billing App');
 });
 
+/* The briefing tells the model: "Set brand.endCard to null when the script
+ * just ends on the result." It was writing exactly that and getting the
+ * default card back, with a warning blaming it for setting cta AND endCard
+ * when it had asked for neither. An instruction the parser contradicts is
+ * worse than no instruction. */
+test('brand: endCard null means no end card, as the briefing promises', () => {
+  for (const written of ['null', '', 'false']) {
+    const { recipe, errors, warnings } = parse(GOOD + `\nbrand:\n  endCard: ${written}\n`, CATALOGUE);
+    assert.deepEqual(errors ?? [], [], written);
+    assert.equal(recipe.brand.endCard, null, written);
+    assert.ok(!(warnings ?? []).some(w => /both cta and endCard/.test(w)), `no false warning for "${written}"`);
+  }
+});
+
+/* A tagline or a number of seconds written on its own used to take the whole
+ * recipe down with "must be a mapping". There is one text field and one
+ * numeric one, so there is nothing to be ambiguous about - and a refused
+ * recipe is not a near miss, it is nothing. */
+test('brand: a bare tagline or duration is understood, not refused', () => {
+  const text = parse(GOOD + '\nbrand:\n  endCard: "Bas, hisaab ho gaya"\n', CATALOGUE);
+  assert.deepEqual(text.errors ?? [], []);
+  assert.equal(text.recipe.brand.endCard.tagline, 'Bas, hisaab ho gaya');
+  assert.equal(text.recipe.brand.endCard.duration, 1.6, 'the other field still defaults');
+
+  const seconds = parse(GOOD + '\nbrand:\n  endCard: 2.5\n', CATALOGUE);
+  assert.deepEqual(seconds.errors ?? [], []);
+  assert.equal(seconds.recipe.brand.endCard.duration, 2.5);
+  assert.equal(seconds.recipe.brand.endCard.tagline, 'India ka No.1 Billing App');
+});
+
+/* Widening what is understood must not widen what passes as valid. */
+test('brand: a bare value that is still nonsense is still refused', () => {
+  for (const written of ['""', '0', '-3', '[]']) {
+    const { errors } = parse(GOOD + `\nbrand:\n  endCard: ${written}\n`, CATALOGUE);
+    assert.ok((errors ?? []).length, `${written} should not pass`);
+  }
+});
+
 test('brand: non-positive endCard duration is an error', () => {
   for (const d of ['0', '-1', 'soon']) {
     const { errors } = parse(GOOD + `\nbrand:\n  endCard: { duration: ${d} }\n`, CATALOGUE);

@@ -259,6 +259,66 @@ test('a retired model is asked again once, and only once', async () => {
   }
 });
 
+/* Measuring the free tier turned up one 500 in five calls. The studio made a
+ * single attempt, so a fault that had already passed still cost somebody
+ * their clip - and for Customer Support that is somebody on the phone to a
+ * customer at the time. */
+test('a provider having a bad minute is asked again, once', async () => {
+  const realFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls++;
+    return calls === 1
+      ? { ok: false, status: 503, text: async () => 'overloaded' } as unknown as Response
+      : {
+          ok: true,
+          json: async () => ({ candidates: [{ content: { parts: [{ text: 'video: t\nshots: []\n' }] } }] })
+        } as unknown as Response;
+  }) as typeof fetch;
+
+  try {
+    const { recipe } = await askProvider({ id: 'gemini', key: 'AIzaKEY', model: 'm', prompt: 'B' });
+    assert.equal(calls, 2, 'the second try is what the viewer gets');
+    assert.match(recipe, /video: t/);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test('a provider down for the minute is reported, not retried forever', async () => {
+  const realFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls++;
+    return { ok: false, status: 500, text: async () => 'internal' } as unknown as Response;
+  }) as typeof fetch;
+
+  try {
+    await assert.rejects(askProvider({ id: 'gemini', key: 'AIzaKEY', model: 'm', prompt: 'B' }), /try again/i);
+    assert.equal(calls, 2, 'twice, then it says so');
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+/* A key that is wrong is wrong the second time too, and asking again only
+ * makes somebody wait longer to be told. */
+test('a rejected key is not waited on and asked again', async () => {
+  const realFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls++;
+    return { ok: false, status: 400, text: async () => 'API key not valid' } as unknown as Response;
+  }) as typeof fetch;
+
+  try {
+    await assert.rejects(askProvider({ id: 'gemini', key: 'bad', model: 'm', prompt: 'B' }), /accept the key/);
+    assert.equal(calls, 1, 'asked once');
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
 /* castToShape took over the job the Claude path used to do: APPLYING the
  * shape rather than merely asking for it in the briefing. The failure it
  * exists for is documented - a shot list comes back on phone screens

@@ -89,6 +89,9 @@ export type How = {
   /* Set when a first try came back complaining about the thinking setting -
    * see askProvider. The request is then sent again without it. */
   withoutThinking?: boolean;
+  /* Set once a transient failure has been waited out, so a provider having a
+   * bad minute cannot hold somebody in a loop. */
+  afterWaiting?: boolean;
   /* Team mode: the studio's own Worker, which holds the key. The request is
    * otherwise identical, and the key field goes empty rather than being
    * filled with a placeholder nobody reads - in team mode the browser has no
@@ -295,6 +298,19 @@ export async function askProvider(
      * whole thing asked again, once. */
     if (!how.withoutThinking && objectsToThinking(detail)) {
       return askProvider({ id, key, model, prompt }, retried, { ...how, withoutThinking: true });
+    }
+
+    /* Google having a bad minute. Measuring the free tier turned up one 500
+     * in five calls, and the studio made exactly one attempt - so a support
+     * person helping a customer on the phone loses the clip to a fault that
+     * had already passed. There is one paid-for-free call in the whole
+     * studio; asking it twice costs a second and a half and nothing else.
+     *
+     * Only the statuses that mean "not now" rather than "not ever": a 401 or
+     * a 400 asked again is the same answer with the viewer kept waiting. */
+    if (!how.afterWaiting && (response.status === 429 || response.status >= 500)) {
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      return askProvider({ id, key, model, prompt }, retried, { ...how, afterWaiting: true });
     }
 
     /* Put through the explainer rather than thrown raw. This used to show

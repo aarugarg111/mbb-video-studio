@@ -2,6 +2,7 @@
  *
  *   GEMINI_API_KEY=AIza...  npx tsx eval.mts            (from web/)
  *   ...  --one 3                 just one script
+ *   ...  --raw                   print the recipe behind a refusal
  *   MODELS=gemini-3.8-flash,gemini-3.5-flash-lite ...    compare two
  *
  * The studio's whole bill is one call per script. It ran on Opus for a year,
@@ -175,6 +176,12 @@ const only = process.argv.includes('--one')
   : null;
 const chosen = only == null ? SCRIPTS : [SCRIPTS[only]].filter(Boolean);
 
+/* --raw prints the recipe behind a verdict, which is the thing you need the
+ * moment a verdict is bad. */
+const raw = process.argv.includes('--raw');
+const indent = (text: string) =>
+  text.trimEnd().split('\n').map(l => '      | ' + l).join('\n') + '\n';
+
 /* The studio's own validator, called the way the studio calls it.
  *
  * This used to be `parse(yamlText)` with no catalogue, and parse takes the
@@ -247,6 +254,10 @@ for (const t of chosen) {
     } catch (err) {
       tally[arm.label].failed.push(t.name);
       console.log(`  ${arm.label.padEnd(26)} DID NOT PARSE  ${(err as Error).message.slice(0, 100)}`);
+      /* Knowing a recipe was refused is half the story; fixing it needs the
+         text that was refused. Without this the only way to see it was to
+         write a throwaway script that re-ran the same call by hand. */
+      if (raw) console.log(indent(recipe));
       continue;
     }
 
