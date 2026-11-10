@@ -4,6 +4,13 @@ export const name = 'scan-reading';
 
 /* Nothing is tapped while the bill is being read. */
 export const targets = {};
+/* How long this screen needs to be on camera for what it shows to land:
+ * the app working, which passes on its own and needs long enough to
+ * register. It was a sentence in the briefing, which held only for as long
+ * as the model chose to follow it. Here it is a property of the screen, like
+ * `scrolls` - the screen knows, nobody else does. */
+export const needsSeconds = 2;
+
 
 /* The wait while the bill is read (reference/frames/scan-t70.png): a magnifier,
  * a counter that climbs, a rotating Quick Tip, and the app's own caution that

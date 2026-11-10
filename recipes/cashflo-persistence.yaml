@@ -30,7 +30,7 @@ cashflo:
 shots:
   # The call going out, as the party's phone sees it.
   - screen: mcf-ai-ringing
-    duration: 2.4
+    duration: 2.5
     actions: []
 
   # Nobody picks up - and the AI does not shrug. It has a second number on

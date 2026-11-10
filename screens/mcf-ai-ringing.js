@@ -24,6 +24,15 @@ export const targets = {
   'decline': { x: 111, y: 747 }
 };
 
+/* How long this screen needs to be on camera for what it shows to land.
+ * a phone ringing reads as a moment, not an instant.
+ *
+ * It was a sentence in the briefing, which means it held only for as long
+ * as the model chose to follow it. Here it is a property of the screen,
+ * so the briefing states it from the data and the studio can check it.
+ * Same idea as `scrolls`: the screen knows, nobody else does. */
+export const needsSeconds = 2.5;
+
 /* Rings twice a second, from the shot's own clock, so two renders match. */
 export function ringPulse(t) {
   return Math.abs(Math.sin((Number(t) || 0) * Math.PI));

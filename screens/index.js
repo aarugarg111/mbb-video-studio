@@ -151,5 +151,24 @@ export function zoomCatalogue() {
  * .png is on disk - so it stays with the caller.
  */
 export function howToValidate(extra = {}) {
-  return { scrollable: scrollables(), zoomable: zoomCatalogue(), ...extra };
+  return { scrollable: scrollables(), zoomable: zoomCatalogue(), needs: screenTimings(), ...extra };
+}
+
+/* What each screen needs on the clock, for the screens that need anything.
+ *
+ * A few screens are an animation rather than a still: the AI call writes a
+ * transcript across the shot, the laptop invoice fills itself in after a tap,
+ * a phone rings. Cut short, they play as a beat nobody can read - and the
+ * clip still renders and still parses, so nothing says a word about it.
+ *
+ * These numbers were prose in the briefing, which meant they held for as long
+ * as the model chose to follow them. A screen declaring its own need can be
+ * put in front of the model as data, checked by the validator, and counted by
+ * the eval. */
+export function screenTimings() {
+  const out = {};
+  for (const [key, mod] of Object.entries(SCREENS)) {
+    if (Number.isFinite(mod.needsSeconds)) out[key] = mod.needsSeconds;
+  }
+  return out;
 }

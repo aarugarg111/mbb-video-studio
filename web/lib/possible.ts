@@ -31,10 +31,10 @@
  * test runner resolves it happily, so `import yaml from` passed every test
  * and broke the deploy. */
 import * as yaml from 'js-yaml';
-import { catalogue, zoomCatalogue, scrollables } from '../../screens/index.js';
+import { catalogue, zoomCatalogue, scrollables, screenTimings } from '../../screens/index.js';
 
 type Action = { do?: unknown; target?: unknown; at?: unknown };
-type Shot = { screen?: unknown; actions?: unknown };
+type Shot = { screen?: unknown; duration?: unknown; actions?: unknown };
 
 /* Where the action was, in the words the validator uses, so a note here and
  * an error there read as the same studio talking. */
@@ -55,6 +55,7 @@ export function dropImpossible(recipeText: string): { recipe: string; dropped: s
   const taps = catalogue() as Record<string, string[]>;
   const zooms = zoomCatalogue() as Record<string, string[]>;
   const scrolls = scrollables() as string[];
+  const timings = screenTimings() as Record<string, number>;
   const dropped: string[] = [];
 
   for (const [i, shotValue] of (doc.shots as unknown[]).entries()) {
@@ -63,6 +64,23 @@ export function dropImpossible(recipeText: string): { recipe: string; dropped: s
     /* An invented screen is left exactly as it came. The validator refuses
        it, which is right: there is no version of this clip without it. */
     if (!screen || !Object.hasOwn(taps, screen)) continue;
+
+    /* A screen that is an animation rather than a still has a floor, and a
+     * shot under it slices off whatever the screen was in the middle of. The
+     * clip still renders and still parses, which is why this went unnoticed
+     * and the timings were "not aligned" - nothing in the studio was lining
+     * them up. Raised rather than refused, and reported like everything
+     * else: the viewer gets the beat, and whoever is checking is told the
+     * clip got longer and by how much. */
+    const floor = timings[screen];
+    if (Number.isFinite(floor) && Number(shot.duration) > 0 && Number(shot.duration) < floor) {
+      dropped.push(
+        `shot ${i + 1}: the ${screen} screen needs about ${floor}s for what it shows to land, ` +
+        `so its ${shot.duration}s was raised to ${floor}s`
+      );
+      shot.duration = floor;
+    }
+
     if (!Array.isArray(shot.actions)) continue;
 
     shot.actions = (shot.actions as unknown[]).filter((actionValue, j) => {

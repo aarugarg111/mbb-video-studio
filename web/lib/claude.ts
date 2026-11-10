@@ -13,10 +13,12 @@
  * renaming it would be churn for its own sake.
  */
 import { SCREENS, ACTIONS, THEMES } from './schema';
-import { scrollables } from '../../screens/index.js';
+import { scrollables, screenTimings } from '../../screens/index.js';
 
 /* The prompt is carried over verbatim from the server route. It has been
  * corrected several times against real scripts; rewriting it loses that. */
+const TIMINGS: Record<string, number> = screenTimings();
+
 export const SYSTEM = `You turn a creator ad script for the myBillBook app into a complete shot list for a video renderer.
 
 THE SCRIPT IS THE SOURCE OF TRUTH. Read everything out of it that you can, and only invent what it genuinely does not say:
@@ -32,6 +34,12 @@ Available themes: ${THEMES.join(', ')}.
 
 The renderer can show exactly these screens, with exactly these tap targets:
 ${Object.entries(SCREENS).map(([s, t]) => `- ${s}: ${t.join(', ')}`).join('\n')}
+
+SOME SCREENS ARE AN ANIMATION, NOT A STILL, and have a floor on how long they
+must be on camera for what they show to land. Give each of these AT LEAST the
+seconds listed - cut shorter, the thing it is in the middle of is sliced off
+and the beat reads as a glitch:
+${Object.entries(TIMINGS).map(([s, secs]) => `- ${s}: at least ${secs}s`).join('\n')}
 
 The actions available are: ${ACTIONS.join(', ')}.
 - tap needs a target that exists on that shot's screen

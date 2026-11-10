@@ -32,7 +32,7 @@ shots:
     duration: 2.4
 
   - screen: scan-done
-    duration: 1.8
+    duration: 2
 
   - screen: create-purchase
     duration: 3.2

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { dropImpossible } from './possible';
 import { parse } from '../../src/recipe.js';
-import { catalogue, howToValidate, scrollables, zoomCatalogue } from '../../screens/index.js';
+import { catalogue, howToValidate, scrollables, zoomCatalogue, screenTimings } from '../../screens/index.js';
 
 /* The studio's own options, not a hand-made set. Writing those out by hand
  * here is how the eval came to be stricter than production and blamed the
@@ -123,4 +123,44 @@ test('it never throws, whatever shape the recipe is in', () => {
   for (const odd of ['', 'null', '[]', 'shots: 3', 'shots:\n  - 7\n', 'shots:\n  - screen: home\n    actions: 4\n']) {
     assert.doesNotThrow(() => dropImpossible(odd), JSON.stringify(odd));
   }
+});
+
+/* "The timings for each interface are not perfectly aligned."
+ *
+ * A handful of screens are an animation rather than a still - the AI call
+ * writes a transcript across the shot, the laptop invoice fills itself in
+ * after a tap. Cut short, the thing the screen was in the middle of is
+ * sliced off. The clip still renders and still parses, so nothing in the
+ * studio was lining these up; the requirement lived in the briefing as
+ * prose, which held for as long as the model chose to follow it. */
+test('a shot too short for what its screen is doing is raised to fit', () => {
+  const timings = screenTimings() as Record<string, number>;
+  assert.ok(timings['mcf-ai-call'] >= 9, 'the AI call declares its own floor');
+
+  const tooShort =
+    'video: t\nshots:\n  - screen: mcf-ai-call\n    duration: 3\n';
+  const { recipe, dropped } = dropImpossible(tooShort);
+
+  assert.match(recipe, /duration: 9/, 'raised to what the screen needs');
+  assert.equal(dropped.length, 1);
+  assert.match(dropped[0], /needs about 9s/);
+  assert.match(dropped[0], /raised/, 'and it is reported, never silent');
+  assert.deepEqual(validate(recipe).errors ?? [], []);
+});
+
+test('a shot already long enough is left exactly alone', () => {
+  const fine = 'video: t\nshots:\n  - screen: mcf-ai-call\n    duration: 10\n';
+  const { recipe, dropped } = dropImpossible(fine);
+  assert.deepEqual(dropped, []);
+  assert.equal(recipe, fine, 'byte for byte');
+});
+
+test('the validator says so too, for a recipe written by hand', () => {
+  /* The studio stays strict where somebody can fix it themselves, and that
+     warning is what the eval counts as roughness. */
+  const { warnings } = parse(
+    'video: t\nshots:\n  - screen: mcf-ai-call\n    duration: 3\n',
+    catalogue(), howToValidate()
+  ) as { warnings?: string[] };
+  assert.ok((warnings ?? []).some(w => /needs about 9s/.test(w)), (warnings ?? []).join(' / '));
 });

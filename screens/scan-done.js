@@ -4,6 +4,13 @@ export const name = 'scan-done';
 
 /* Nothing is tapped on the confirmation; it passes on its own. */
 export const targets = {};
+/* How long this screen needs to be on camera for what it shows to land:
+ * the app working, which passes on its own and needs long enough to
+ * register. It was a sentence in the briefing, which held only for as long
+ * as the model chose to follow it. Here it is a property of the screen, like
+ * `scrolls` - the screen knows, nobody else does. */
+export const needsSeconds = 2;
+
 
 /* The moment the bill has been read (reference/frames/scan-t78.png). The claim
  * underneath is the app's own and is the point of the feature, so a video that

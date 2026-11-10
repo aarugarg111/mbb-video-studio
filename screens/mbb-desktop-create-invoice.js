@@ -51,6 +51,15 @@ export const targets = {
   'proceed': { x: 75, y: 186 }
 };
 
+/* How long this screen needs to be on camera for what it shows to land.
+ * the shot IS the change: empty outlines before the upload tap, a filled form after, and both halves have to be seen.
+ *
+ * It was a sentence in the briefing, which means it held only for as long
+ * as the model chose to follow it. Here it is a property of the screen,
+ * so the briefing states it from the data and the studio can check it.
+ * Same idea as `scrolls`: the screen knows, nobody else does. */
+export const needsSeconds = 4;
+
 /* "+ Add Item" opens the picker and "Add to Bill" closes it over a filled
  * table. Mira's two buttons fill the same table the other way round. */
 export const tapEffects = {

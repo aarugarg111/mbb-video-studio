@@ -56,6 +56,10 @@ export function parse(text, catalogue, options = {}) {
    * screen named a place. */
   const zoomable = options.zoomable ?? catalogue;
   const themes = options.themes ?? BUILT_IN_THEMES;
+  /* How long particular screens need to be on camera for what they show to
+   * land - an animation rather than a still. Empty when the caller says
+   * nothing, which is how this behaved before any screen declared one. */
+  const needs = options.needs ?? {};
   const errors = [];
   const warnings = [];
 
@@ -405,6 +409,18 @@ export function parse(text, catalogue, options = {}) {
     }
     if (duration < MIN_SHOT_SECONDS) {
       warnings.push(`${where}: ${duration}s is very short - under ${MIN_SHOT_SECONDS}s is hard to read.`);
+    }
+    /* Some screens are an animation, not a still, and have their own floor.
+     * The AI call writes a transcript across the shot; the laptop invoice
+     * fills itself in after the tap. Cut short they play as a beat nobody
+     * can read, and the clip renders and parses perfectly, so without this
+     * nothing ever says so. */
+    const needed = needs[shot.screen];
+    if (Number.isFinite(needed) && duration < needed) {
+      warnings.push(
+        `${where}: the ${shot.screen} screen needs about ${needed}s for what it shows to ` +
+        `land and this gives it ${duration}s. What it is in the middle of will be cut off.`
+      );
     }
     totalSeconds += duration;
 

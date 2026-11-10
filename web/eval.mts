@@ -195,23 +195,37 @@ const indent = (text: string) =>
  * read 0/8. That is a JavaScript error from inside the harness wearing the
  * costume of a verdict on the model, which is the worst thing a measurement
  * can do: it was about to be evidence for a decision about which AI to use. */
-function screensOf(yamlText: string): string[] {
+function readRecipe(yamlText: string): { screens: string[]; warnings: string[] } {
   /* howToValidate, not a hand-made options object. This passed `scrollable`
    * and not `zoomable`, so zooms were checked against tap targets alone -
    * stricter than the studio, which allows a zoom to anywhere a screen names
    * for looking at. It refused a recipe that renders and the report called it
    * the model inventing a label. Twice now this harness has produced a
    * verdict about the model out of its own difference from production. */
-  const { recipe, errors } = parse(yamlText, catalogue(), howToValidate());
+  const { recipe, errors, warnings } = parse(yamlText, catalogue(), howToValidate());
   /* A recipe the studio would refuse is a failure, and WHY it refused is the
      useful half - "no such screen: foo" says what the model got wrong. */
   if (errors?.length) throw new Error(errors.join('; '));
-  return recipe.shots.map((s: { screen: string }) => s.screen);
+  return {
+    screens: recipe.shots.map((s: { screen: string }) => s.screen),
+    /* The studio's own verdict on whether a clip is any good to WATCH, which
+     * this used to throw on the floor.
+     *
+     * "Parsed" and "kept the point" both say yes to a clip with a beat
+     * nobody can read, three seconds of dead air, or two taps 0.3s apart -
+     * so the report said 7/8 while the shot lists coming out were not crisp,
+     * and there was nothing in the table to disagree with. These warnings
+     * are exactly that judgement, already written and already tuned against
+     * real clips: dead air, beats too quick to follow, shots too short to
+     * register, a clip that runs long, a cut between a laptop and a phone.
+     * Counting them is free and it is the measure that was missing. */
+    warnings: (warnings ?? []) as string[]
+  };
 }
 
-type Tally = { parsed: number; kept: number; seconds: number; failed: string[]; dropped: number };
+type Tally = { parsed: number; kept: number; seconds: number; failed: string[]; dropped: number; notes: number };
 const tally: Record<string, Tally> = {};
-for (const a of ARMS) tally[a.label] = { parsed: 0, kept: 0, seconds: 0, failed: [], dropped: 0 };
+for (const a of ARMS) tally[a.label] = { parsed: 0, kept: 0, seconds: 0, failed: [], dropped: 0, notes: 0 };
 
 /* The harness checks ITSELF before it judges anything.
  *
@@ -238,7 +252,7 @@ try {
   const broken = names
     .map(name => {
       try {
-        if (!screensOf(readFileSync(join(dir, name), 'utf8')).length) {
+        if (!readRecipe(readFileSync(join(dir, name), 'utf8')).screens.length) {
           throw new Error('no screens');
         }
         return null;
@@ -283,9 +297,11 @@ for (const t of chosen) {
     tally[arm.label].dropped += dropped.length;
 
     let screens: string[];
+    let notes: string[] = [];
     try {
-      screens = screensOf(recipe);
+      ({ screens, warnings: notes } = readRecipe(recipe));
       tally[arm.label].parsed++;
+      tally[arm.label].notes += notes.length;
     } catch (err) {
       tally[arm.label].failed.push(t.name);
       console.log(`  ${arm.label.padEnd(26)} DID NOT PARSE  ${(err as Error).message.slice(0, 100)}`);
@@ -305,7 +321,15 @@ for (const t of chosen) {
       /* What the studio repaired to get this far. Counted in the table AND
          printed here, because a repair that only shows up as a better score
          is the model's mistake going quiet. */
-      dropped.map(d => `\n  ${' '.repeat(26)} DROPPED: ${d}`).join('')
+      dropped.map(d => `\n  ${' '.repeat(26)} DROPPED: ${d}`).join('') +
+      /* The studio's own complaints about the clip as a thing to watch. This
+         is the difference between a recipe that is valid and one that is
+         good, and it is the column that was missing while the table said
+         7/8 about shot lists that were not crisp. */
+      notes.map(n => `\n  ${' '.repeat(26)} ROUGH: ${n}`).join('') +
+      /* The screens tell you the shape of the clip; they say nothing about
+         whether it is any good to watch. For that you have to read it. */
+      (raw ? '\n' + indent(recipe) : '')
     );
   }
   console.log('');
@@ -314,13 +338,14 @@ for (const t of chosen) {
 console.log('-'.repeat(74));
 console.log(
   `  ${'model'.padEnd(26)} ${'parsed'.padEnd(8)} ${'kept the point'.padEnd(16)} ` +
-  `${'repaired'.padEnd(10)} avg seconds`
+  `${'repaired'.padEnd(10)} ${'rough'.padEnd(8)} avg seconds`
 );
 for (const arm of ARMS) {
   const s = tally[arm.label];
   console.log(
     `  ${arm.label.padEnd(26)} ${`${s.parsed}/${chosen.length}`.padEnd(8)} ` +
     `${`${s.kept}/${chosen.length}`.padEnd(16)} ${String(s.dropped).padEnd(10)} ` +
+    `${String(s.notes).padEnd(8)} ` +
     `${(s.seconds / chosen.length).toFixed(1)}${arm.free ? '   (free)' : ''}`
   );
 }

@@ -20,6 +20,15 @@ export const targets = {
   'mute': { x: 65, y: 790 }
 };
 
+/* How long this screen needs to be on camera for what it shows to land.
+ * the exchange writes itself across the shot and ends on the commitment being noted - under this and the last line never lands.
+ *
+ * It was a sentence in the briefing, which means it held only for as long
+ * as the model chose to follow it. Here it is a property of the screen,
+ * so the briefing states it from the data and the studio can check it.
+ * Same idea as `scrolls`: the screen knows, nobody else does. */
+export const needsSeconds = 9;
+
 /* The call, as a timetable. Each line appears when the clock reaches it, so
  * the transcript writes itself across the shot instead of arriving whole -
  * and because it is a pure function of t, two renders are identical.
