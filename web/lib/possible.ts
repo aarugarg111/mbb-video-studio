@@ -26,7 +26,11 @@
  *   hand should be pointed at, not swallowed - they are sitting there, able
  *   to fix it, and being told is the fastest way.
  */
-import yaml from 'js-yaml';
+/* A namespace import, like providers.ts next door. js-yaml's ESM build has
+ * no default export, and the Next build is the only thing that says so - the
+ * test runner resolves it happily, so `import yaml from` passed every test
+ * and broke the deploy. */
+import * as yaml from 'js-yaml';
 import { catalogue, zoomCatalogue, scrollables } from '../../screens/index.js';
 
 type Action = { do?: unknown; target?: unknown; at?: unknown };

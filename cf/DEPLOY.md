@@ -1,8 +1,14 @@
 # Putting the studio on Cloudflare, on one API key
 
-This is for the team version: one web address, one shared password, and
-Aryan's Anthropic key held by Cloudflare. Nobody on the team ever sees or
-pastes a key.
+This is for the team version: one web address, one shared password, and one
+free Gemini key held by Cloudflare. Nobody on the team ever sees or pastes a
+key.
+
+**The address:** <https://mbb-video-studio.aryangarg-flobiz.workers.dev>
+
+Written down because it was not, and a fault that needed somebody to open
+the studio and read what it said turned into guessing at subdomains. If the
+Worker is ever renamed, change it here.
 
 The videos are still made in each person's own browser, and the one call
 that turns a script into a shot list runs on Gemini's free tier — so the
@@ -56,6 +62,16 @@ There is no Anthropic key any more. The studio used to read scripts with
 Claude and that was the only thing it ever cost anybody; it reads them on
 Gemini's free tier now and nothing else. If you set one before, you can
 delete it: `npx wrangler secret delete ANTHROPIC_API_KEY`.
+
+> **Deploy the new code FIRST, then delete that secret.** In the other order
+> the studio goes down completely and does not say why. The old Worker
+> refuses every `/api/` request unless `ANTHROPIC_API_KEY` is set, so taking
+> it away while the old code is still live means a 503 on everything -
+> signing in included. What it says is "This studio is not finished being
+> set up", which reads like a mistake in the setup rather than a deployment
+> one version behind. This has happened: the team password was changed twice
+> chasing it, because a Worker that could not answer anything looked exactly
+> like a password that was wrong.
 
 Without `GEMINI_API_KEY` the Worker still serves the page and still signs
 people in, and says plainly that the key is missing when somebody tries to
