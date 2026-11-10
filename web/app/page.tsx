@@ -115,6 +115,13 @@ export default function Page() {
   const [keyDraft, setKeyDraft] = useState('');
   const [editingKey, setEditingKey] = useState(false);
   const [password, setPassword] = useState('');
+  /* Kept apart from `error`, which renders in one block at the FOOT of the
+   * page. Sign-in is the first thing on it, so a rejected password put its
+   * explanation several screens below the button that caused it - and the
+   * report that came back was "nothing happens at all". A message nobody can
+   * see is the same as no message, and worse, because it looks like a dead
+   * button. This one renders beside the box. */
+  const [signInError, setSignInError] = useState('');
   const [signedIn, setSignedIn] = useState(false);
   const [checkingSession, setCheckingSession] = useState(TEAM_MODE);
   const [supported, setSupported] = useState(true);
@@ -203,12 +210,14 @@ export default function Page() {
     setBusy(true);
     setError('');
     setErrorDetail('');
+    setSignInError('');
     try {
       await signIn(password);
       setPassword('');
+      setSignInError('');
       setSignedIn(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not sign in.');
+      setSignInError(e instanceof Error ? e.message : 'Could not sign in.');
     } finally {
       setBusy(false);
     }
@@ -486,6 +495,8 @@ export default function Page() {
           <button onClick={submitPassword} disabled={busy || !password.trim()}>
             {busy ? 'Signing in…' : 'Sign in'}
           </button>
+
+          {signInError && <p className="whose-note warn" role="alert">{signInError}</p>}
         </div>
       )}
 
