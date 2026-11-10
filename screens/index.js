@@ -134,3 +134,22 @@ export function zoomCatalogue() {
   }
   return out;
 }
+
+/* How the studio validates a recipe, in one place.
+ *
+ * src/recipe.js takes the catalogue and its options from whoever calls it,
+ * deliberately: it does no filesystem access and knows nothing about screens.
+ * That left every caller assembling the same options by hand, and they
+ * drifted - the eval was passing `scrollable` and NOT `zoomable`, so zooms
+ * were checked against tap targets alone. The studio allows a zoom to any
+ * place a screen names for looking at, so the eval was stricter than the
+ * thing it was measuring: it refused a recipe that renders, and reported it
+ * as the model inventing a label. A measurement harness that is quietly
+ * stricter than production manufactures faults and attributes them.
+ *
+ * ctaImage is the one thing this cannot know - whether kit/cta/download-now
+ * .png is on disk - so it stays with the caller.
+ */
+export function howToValidate(extra = {}) {
+  return { scrollable: scrollables(), zoomable: zoomCatalogue(), ...extra };
+}

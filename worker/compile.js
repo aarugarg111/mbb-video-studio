@@ -12,7 +12,7 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { parse, BUILT_IN_THEMES } from '../src/recipe.js';
-import { catalogue, scrollables, zoomCatalogue } from '../screens/index.js';
+import { catalogue, howToValidate } from '../screens/index.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -25,10 +25,8 @@ export async function compile(text) {
     .filter(f => /.(png|jpe?g|webp)$/i.test(f))
     .map(f => f.replace(/.[^.]+$/, ''));
 
-  return parse(text, catalogue(), {
+  return parse(text, catalogue(), howToValidate({
     themes: [...BUILT_IN_THEMES, ...art],
-    scrollable: scrollables(),
-    zoomable: zoomCatalogue(),
     ctaImage: existsSync(join(ROOT, 'kit', 'cta', 'download-now.png'))
-  });
+  }));
 }

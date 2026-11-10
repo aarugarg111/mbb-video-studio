@@ -34,9 +34,16 @@ async function askForShotList(brief: string, apiKey: string, shape: string) {
   /* The shape is applied to the answer, not merely asked for in the brief -
    * see castToShape. */
   const cast = castToShape(answered.recipe, shape);
+
+  /* Then the parts the renderer cannot do come out, rather than the whole
+   * shot list being refused over one of them - see dropImpossible. Both
+   * steps REPORT what they changed, into the same list shown beside the
+   * recipe: a repair nobody is told about is how a clip goes out missing
+   * the thing it was for. */
+  const possible = dropImpossible(cast.recipe);
   return {
-    recipe: cast.recipe,
-    unsupported: [...answered.unsupported, ...cast.unsupported]
+    recipe: possible.recipe,
+    unsupported: [...answered.unsupported, ...cast.unsupported, ...possible.dropped]
   };
 }
 import { TEAM_MODE, signIn, signOut, isSignedIn, proxyBaseUrl } from '@/lib/team';
@@ -48,12 +55,13 @@ import {
   askProvider, providerById, providerOfKey, castToShape, PROVIDERS, type ProviderId,
   readKey, writeKey, migrateKey, PROVIDER_SLOT
 } from '../lib/providers';
+import { dropImpossible } from '@/lib/possible';
 import { runSelfTest, asReport, type Step as CheckStep } from '@/lib/selftest';
 import { Stage } from './studio/stage';
 import { ShotListForm } from './studio/shot-list';
 // The renderer's own validator - the same one the CLI uses.
 import { parse } from '../../src/recipe.js';
-import { catalogue, scrollables, zoomCatalogue } from '../../screens/index.js';
+import { catalogue, howToValidate } from '../../screens/index.js';
 
 type Step = 'fill' | 'check' | 'rendering' | 'done';
 
@@ -351,11 +359,7 @@ export default function Page() {
 
     let checked: any;
     try {
-      checked = parse(recipe, catalogue(), {
-        scrollable: scrollables(),
-        zoomable: zoomCatalogue(),
-        ctaImage: await ctaImageExists()
-      });
+      checked = parse(recipe, catalogue(), howToValidate({ ctaImage: await ctaImageExists() }));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'The shot list could not be read.');
       return;

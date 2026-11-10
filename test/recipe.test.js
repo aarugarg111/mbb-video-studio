@@ -4,7 +4,7 @@ import { parse } from '../src/recipe.js';
 /* Most of this file works against the small catalogue below, deliberately.
    The places on a bill are a property of the real screens, so the test for
    those uses the real ones. */
-import { catalogue, scrollables, zoomCatalogue } from '../screens/index.js';
+import { catalogue, scrollables, zoomCatalogue, howToValidate } from '../screens/index.js';
 
 const CATALOGUE = {
   home: ['create-invoice-cta'],
@@ -581,27 +581,40 @@ shots:
   }
 });
 
-test('everything that reads a shot list tells it which screens scroll', async () => {
+test('everything that reads a shot list asks the studio how to read one', async () => {
   /* parse() sees screen names and their buttons, never the screens
-     themselves, so it has to be TOLD which ones have a list worth scrolling.
-     Left out, the answer is "none", and a perfectly good scroll is refused
-     with "Screens that scroll: ." - which is what the studio did, because the
-     command line was wired up and the web page was not.
+     themselves, so it has to be TOLD which ones scroll and where a camera
+     may go. Left out, the answer is "none" and "only the buttons", and a
+     perfectly good recipe is refused.
 
-     Checked at the source rather than by behaviour: a third caller added
-     later would be wrong in exactly the same way, and nothing else would
-     notice. */
+     This test used to look for `scrollable: scrollables()` in two files, and
+     warned that "a third caller added later would be wrong in exactly the
+     same way, and nothing else would notice". That is exactly what happened:
+     the eval became the third caller, passed `scrollable` and not `zoomable`,
+     and so refused every zoom to a look-at-only place - then reported it as
+     the model inventing labels. The options now come from one function, so
+     this checks that each caller asks for them rather than assembling its
+     own, which is the thing that can drift. */
   const { readFile } = await import('node:fs/promises');
-  const callers = ['../worker/compile.js', '../web/app/page.tsx'];
+  const callers = ['../worker/compile.js', '../web/app/page.tsx', '../web/eval.mts'];
 
   for (const file of callers) {
     const src = await readFile(new URL(file, import.meta.url), 'utf8');
     assert.match(src, /parse\(/, `${file} no longer reads a shot list - update this test`);
     assert.match(
-      src, /scrollable:\s*scrollables\(\)/,
-      `${file} reads a shot list without saying which screens scroll`
+      src, /howToValidate\(/,
+      `${file} reads a shot list on options of its own making - use howToValidate()`
     );
   }
+});
+
+test('howToValidate says both of the things parse cannot work out alone', () => {
+  const how = howToValidate();
+  assert.ok(Array.isArray(how.scrollable) && how.scrollable.length, 'which screens scroll');
+  assert.ok(how.zoomable && Object.keys(how.zoomable).length, 'where a camera may go');
+  /* The caller's own settings win, because ctaImage is the one thing this
+     cannot know. */
+  assert.equal(howToValidate({ ctaImage: false }).ctaImage, false);
 });
 
 test('a tap has to be a button, but a zoom may be a place', () => {

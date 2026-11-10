@@ -34,13 +34,14 @@
  * Gemini arm is free.
  */
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { askProvider, providerById, castToShape } from './lib/providers.ts';
 import { briefingFor } from './lib/briefing.ts';
+import { dropImpossible } from './lib/possible.ts';
 import { parse } from '../src/recipe.js';
-import { catalogue, scrollables } from '../screens/index.js';
+import { catalogue, howToValidate } from '../screens/index.js';
 
 /* The key, from the environment or - failing that - from cf/.dev.vars, which
  * is where the Worker's local copy already lives and which git ignores.
@@ -79,7 +80,7 @@ if (!geminiKey) {
 type Arm = {
   label: string;
   free: boolean;
-  run: (script: string, shape: string) => Promise<string>;
+  run: (script: string, shape: string) => Promise<{ recipe: string; dropped: string[] }>;
 };
 
 /* One arm. This compared three models while the studio had three to choose
@@ -99,7 +100,11 @@ const ARMS: Arm[] = MODELS.map(model => ({
       id: 'gemini', key: geminiKey, model: model.trim(),
       prompt: briefingFor(script, { shape })
     });
-    return castToShape(recipe, shape).recipe;
+    /* The same two repairs the studio makes, in the same order. An eval of a
+       path nobody uses proves nothing - but a repair that is counted and not
+       SHOWN is worse than that: the score goes up and what the model got
+       wrong disappears from the report. So they are printed. */
+    return dropImpossible(castToShape(recipe, shape).recipe);
   }
 }));
 
@@ -191,16 +196,22 @@ const indent = (text: string) =>
  * costume of a verdict on the model, which is the worst thing a measurement
  * can do: it was about to be evidence for a decision about which AI to use. */
 function screensOf(yamlText: string): string[] {
-  const { recipe, errors } = parse(yamlText, catalogue(), { scrollable: scrollables() });
+  /* howToValidate, not a hand-made options object. This passed `scrollable`
+   * and not `zoomable`, so zooms were checked against tap targets alone -
+   * stricter than the studio, which allows a zoom to anywhere a screen names
+   * for looking at. It refused a recipe that renders and the report called it
+   * the model inventing a label. Twice now this harness has produced a
+   * verdict about the model out of its own difference from production. */
+  const { recipe, errors } = parse(yamlText, catalogue(), howToValidate());
   /* A recipe the studio would refuse is a failure, and WHY it refused is the
      useful half - "no such screen: foo" says what the model got wrong. */
   if (errors?.length) throw new Error(errors.join('; '));
   return recipe.shots.map((s: { screen: string }) => s.screen);
 }
 
-type Tally = { parsed: number; kept: number; seconds: number; failed: string[] };
+type Tally = { parsed: number; kept: number; seconds: number; failed: string[]; dropped: number };
 const tally: Record<string, Tally> = {};
-for (const a of ARMS) tally[a.label] = { parsed: 0, kept: 0, seconds: 0, failed: [] };
+for (const a of ARMS) tally[a.label] = { parsed: 0, kept: 0, seconds: 0, failed: [], dropped: 0 };
 
 /* The harness checks ITSELF before it judges anything.
  *
@@ -211,12 +222,33 @@ for (const a of ARMS) tally[a.label] = { parsed: 0, kept: 0, seconds: 0, failed:
  * a decision from. A measurement that can fail silently in its own favour is
  * worse than no measurement.
  *
- * So one of the repo's own recipes goes through the same path first. It is
- * known good - it renders - so anything wrong here is the harness. */
+ * So the repo's own recipes go through the same path first. They are known
+ * good - they render - so anything wrong here is the harness.
+ *
+ * It ran ONE recipe at first, and that recipe's only zoom happened to land
+ * on a tap target - so it sailed through while the harness was refusing
+ * every zoom to a look-at-only place, and the report blamed the model for
+ * inventing labels. Now it runs all of them, which costs nothing and covers
+ * the whole vocabulary rather than one corner of it. */
 try {
-  const known = readFileSync(join(HERE, '..', 'recipes', 'desktop-reports-profit.yaml'), 'utf8');
-  const got = screensOf(castToShape(known, 'laptop').recipe);
-  if (!got.length) throw new Error('a known-good recipe produced no screens');
+  const dir = join(HERE, '..', 'recipes');
+  const names = readdirSync(dir).filter(n => n.endsWith('.yaml'));
+  if (names.length < 10) throw new Error(`only found ${names.length} recipes to check against`);
+
+  const broken = names
+    .map(name => {
+      try {
+        if (!screensOf(readFileSync(join(dir, name), 'utf8')).length) {
+          throw new Error('no screens');
+        }
+        return null;
+      } catch (err) {
+        return `${name}: ${(err as Error).message}`;
+      }
+    })
+    .filter(Boolean);
+
+  if (broken.length) throw new Error(broken.join('\n  '));
 } catch (err) {
   console.error(
     '\nThe harness is broken, so nothing was asked of any model and nothing\n' +
@@ -234,9 +266,9 @@ for (const t of chosen) {
 
   for (const arm of ARMS) {
     const started = Date.now();
-    let recipe: string;
+    let answer: { recipe: string; dropped: string[] };
     try {
-      recipe = await arm.run(t.script, t.shape);
+      answer = await arm.run(t.script, t.shape);
     } catch (err) {
       const seconds = (Date.now() - started) / 1000;
       tally[arm.label].seconds += seconds;
@@ -246,6 +278,9 @@ for (const t of chosen) {
     }
     const seconds = (Date.now() - started) / 1000;
     tally[arm.label].seconds += seconds;
+
+    const { recipe, dropped } = answer;
+    tally[arm.label].dropped += dropped.length;
 
     let screens: string[];
     try {
@@ -266,7 +301,11 @@ for (const t of chosen) {
 
     console.log(
       `  ${arm.label.padEnd(26)} ${seconds.toFixed(1)}s  ${screens.join(' > ')}` +
-      `${missing.length ? `\n  ${' '.repeat(26)} MISSING THE POINT: ${missing.join(', ')}` : ''}`
+      `${missing.length ? `\n  ${' '.repeat(26)} MISSING THE POINT: ${missing.join(', ')}` : ''}` +
+      /* What the studio repaired to get this far. Counted in the table AND
+         printed here, because a repair that only shows up as a better score
+         is the model's mistake going quiet. */
+      dropped.map(d => `\n  ${' '.repeat(26)} DROPPED: ${d}`).join('')
     );
   }
   console.log('');
@@ -274,18 +313,24 @@ for (const t of chosen) {
 
 console.log('-'.repeat(74));
 console.log(
-  `  ${'model'.padEnd(26)} ${'parsed'.padEnd(8)} ${'kept the point'.padEnd(16)} avg seconds`
+  `  ${'model'.padEnd(26)} ${'parsed'.padEnd(8)} ${'kept the point'.padEnd(16)} ` +
+  `${'repaired'.padEnd(10)} avg seconds`
 );
 for (const arm of ARMS) {
   const s = tally[arm.label];
   console.log(
     `  ${arm.label.padEnd(26)} ${`${s.parsed}/${chosen.length}`.padEnd(8)} ` +
-    `${`${s.kept}/${chosen.length}`.padEnd(16)} ${(s.seconds / chosen.length).toFixed(1)}` +
-    `${arm.free ? '   (free)' : ''}`
+    `${`${s.kept}/${chosen.length}`.padEnd(16)} ${String(s.dropped).padEnd(10)} ` +
+    `${(s.seconds / chosen.length).toFixed(1)}${arm.free ? '   (free)' : ''}`
   );
 }
 console.log(
   '\n  A different screen list is not automatically worse - read the lines\n' +
   '  above and decide. "MISSING THE POINT" always is: that is the beat the\n' +
-  '  script was written for, dropped from a clip that still renders.\n'
+  '  script was written for, dropped from a clip that still renders.\n\n' +
+  '  "repaired" is how many details the studio took out to get these to\n' +
+  '  parse at all - a zoom to a label no screen has, a tap on the wrong\n' +
+  '  screen. The clip is still made and the person is told what went. It is\n' +
+  '  the honest measure of how often the model invents a word, so it belongs\n' +
+  '  beside the score rather than hidden inside it.\n'
 );
