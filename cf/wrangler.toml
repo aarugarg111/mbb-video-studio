@@ -13,9 +13,22 @@ compatibility_date = "2026-01-01"
 # reaches it through Hong Kong. The fix was to make the call from an object
 # pinned to a region, so it always left from the United States.
 #
-# The studio does not call Anthropic any more, so none of that applies. The
-# object stored nothing and existed only for its address, and it was never
-# deployed, so it is simply gone rather than retired with a migration.
+# The studio does not call Anthropic any more, so none of that applies and
+# the object is gone from the code.
+#
+# It said here that the object "was never deployed, so it is simply gone
+# rather than retired with a migration". That was wrong, and it was wrong in
+# the one way that mattered: Cloudflare refused every deploy afterwards with
+#
+#   New version of script does not export class 'Egress' which is depended
+#   on by existing Durable Objects.
+#
+# So the studio could not be deployed AT ALL - which is why it stayed on the
+# old code, kept answering 503 to everything, and looked for an afternoon
+# like a team password that had gone wrong. A binding deleted from a config
+# is not a thing deleted from an account. The delete-class migration below
+# is what actually retires it; the object held no data, so there is nothing
+# to lose with it.
 #
 # Smart placement stays: it costs nothing. It was never the fix on its own -
 # it is a latency optimisation that needs traffic before it decides anything,
@@ -23,6 +36,18 @@ compatibility_date = "2026-01-01"
 # nothing left here for it to get wrong.
 [placement]
 mode = "smart"
+
+# The whole history, oldest first - this list is cumulative, and Cloudflare
+# applies whatever comes after the last tag it has already seen. v1-egress is
+# the one that created the class and is already applied; leaving it out does
+# not undo it, it just loses the record of how the account got this way.
+[[migrations]]
+tag = "v1-egress"
+new_sqlite_classes = ["Egress"]
+
+[[migrations]]
+tag = "v2-egress-retired"
+deleted_classes = ["Egress"]
 
 [assets]
 directory = "../web/out"
