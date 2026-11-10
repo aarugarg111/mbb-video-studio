@@ -87,26 +87,7 @@ export function explain(error: unknown, teamMode: boolean): Explained {
 
   if (status === 401 || text.includes('authentication_error') || text.includes('invalid x-api-key')) {
     return {
-      message: `Claude would not accept the key. ${keyHolder}`,
-      detail
-    };
-  }
-
-  /* A 403 that carries a Cloudflare ray and NO request id never reached
-   * Claude: it was refused by the edge sitting in front of Anthropic. The
-   * commonest reason is where the request happened to come FROM - Anthropic
-   * does not serve every country - and the key is fine.
-   *
-   * This has to come before the general 403 below, which says the opposite
-   * and is what sent the first person who hit this to check a key that was
-   * never the problem. */
-  if (status === 403 && /cloudflare ray:/.test(detail) && !/request id:/.test(detail)) {
-    return {
-      message:
-        'The request was stopped before it reached Claude - by the network in front of Claude, ' +
-        'not by Claude and not by the key. This usually means it was sent from a country Claude ' +
-        'does not serve. Nothing is wrong with your script or your sign-in. Send this to Aryan: ' +
-        'it is fixed in the studio settings, not from here.',
+      message: `Google would not accept the key. ${keyHolder}`,
       detail
     };
   }
@@ -114,8 +95,8 @@ export function explain(error: unknown, teamMode: boolean): Explained {
   if (status === 403 || text.includes('forbidden') || text.includes('permission_error')) {
     return {
       message:
-        'Something refused the request before Claude could answer it. That is usually the key ' +
-        'being turned off, out of credit, or not allowed to use this model - but it can also be ' +
+        'Something refused the request before Google could answer it. That is usually the key ' +
+        'being turned off, out of quota, or not allowed to use this model - but it can also be ' +
         `the connection in between. ${keyHolder} Open "What it said exactly" and send that too.`,
       detail
     };
@@ -123,21 +104,21 @@ export function explain(error: unknown, teamMode: boolean): Explained {
 
   if (status === 429 || text.includes('rate_limit')) {
     return {
-      message: 'Claude is being asked for too much at once. Wait a minute and try again — nothing is broken.',
+      message: 'Too many scripts at once for the free tier. Wait a minute and try again — nothing is broken, and nothing is being charged.',
       detail
     };
   }
 
   if (status === 529 || text.includes('overloaded')) {
     return {
-      message: 'Claude is overloaded at the moment. Try again in a minute — nothing is broken.',
+      message: 'Google is overloaded at the moment. Try again in a minute — nothing is broken.',
       detail
     };
   }
 
   if (status !== null && status >= 500) {
     return {
-      message: 'Claude had a problem at its end. Try again in a minute.',
+      message: 'Google had a problem at its end. Try again in a minute.',
       detail
     };
   }

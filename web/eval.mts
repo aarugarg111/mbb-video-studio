@@ -1,8 +1,8 @@
-/* Is the free, fast model as good as the dear one?
+/* Does the free, fast model actually do the job?
  *
- *   GEMINI_API_KEY=AIza...  npx tsx eval.mts        (from web/)
- *   ANTHROPIC_API_KEY=sk-ant-...  npx tsx eval.mts  (adds the Claude arms)
- *   ...both, to compare all three.  --one 3 for a single script.
+ *   GEMINI_API_KEY=AIza...  npx tsx eval.mts            (from web/)
+ *   ...  --one 3                 just one script
+ *   MODELS=gemini-3.8-flash,gemini-3.5-flash-lite ...    compare two
  *
  * The studio's whole bill is one call per script. It ran on Opus for a year,
  * doing a job that is not writing but reading a script into a fixed
@@ -33,20 +33,17 @@
  * Gemini arm is free.
  */
 
-import { proposeRecipe } from './lib/claude.ts';
-import { askProvider, providerById } from './lib/providers.ts';
+import { askProvider, providerById, castToShape } from './lib/providers.ts';
 import { briefingFor } from './lib/briefing.ts';
 import { parse } from '../src/recipe.js';
 
-const anthropicKey = process.env.ANTHROPIC_API_KEY;
 const geminiKey = process.env.GEMINI_API_KEY;
 
-if (!anthropicKey && !geminiKey) {
+if (!geminiKey) {
   console.error(
-    'Set GEMINI_API_KEY (free, from aistudio.google.com/apikey) or\n' +
-    'ANTHROPIC_API_KEY, or both to compare them. Keys are read from the\n' +
-    'environment, go to their own provider and nowhere else, and are never\n' +
-    'written down by this script.'
+    'Set GEMINI_API_KEY - free, from aistudio.google.com/apikey. It is read\n' +
+    'from the environment, sent to Google and nowhere else, and never written\n' +
+    'down by this script.'
   );
   process.exit(1);
 }
@@ -57,34 +54,26 @@ type Arm = {
   run: (script: string, shape: string) => Promise<string>;
 };
 
-/* The arms, in the order the studio would reach for them. */
-const ARMS: Arm[] = [];
+/* One arm. This compared three models while the studio had three to choose
+ * between; it has one now, so the question stopped being "which is best" and
+ * became "does the one we use do the job". The comparison is in the history
+ * if it is ever needed again. */
+const MODELS = (process.env.MODELS ?? providerById('gemini').defaultModel).split(',');
 
-if (geminiKey) {
-  const model = providerById('gemini').defaultModel;
-  ARMS.push({
-    label: `gemini (${model})`,
-    free: true,
-    run: async (script, shape) => (await askProvider({
-      id: 'gemini', key: geminiKey, model,
-      /* The same briefing the studio hands anybody pasting into a chat
-         window - this must be the real path, not a tidied-up one. */
+const ARMS: Arm[] = MODELS.map(model => ({
+  label: model.trim(),
+  free: true,
+  run: async (script, shape) => {
+    /* The real path, not a tidied-up one: the same briefing the studio hands
+       anybody pasting into a chat window, and the same shape-casting
+       afterwards. An eval of a path nobody uses proves nothing. */
+    const { recipe } = await askProvider({
+      id: 'gemini', key: geminiKey, model: model.trim(),
       prompt: briefingFor(script, { shape })
-    })).recipe
-  });
-}
-
-if (anthropicKey) {
-  for (const model of ['claude-haiku-5-5', 'claude-opus-5-5']) {
-    ARMS.push({
-      label: `claude (${model.replace('claude-', '')})`,
-      free: false,
-      run: async (script, shape) => (await proposeRecipe({
-        apiKey: anthropicKey, script, model, details: { shape }
-      })).recipe
     });
+    return castToShape(recipe, shape).recipe;
   }
-}
+}));
 
 /* The scripts. Eight, chosen to cover what the studio is actually asked for
  * rather than to be easy: both shapes, both products, and the two flows that

@@ -1,16 +1,19 @@
-import Anthropic from '@anthropic-ai/sdk';
-import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
-import * as yaml from 'js-yaml';
-import type { Recipe } from './schema';
-import { TEAM_MODE, proxyBaseUrl } from './team';
-import { RecipeSchema, SCREENS, ACTIONS, THEMES } from './schema';
-import { explain } from './errors';
-/* Shared with the command line, so the two cannot disagree about which laptop
-   screen stands in for which phone screen. */
-import { recastShape } from '../../src/shape.js';
-import { catalogue, scrollables } from '../../screens/index.js';
-
-const CATALOGUE = catalogue() as Record<string, string[]>;
+/* What the studio tells an AI about itself.
+ *
+ * This file used to be the Claude path: the SDK, a schema, a request, and
+ * the shape-recasting that went with it. All of that is gone - the studio
+ * reads scripts with Gemini's free tier and nothing else, so the one thing
+ * anybody ever paid for is no longer in the build at all.
+ *
+ * What is left is the part that was never about Claude: the instruction
+ * block. briefing.ts wraps it for whoever is reading, and it is the same
+ * briefing a person gets if they would rather paste a script into a chat
+ * window themselves. The name on this file is now the only thing in it that
+ * mentions Claude; it stays because every import of SYSTEM points here and
+ * renaming it would be churn for its own sake.
+ */
+import { SCREENS, ACTIONS, THEMES } from './schema';
+import { scrollables } from '../../screens/index.js';
 
 /* The prompt is carried over verbatim from the server route. It has been
  * corrected several times against real scripts; rewriting it loses that. */
@@ -86,93 +89,3 @@ Rules you must follow:
 - If the script describes something the renderer has no screen for, cover what you can with the screens above and keep the video short rather than inventing a screen.
 - Put in "unsupported" every feature the script asks for that none of the available screens can show. Name the feature as the script describes it, briefly: "batch-wise stock records", "GST reports". Use an empty array when the screens cover the whole script.
 - Still build the best shot list you can from the screens that do exist. The "unsupported" list is a warning to the author, not a refusal.`;
-
-/* Split the model's output into the recipe YAML and the unsupported list.
- * src/recipe.js knows nothing about "unsupported", so it must never reach the
- * YAML. */
-export function splitRecipe(
-  parsed: Recipe,
-  shape?: string
-): { recipe: string; unsupported: string[] } {
-  const { unsupported, ...rest } = parsed;
-  /* The shape the studio was asked for is applied here rather than left to the
-   * prompt. Asking the model is a request; a shot list came back on phone
-   * screens whatever the picker said, because the script's own UI markers name
-   * phone screens. Swapping them afterwards is the part that cannot be
-   * ignored. A tap with no equivalent on the other shape is reported, not
-   * quietly dropped. */
-  const { recipe, dropped } = recastShape(rest, shape, CATALOGUE);
-  const notes = dropped.map(d => `${d} - no equivalent on a ${shape}, so that tap is left out`);
-  return { recipe: yaml.dump(recipe), unsupported: [...(unsupported ?? []), ...notes] };
-}
-
-/* The model that works the shot list out.
- *
- * This was Opus, the dearest model there is, and it is the ONLY thing in the
- * studio anybody pays for - drawing the screens, rendering and encoding are
- * ordinary code and cost nothing however many clips get made. So the entire
- * bill was one call, on the most expensive model, doing the cheapest kind of
- * work: filling a fixed schema in from a script, against a catalogue of
- * screens handed to it. The effort below was already set to "low", which is
- * that same judgement written down and then not acted on.
- *
- * Structured outputs - the thing that makes the answer safe to use at all -
- * are available on every model, so nothing is given up by moving off Opus.
- * It is a parameter rather than a constant so eval.mjs can put the same
- * scripts through both and show the difference, instead of anyone having to
- * take my word for it. */
-export const MODEL = 'claude-haiku-5-5';
-
-export async function proposeRecipe(
-  { apiKey, script, details, model = MODEL }:
-    { apiKey?: string; script: string; details: unknown; model?: string }
-): Promise<{ recipe: string; unsupported: string[] }> {
-  /* Two ways to reach Anthropic, and the request below is identical either
-   * way. In team mode the studio posts to its own Worker, which holds the key
-   * and checks the session cookie; the placeholder below is never read by
-   * anything, but the SDK refuses to start without some key. Otherwise the
-   * key is the viewer's own, held in their browser and sent only to Anthropic. */
-  const client = TEAM_MODE
-    ? new Anthropic({ apiKey: 'held-by-the-worker', baseURL: proxyBaseUrl(), dangerouslyAllowBrowser: true })
-    : new Anthropic({ apiKey: apiKey ?? '', dangerouslyAllowBrowser: true });
-
-  /* Whatever comes back from here reaches a teammate's screen, so it is
-   * translated on the way out. The raw text is kept on the error so whoever
-   * has to fix it still has it. */
-  let response;
-  try {
-    response = await client.messages.parse({
-      model,
-      max_tokens: 16000,
-      /* The instruction block is 6,000-odd tokens of screen catalogue and
-       * rules, it is byte-identical on every call, and it was being re-sent
-       * and re-charged in full every time anybody made a clip. Cached, a
-       * repeat call pays about a tenth for it. The schema below has to stay
-       * fixed for the cache to hold, and it does - it is generated from the
-       * screens, not from the script. */
-      system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
-      messages: [{
-        role: 'user',
-        content: `Overrides (may be empty - anything absent comes from the script):\n` +
-          `${JSON.stringify(details, null, 2)}\n\nScript:\n${script}`
-      }],
-      output_config: {
-        /* Low effort: structured extraction against a fixed schema, not hard
-         * reasoning. Raise it if the shot lists come back sloppy. */
-        effort: 'low',
-        format: zodOutputFormat(RecipeSchema)
-      }
-    });
-  } catch (err) {
-    const { message, detail } = explain(err, TEAM_MODE);
-    const friendly = new Error(message);
-    (friendly as Error & { detail?: string }).detail = detail;
-    throw friendly;
-  }
-
-  if (!response.parsed_output) {
-    throw new Error('The model did not return a usable shot list. Try again.');
-  }
-
-  return splitRecipe(response.parsed_output, (details as { shape?: string })?.shape);
-}

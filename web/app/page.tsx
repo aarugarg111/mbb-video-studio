@@ -11,42 +11,41 @@ import { zipBlobs } from '@/lib/zip';
 /* The picker's fourth button: cut the same shot list in all three shapes. */
 const ALL = 'all';
 
-/* Team mode asks the FREE provider first.
+/* ONE path, for everybody.
  *
- * Everyone signed in shares Aryan's keys, so team mode is the one place
- * where nobody using it sees what it costs - which is exactly where the
- * cheap path belongs. Gemini has a free tier, it goes through the studio's
- * own validator like every other provider, and the Worker holds the key.
- *
- * Claude is the fallback, and ONLY when the Worker says it has no Gemini key
- * set. A quota error or a bad key is not a reason to quietly start spending
- * money - those are raised, so somebody fixes the free path rather than
- * paying for a year without noticing it broke. */
-async function askTeam(brief: string, script: string, details: unknown) {
-  try {
-    return await askProvider(
-      {
-        id: 'gemini',
-        key: '',
-        model: providerById('gemini').defaultModel,
-        prompt: brief
-      },
-      false,
-      { baseUrl: proxyBaseUrl() }
-    );
-  } catch (e) {
-    if (!/gemini-not-configured/.test(String((e as Error)?.message ?? ''))) throw e;
-    return proposeRecipe({ script, details });
-  }
+ * The studio used to have two: Claude against a schema, and everyone else
+ * against a briefing, with team mode wired to the first - so the deployment
+ * the team actually uses was the only one that had to pay. There is one
+ * provider now and one way through, and the only difference between a person
+ * with their own key and a signed-in teammate is WHERE the key is: in their
+ * browser, or on the Worker. */
+async function askForShotList(brief: string, apiKey: string, shape: string) {
+  const answered = await askProvider(
+    {
+      id: PROVIDERS[0].id,
+      key: TEAM_MODE ? '' : apiKey,
+      model: providerById(PROVIDERS[0].id).defaultModel,
+      prompt: brief
+    },
+    false,
+    TEAM_MODE ? { baseUrl: proxyBaseUrl() } : {}
+  );
+
+  /* The shape is applied to the answer, not merely asked for in the brief -
+   * see castToShape. */
+  const cast = castToShape(answered.recipe, shape);
+  return {
+    recipe: cast.recipe,
+    unsupported: [...answered.unsupported, ...cast.unsupported]
+  };
 }
-import { proposeRecipe } from '@/lib/claude';
 import { TEAM_MODE, signIn, signOut, isSignedIn, proxyBaseUrl } from '@/lib/team';
 import { renderVideo } from '@/lib/render';
 import { canEncode } from '@/lib/encode';
 import { renderRemotely, canRenderRemotely } from '@/lib/render-remote';
 import { briefingFor } from '@/lib/briefing';
 import {
-  askProvider, providerById, providerOfKey, PROVIDERS, type ProviderId,
+  askProvider, providerById, providerOfKey, castToShape, PROVIDERS, type ProviderId,
   readKey, writeKey, migrateKey, PROVIDER_SLOT
 } from '../lib/providers';
 import { runSelfTest, asReport, type Step as CheckStep } from '@/lib/selftest';
@@ -330,20 +329,10 @@ export default function Page() {
         ...(shape ? { shape } : {})
       };
 
+      /* The same briefing the studio hands to somebody pasting into a chat
+       * window. One set of instructions, whoever reads them. */
       const brief = briefingFor(script, { business, party, theme, shape });
-
-      const proposed = onOwnKey
-        ? await askProvider({
-            id: provider,
-            key: apiKey,
-            model: providerById(provider).defaultModel,
-            /* The same briefing the studio hands to somebody pasting into a
-             * chat window. One set of instructions, whoever reads them. */
-            prompt: brief
-          })
-        : TEAM_MODE
-          ? await askTeam(brief, script, details)
-          : await proposeRecipe({ apiKey, script, details });
+      const proposed = await askForShotList(brief, apiKey, shape);
       setRecipe(proposed.recipe);
       setUnsupported(proposed.unsupported);
       setStep('check');
@@ -454,7 +443,7 @@ export default function Page() {
    * picked another AI and saved a key is read by that instead - which is the
    * whole point of offering them, since Gemini and Grok have free tiers and
    * the team key does not. */
-  const onOwnKey = provider !== 'anthropic' && apiKey.trim().length > 0;
+  const onOwnKey = !TEAM_MODE && apiKey.trim().length > 0;
   /* Whether the studio can read a script ITSELF. The form no longer waits
    * behind this: without a key there is still the free path, where another AI
    * writes the shot list and the studio only renders it. */
@@ -497,50 +486,10 @@ export default function Page() {
       )}
 
 
-      {TEAM_MODE && signedIn && (
-        <details className="overrides own-key" open={onOwnKey}>
-          <summary>
-            {onOwnKey
-              ? `Reading your scripts with your own ${providerById(provider).name} key`
-              : 'Use your own AI key instead — free'}
-          </summary>
-          <p className="whose-note">
-            The studio reads scripts on the team&rsquo;s key, which costs the team money.
-            Gemini and Grok have free tiers, so you can use your own instead. It stays in
-            this browser and is sent only to the AI you pick.
-          </p>
-          <div className="whose" role="group" aria-label="Whose AI reads the script">
-            {PROVIDERS.map(p => (
-              <button key={p.id} type="button" className={provider === p.id ? 'on' : ''}
-                      aria-pressed={provider === p.id}
-                      onClick={() => pickProvider(p.id)}>
-                {p.id === 'anthropic' ? 'The team key' : p.name}
-              </button>
-            ))}
-          </div>
-          {provider !== 'anthropic' && (
-            <>
-              <p className="whose-note">
-                {providerById(provider).free}{' '}
-                Keys at{' '}
-                <a href={providerById(provider).whereUrl} target="_blank" rel="noreferrer">
-                  {providerById(provider).where}
-                </a>.
-              </p>
-              <input type="password" value={keyDraft} onChange={e => setKeyDraft(e.target.value)}
-                     placeholder={providerById(provider).hint}
-                     aria-label={`${providerById(provider).name} API key`} />
-              {keyDraft.trim() && providerOfKey(keyDraft) && providerOfKey(keyDraft) !== provider && (
-                <p className="whose-note warn">
-                  That looks like a {providerById(providerOfKey(keyDraft)!).name} key.
-                  Saving it will switch to {providerById(providerOfKey(keyDraft)!).name}.
-                </p>
-              )}
-              <button onClick={saveKey} disabled={!keyDraft.trim()}>Save key</button>
-            </>
-          )}
-        </details>
-      )}
+      {/* Team mode used to offer "use your own key instead", because the
+          team's key was Claude's and every script a teammate read cost the
+          team money. The team's key is Gemini's free tier now, so there is
+          nothing left to opt out of and nothing to configure. */}
 
       {needKey && (
         <div className="keybox">
@@ -550,20 +499,11 @@ export default function Page() {
             own to send it to.
           </p>
 
-          {/* Gemini and Grok both have a free tier, which is the point of
-              offering them: the people writing these videos are not the
-              people with an API budget. */}
-          <div className="whose" role="group" aria-label="Whose AI reads the script">
-            {PROVIDERS.map(p => (
-              <button
-                key={p.id}
-                type="button"
-                className={provider === p.id ? 'on' : ''}
-                aria-pressed={provider === p.id}
-                onClick={() => pickProvider(p.id)}
-              >{p.name}</button>
-            ))}
-          </div>
+          {/* There used to be a row of buttons here to choose between three
+              AIs. There is one now, and a picker with one option is a
+              question nobody can answer wrongly - so it is gone. Gemini's
+              free tier is the point: the people writing these videos are not
+              the people with an API budget. */}
           <p className="whose-note">
             {providerById(provider).free}{' '}
             Keys at{' '}

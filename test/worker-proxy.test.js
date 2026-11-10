@@ -4,13 +4,12 @@ import worker from '../cf/src/worker.js';
 import { signSession, cookieHeader } from '../cf/src/auth.js';
 
 const ENV = {
-  ANTHROPIC_API_KEY: 'sk-ant-the-real-one',
   TEAM_PASSWORD: 'let-me-in',
   SESSION_SECRET: 'session-secret',
   ASSETS: { fetch: async () => new Response('the studio page', { status: 200 }) }
 };
 
-/* Stands in for api.anthropic.com and records what the worker sent it. */
+/* Stands in for Google, and records what the worker sent it. */
 function captureUpstream() {
   const seen = {};
   const real = globalThis.fetch;
@@ -47,92 +46,10 @@ test('a wrong password is refused and sets no cookie', async () => {
   assert.equal(res.headers.get('Set-Cookie'), null);
 });
 
-test('the proxy refuses a request with no session', async () => {
-  const cap = captureUpstream();
-  try {
-    const res = await worker.fetch(post('/api/anthropic/v1/messages', { model: 'x' }), ENV);
-    assert.equal(res.status, 401);
-    assert.equal(cap.seen.url, undefined, 'an unauthenticated call must never reach Anthropic');
-  } finally { cap.restore(); }
-});
-
-test('the api key is added by the worker and never comes from the browser', async () => {
-  const cap = captureUpstream();
-  try {
-    await worker.fetch(
-      post('/api/anthropic/v1/messages', { model: 'claude-opus-5-5', max_tokens: 100 }, await signedInCookie()),
-      ENV
-    );
-    assert.equal(cap.seen.headers['x-api-key'], ENV.ANTHROPIC_API_KEY);
-    assert.equal(cap.seen.url, 'https://api.anthropic.com/v1/messages');
-  } finally { cap.restore(); }
-});
-
-test('an unknown model falls back to the cheap one, never to a costly one', async () => {
-  const cap = captureUpstream();
-  try {
-    await worker.fetch(
-      post('/api/anthropic/v1/messages', { model: 'something-expensive' }, await signedInCookie()),
-      ENV
-    );
-    assert.equal(cap.seen.body.model, 'claude-haiku-5-5');
-  } finally { cap.restore(); }
-});
-
-/* The pin became a LIST so the eval can put the same scripts through both and
- * show the difference. It is still not a free choice: anything off the list
- * lands on the cheap default above, so the worst a password-holder can do is
- * ask for the model that every request used to cost. */
-test('a model on the list is honoured, so the two can be compared', async () => {
-  for (const model of ['claude-haiku-5-5', 'claude-opus-5-5']) {
-    const cap = captureUpstream();
-    try {
-      await worker.fetch(
-        post('/api/anthropic/v1/messages', { model }, await signedInCookie()),
-        ENV
-      );
-      assert.equal(cap.seen.body.model, model, `${model} is on the list and must go through`);
-    } finally { cap.restore(); }
-  }
-});
-
-test('max_tokens is capped, whatever the browser asks for', async () => {
-  const cap = captureUpstream();
-  try {
-    await worker.fetch(
-      post('/api/anthropic/v1/messages', { max_tokens: 900000 }, await signedInCookie()),
-      ENV
-    );
-    assert.equal(cap.seen.body.max_tokens, 16000);
-  } finally { cap.restore(); }
-});
-
-test('a smaller max_tokens is left alone', async () => {
-  const cap = captureUpstream();
-  try {
-    await worker.fetch(
-      post('/api/anthropic/v1/messages', { max_tokens: 500 }, await signedInCookie()),
-      ENV
-    );
-    assert.equal(cap.seen.body.max_tokens, 500);
-  } finally { cap.restore(); }
-});
-
-test('streaming is stripped', async () => {
-  const cap = captureUpstream();
-  try {
-    await worker.fetch(
-      post('/api/anthropic/v1/messages', { stream: true }, await signedInCookie()),
-      ENV
-    );
-    assert.equal('stream' in cap.seen.body, false);
-  } finally { cap.restore(); }
-});
-
 test('a missing secret says so instead of looking like a wrong password', async () => {
-  const res = await worker.fetch(post('/api/login', { password: 'let-me-in' }), { ...ENV, ANTHROPIC_API_KEY: '' });
+  const res = await worker.fetch(post('/api/login', { password: 'let-me-in' }), { ...ENV, TEAM_PASSWORD: '' });
   assert.equal(res.status, 503);
-  assert.match((await res.json()).error, /ANTHROPIC_API_KEY/);
+  assert.match((await res.json()).error, /TEAM_PASSWORD/);
 });
 
 test('an unknown api path is a 404, not the studio page', async () => {
@@ -178,24 +95,10 @@ test('an empty password is refused even against an unset-looking secret', async 
   assert.equal(res.status, 401, 'an all-whitespace password must never be a way in');
 });
 
-test('a key stored with a trailing newline is still sent as the key', async () => {
-  /* Anthropic answers "invalid x-api-key" for this, which reads like the wrong
-   * key rather than the right one with a character stuck to it. */
-  const cap = captureUpstream();
-  try {
-    await worker.fetch(
-      post('/api/anthropic/v1/messages', {}, await signedInCookie()),
-      { ...ENV, ANTHROPIC_API_KEY: ENV.ANTHROPIC_API_KEY + '\n' }
-    );
-    assert.equal(cap.seen.headers['x-api-key'], ENV.ANTHROPIC_API_KEY);
-  } finally { cap.restore(); }
-});
-
-/* The Gemini route: the same arrangement as the Anthropic one, for the free
- * provider. It exists because team mode could not reach the free path at
- * all - the studio on Pages has taken a Gemini key for a while, but the team
- * build sent everything to Anthropic, so the one deployment the team
- * actually uses was the only one that had to pay. */
+/* The Gemini route is the only AI route there is now. The Worker used to
+ * proxy Anthropic as well - a model allow-list, a token ceiling and a
+ * region-pinned Durable Object - and all of it went with the paid path,
+ * along with the tests that covered it. */
 const GEM_PATH = '/api/gemini/v1beta/models/gemini-3.5-flash-lite:generateContent';
 const GEM_ENV = { ...ENV, GEMINI_API_KEY: 'AIza-the-real-one' };
 

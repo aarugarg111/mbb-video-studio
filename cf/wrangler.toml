@@ -5,46 +5,24 @@ compatibility_date = "2026-01-01"
 # The studio is a static site; the Worker exists only to hold the API key and
 # the team password. Everything not under /api/ is served straight from the
 # Next export, so a render still costs nothing and runs in the viewer's browser.
-# A Worker runs in the Cloudflare data centre nearest whoever opened the page,
-# and calls Anthropic from there. Anthropic does not serve every country, so a
-# request that runs in an unsupported one is refused at Anthropic's edge before
-# it ever reaches Claude. It looks exactly like the key being turned off, and
-# it is not: the key is fine and the same script works for everybody else.
 #
-# The part worth writing down, because it is the opposite of what anybody
-# assumes: the teammate this happened to was in BANGALORE. India is served.
-# Cloudflare routes by network peering rather than by geography, and a good
-# deal of Indian traffic reaches it through Hong Kong - so the person was in a
-# supported country and their code was not. "They are in India, so it cannot
-# be a region problem" is the wrong conclusion, and it is the first one
-# everyone reaches.
+# There used to be a Durable Object here, and a long note about why. The
+# Worker called Anthropic, Anthropic refuses whole regions at its own edge,
+# and a teammate IN BANGALORE was refused - because Cloudflare routes by
+# network peering rather than geography and a good deal of Indian traffic
+# reaches it through Hong Kong. The fix was to make the call from an object
+# pinned to a region, so it always left from the United States.
 #
-# Smart placement runs the Worker near what it talks to rather than near the
-# viewer. It is kept because it costs nothing and helps, but it was NOT enough
-# on its own: it is a latency optimisation, it needs traffic before it decides
-# anything, it is free to change its mind, and it never promises a region. The
-# refusal happened again with it switched on.
+# The studio does not call Anthropic any more, so none of that applies. The
+# object stored nothing and existed only for its address, and it was never
+# deployed, so it is simply gone rather than retired with a migration.
+#
+# Smart placement stays: it costs nothing. It was never the fix on its own -
+# it is a latency optimisation that needs traffic before it decides anything,
+# is free to change its mind, and never promises a region - but there is
+# nothing left here for it to get wrong.
 [placement]
 mode = "smart"
-
-# So the call to Anthropic is made from inside a Durable Object instead. An
-# object is created with a location hint and then stays where it was put, so
-# the call leaves from the United States for everybody - whoever opened the
-# page, and wherever Cloudflare happened to route them. The page itself is
-# still served from the edge, so nothing got slower to load.
-# See cf/src/egress.js for the whole story.
-#
-# The object stores nothing. It exists for its address.
-[[durable_objects.bindings]]
-name = "EGRESS"
-class_name = "Egress"
-
-# SQLite-backed, which is the kind of Durable Object the free plan can create.
-# Nothing is ever written to it - this is about which plans may declare the
-# class at all. `wrangler deploy` applies this itself; there is no extra step.
-[[migrations]]
-tag = "v1-egress"
-new_sqlite_classes = ["Egress"]
 
 [assets]
 directory = "../web/out"

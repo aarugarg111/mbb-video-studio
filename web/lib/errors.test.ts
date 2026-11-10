@@ -57,9 +57,12 @@ test('a dropped connection is not blamed on the key', () => {
 });
 
 test('a status buried in the message is still found', () => {
-  /* The SDK puts it at the front of the text rather than on a field. */
+  /* The provider puts it at the front of the text rather than on a field. */
   const { message } = explain(new Error('429 Too Many Requests'), true);
-  assert.match(message, /too much at once/);
+  assert.match(message, /Too many scripts at once/);
+  /* It says the free tier is what was hit. Without that, a rate limit reads
+     like a bill arriving, which is the opposite of what happened. */
+  assert.match(message, /nothing is being charged/);
 });
 
 test('something unrecognised is passed through rather than swallowed', () => {
@@ -113,24 +116,21 @@ test('headers given as a plain object are read too', () => {
   assert.match(explain(err, true).detail, /answered by: worker/);
 });
 
-test('a 403 from the edge is not reported as a key problem', () => {
-  /* The real one, from the first report: refused by Cloudflare in front of
-     Anthropic, at their Hong Kong edge. It carries a ray and NO request id,
-     which is how you know it never reached Claude.
+/* There used to be a test here for a 403 carrying a Cloudflare ray and no
+ * request id - the refusal Anthropic issued at its own edge, before the key
+ * was looked at, which broke the studio for a teammate in Bangalore while
+ * working for everybody else. Both the branch and the test have gone with
+ * the Anthropic path: the studio does not call Anthropic any more, and a
+ * message diagnosing a failure mode nobody has seen from Google would be a
+ * guess dressed up as help. cf/DEPLOY.md keeps the lesson. */
 
-     The old message said "that is usually the key being turned off", which is
-     exactly wrong here - the key was fine, and the person who hit it went and
-     checked a key that was never the problem. */
-  const edgeBlock = {
+test('a 403 still says it may not be the key, and whose key it is', () => {
+  const refused = {
     status: 403,
-    message: '403 {"error":{"type":"forbidden","message":"Request not allowed"}}',
-    headers: new Headers({ 'x-mvs-stage': 'anthropic', 'cf-ray': 'a4adccce5f5e20f3-HKG' })
+    message: '403 {"error":{"status":"PERMISSION_DENIED"}}'
   };
-  const said = explain(edgeBlock, true);
-  assert.match(said.message, /stopped before it reached Claude/);
-  assert.match(said.message, /country Claude does not serve/);
-  assert.doesNotMatch(said.message, /key being turned off/);
-  assert.doesNotMatch(said.message, /out of credit/);
+  assert.match(explain(refused, true).message, /not something you can fix from here/);
+  assert.match(explain(refused, false).message, /key saved in this browser/);
 });
 
 test('a 403 that DID reach Claude is still reported as a key problem', () => {

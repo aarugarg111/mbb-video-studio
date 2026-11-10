@@ -5,21 +5,22 @@ import { catalogue, scrollables } from '../../screens/index.js';
 import {
   PROVIDERS, providerById, providerOfKey, buildRequest, extractText, recipeFromText,
   readKey, writeKey, migrateKey, keySlotFor, replacementModel, askProvider,
-  objectsToThinking
+  objectsToThinking, castToShape
 } from './providers';
 
-test('a key goes to the provider it came from', () => {
-  /* Pasting a Gemini key into a box set to Grok is the obvious first mistake,
-     and the provider answers it with "unauthorised", which reads like the key
-     is wrong rather than in the wrong place. */
+test('a key is recognised by its shape, and nothing else is guessed at', () => {
   assert.equal(providerOfKey('AIzaSyDxxxxxxxxxxxxxxxxxxxxxxxx'), 'gemini');
-  assert.equal(providerOfKey('xai-abcdefghijklmnop'), 'grok');
-  assert.equal(providerOfKey('sk-ant-api03-xxxx'), 'anthropic');
   assert.equal(providerOfKey('  AIzaWithSpaces  '), 'gemini', 'a pasted key brings whitespace');
-  assert.equal(providerOfKey('hello'), null, 'and anything else is not guessed at');
+  /* Keys from the AIs the studio no longer uses must NOT be recognised as
+     Gemini ones. Somebody pasting an old Claude key needs to be told it is
+     the wrong key, not have it sent to Google and answered with
+     "unauthorised" - a true sentence about the wrong problem. */
+  assert.equal(providerOfKey('sk-ant-api03-xxxx'), null);
+  assert.equal(providerOfKey('xai-abcdefghijklmnop'), null);
+  assert.equal(providerOfKey('hello'), null);
 });
 
-test('each provider is asked in the shape it expects', () => {
+test('gemini is asked in the shape it expects', () => {
   const gem = buildRequest('gemini', 'AIzaKEY', 'gemini-3.8-flash', 'BRIEFING');
   assert.match(gem.url, /generativelanguage\.googleapis\.com/);
   assert.match(gem.url, /gemini-3.8-flash:generateContent$/);
@@ -28,13 +29,6 @@ test('each provider is asked in the shape it expects', () => {
   assert.equal(gem.headers['x-goog-api-key'], 'AIzaKEY');
   assert.ok(!gem.url.includes('AIzaKEY'), 'the key is in the address bar');
   assert.match(JSON.parse(gem.body).contents[0].parts[0].text, /BRIEFING/);
-
-  const grok = buildRequest('grok', 'xai-KEY', 'grok-4', 'BRIEFING');
-  assert.equal(grok.url, 'https://api.x.ai/v1/chat/completions');
-  assert.equal(grok.headers.Authorization, 'Bearer xai-KEY');
-  const body = JSON.parse(grok.body);
-  assert.equal(body.model, 'grok-4');
-  assert.equal(body.messages[0].content, 'BRIEFING');
 });
 
 test('a model name with something odd in it cannot escape the address', () => {
@@ -47,9 +41,6 @@ test('the answer is found wherever each provider puts it', () => {
     extractText('gemini', { candidates: [{ content: { parts: [{ text: 'a' }, { text: 'b' }] } }] }),
     'ab', 'Gemini splits an answer across parts'
   );
-  assert.equal(
-    extractText('grok', { choices: [{ message: { content: 'hello' } }] }), 'hello'
-  );
 });
 
 test('an empty answer says why, rather than looking like an empty shot list', () => {
@@ -60,7 +51,6 @@ test('an empty answer says why, rather than looking like an empty shot list', ()
     () => extractText('gemini', { candidates: [{ finishReason: 'SAFETY', content: {} }] }),
     /SAFETY/
   );
-  assert.throws(() => extractText('grok', { choices: [] }), /nothing back/);
 });
 
 test('a fenced answer is unwrapped, and what it cannot show is kept', () => {
@@ -167,32 +157,31 @@ function store(seed: Record<string, string> = {}) {
   };
 }
 
-test('each provider keeps its own key, so switching AI switches the key', () => {
-  /* The bug: one key under one name. Saving a Gemini key and then picking
-     Grok sent the Gemini key to x.ai, which answers "Incorrect API key
-     provided" - a true sentence about the wrong problem. */
+test('a key is kept in a slot named after its provider', () => {
+  /* The bug this fixed: one key under one name, so saving a key for one AI
+     and then picking another sent the first one's key onward - answered with
+     "Incorrect API key provided", a true sentence about the wrong problem.
+     There is one provider now, but the slot stays NAMED after it rather than
+     being collapsed to a single box: bringing a second provider back should
+     not bring that bug back with it. */
   const s = store();
   writeKey(s, 'gemini', 'AIzaGEM');
-  writeKey(s, 'grok', 'xai-GROK');
   assert.equal(readKey(s, 'gemini'), 'AIzaGEM');
-  assert.equal(readKey(s, 'grok'), 'xai-GROK');
-  assert.equal(readKey(s, 'anthropic'), '', 'a provider with no key has no key');
-  assert.notEqual(keySlotFor('gemini'), keySlotFor('grok'));
+  assert.match(keySlotFor('gemini'), /gemini/, 'the slot names its provider');
 });
 
 test('a pasted key is trimmed before it is kept', () => {
-  /* It arrives from a clipboard, and a trailing newline in an Authorization
-     header is rejected by the browser before it ever reaches the provider. */
+  /* It arrives from a clipboard, and a trailing newline in a header is
+     rejected by the browser before it ever reaches the provider. */
   const s = store();
-  writeKey(s, 'grok', '  xai-GROK\n');
-  assert.equal(readKey(s, 'grok'), 'xai-GROK');
+  writeKey(s, 'gemini', '  AIzaGEM\n');
+  assert.equal(readKey(s, 'gemini'), 'AIzaGEM');
 });
 
 test('the one old shared key is filed under whoever it belongs to', () => {
-  const s = store({ 'mbb-anthropic-key': 'xai-GROK', 'mbb-ai-provider': 'grok' });
+  const s = store({ 'mbb-anthropic-key': 'AIzaOLD', 'mbb-ai-provider': 'gemini' });
   migrateKey(s);
-  assert.equal(readKey(s, 'grok'), 'xai-GROK');
-  assert.equal(readKey(s, 'anthropic'), '', 'and not left sitting under Claude');
+  assert.equal(readKey(s, 'gemini'), 'AIzaOLD');
   assert.equal(s.getItem('mbb-anthropic-key'), null, 'the old slot is emptied');
 });
 
@@ -213,7 +202,7 @@ test('migrating twice does not overwrite a key saved since', () => {
 test('nothing to migrate is not an error', () => {
   const s = store();
   migrateKey(s);
-  assert.equal(readKey(s, 'anthropic'), '');
+  assert.equal(readKey(s, 'gemini'), '');
 });
 
 /* Google's own words when it retired the model this studio was asking for. */
@@ -268,4 +257,34 @@ test('a retired model is asked again once, and only once', async () => {
   } finally {
     globalThis.fetch = realFetch;
   }
+});
+
+/* castToShape took over the job the Claude path used to do: APPLYING the
+ * shape rather than merely asking for it in the briefing. The failure it
+ * exists for is documented - a shot list comes back on phone screens
+ * whatever the picker said, because the script's own "Internal team adds:
+ * UI" markers name phone screens and the model follows the script. */
+test('a phone shot list asked for as a laptop one comes back on laptop screens', () => {
+  const phone = 'video: t\nshots:\n  - screen: home\n    duration: 2\n';
+  const { recipe } = castToShape(phone, 'laptop');
+  assert.match(recipe, /mbb-desktop-dashboard/, 'the laptop screen stands in for home');
+  assert.ok(!/screen: home/.test(recipe), 'and the phone one is gone');
+});
+
+test('a shot list with no shape asked for is left exactly as it came', () => {
+  const asWritten = 'video: t\nshots:\n  - screen: home\n    duration: 2\n';
+  assert.equal(castToShape(asWritten, '').recipe, asWritten);
+  assert.equal(castToShape(asWritten, undefined).recipe, asWritten);
+});
+
+test('something it cannot read is passed on untouched, not thrown away', () => {
+  /* The validator one step later reports a broken recipe far better than
+     this could, and a recipe this cannot read is exactly the one somebody
+     needs to see rather than have silently replaced. */
+  const broken = 'video: t\n  shots: [[[\n';
+  assert.equal(castToShape(broken, 'laptop').recipe, broken);
+  assert.deepEqual(castToShape(broken, 'laptop').unsupported, []);
+
+  const noShots = 'video: t\n';
+  assert.equal(castToShape(noShots, 'laptop').recipe, noShots);
 });

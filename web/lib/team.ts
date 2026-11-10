@@ -1,14 +1,21 @@
-/* Team mode: the studio talks to its own Worker, which holds the Anthropic key
- * and checks a shared password. Nobody on the team handles a key, and the key
- * can be replaced in one place without anyone noticing.
+/* Team mode: the studio talks to its own Worker, which holds the API key and
+ * checks a shared password. Nobody on the team handles a key, and the key can
+ * be replaced in one place without anyone noticing.
  *
  * Off by default, so the same build still runs as a static page where each
  * person brings their own key. The Worker build turns it on. */
 export const TEAM_MODE = process.env.NEXT_PUBLIC_TEAM_MODE === '1';
 
-/* The SDK appends /v1/messages, so this is the prefix the Worker routes on. */
+/* The studio's own origin. Whoever calls adds the rest of the path.
+ *
+ * It used to return the origin PLUS "/api/anthropic", because the Anthropic
+ * SDK appended "/v1/messages" to whatever base URL it was given. There is no
+ * SDK any more and the caller builds the whole path, so a base carrying half
+ * a route would have produced /api/anthropic/api/gemini/... - a 404 in team
+ * mode and nowhere else, which is the single place it would have gone
+ * unnoticed until a teammate hit it. */
 export function proxyBaseUrl(): string {
-  return (typeof window === 'undefined' ? '' : window.location.origin) + '/api/anthropic';
+  return typeof window === 'undefined' ? '' : window.location.origin;
 }
 
 async function readError(res: Response, fallback: string): Promise<string> {

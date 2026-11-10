@@ -23,7 +23,7 @@ const find = (steps: Awaited<ReturnType<typeof runSelfTest>>, name: string) =>
 test('a working studio passes every step', async () => {
   const steps = await runSelfTest(stub({
     '/api/session': () => reply(200, { signedIn: true, canRender: false }, FROM_WORKER),
-    '/api/anthropic/v1/messages': () => reply(200, { content: [] }, { ...FROM_WORKER, 'x-mvs-stage': 'anthropic', 'x-mvs-request-id': 'req_1' })
+    '/api/gemini/v1beta/models/gemini-3.5-flash-lite:generateContent': () => reply(200, { content: [] }, { ...FROM_WORKER, 'x-mvs-stage': 'gemini', 'x-mvs-request-id': 'req_1' })
   }));
   assert.deepEqual(steps.map(s => s.outcome), ['ok', 'ok', 'ok']);
 });
@@ -48,7 +48,7 @@ test('a studio that cannot be reached at all blames the network, not the key', a
   assert.equal(find(steps, 'Reaching the studio').outcome, 'failed');
   assert.match(find(steps, 'Reaching the studio').detail, /this network or something on it/i);
   /* Nothing further can be concluded, so nothing further is claimed. */
-  assert.equal(find(steps, 'Reaching Claude').outcome, 'skipped');
+  assert.equal(find(steps, 'Reaching the AI').outcome, 'skipped');
 });
 
 test('a dropped sign-in cookie is told apart from a refusal', async () => {
@@ -58,48 +58,48 @@ test('a dropped sign-in cookie is told apart from a refusal', async () => {
   assert.equal(find(steps, 'Reaching the studio').outcome, 'ok');
   assert.equal(find(steps, 'Signed in').outcome, 'failed');
   assert.match(find(steps, 'Signed in').detail, /blocking the cookie/);
-  assert.equal(find(steps, 'Reaching Claude').outcome, 'skipped');
+  assert.equal(find(steps, 'Reaching the AI').outcome, 'skipped');
 });
 
-test('a refusal that reached Claude is told apart from one that did not', async () => {
+test('a refusal from Google is told apart from one the Worker made itself', async () => {
   const reachedClaude = await runSelfTest(stub({
     '/api/session': () => reply(200, { signedIn: true }, FROM_WORKER),
-    '/api/anthropic/v1/messages': () => reply(403, { type: 'error', error: { type: 'permission_error', message: 'no' } },
-      { 'x-mvs-stage': 'anthropic', 'x-mvs-request-id': 'req_9' })
+    '/api/gemini/v1beta/models/gemini-3.5-flash-lite:generateContent': () => reply(403, { type: 'error', error: { type: 'permission_error', message: 'no' } },
+      { 'x-mvs-stage': 'gemini', 'x-mvs-request-id': 'req_9' })
   }));
-  assert.match(find(reachedClaude, 'Reaching Claude').detail, /Claude itself refused this/);
-  assert.match(find(reachedClaude, 'Reaching Claude').detail, /key, its credit/);
+  assert.match(find(reachedClaude, 'Reaching the AI').detail, /Google itself refused this/);
+  assert.match(find(reachedClaude, 'Reaching the AI').detail, /key, its quota/);
 
   const stoppedEarlier = await runSelfTest(stub({
     '/api/session': () => reply(200, { signedIn: true }, FROM_WORKER),
-    '/api/anthropic/v1/messages': () => reply(403, { error: { type: 'forbidden', message: 'Request not allowed' } },
-      { 'x-mvs-stage': 'anthropic', 'x-mvs-cf-ray': '8f2a' })
+    '/api/gemini/v1beta/models/gemini-3.5-flash-lite:generateContent': () => reply(501, { error: 'gemini-not-configured' },
+      { 'x-mvs-stage': 'worker' })
   }));
-  assert.match(find(stoppedEarlier, 'Reaching Claude').detail, /never reached Claude/);
-  assert.ok(!find(stoppedEarlier, 'Reaching Claude').detail.includes('its credit'));
+  assert.match(find(stoppedEarlier, 'Reaching the AI').detail, /never reached Google/);
+  assert.ok(!find(stoppedEarlier, 'Reaching the AI').detail.includes('its quota'));
 });
 
 test('the refusal text itself is carried, not summarised away', async () => {
   const steps = await runSelfTest(stub({
     '/api/session': () => reply(200, { signedIn: true }, FROM_WORKER),
-    '/api/anthropic/v1/messages': () => reply(403, '{"error":{"type":"forbidden","message":"Request not allowed"}}',
-      { 'x-mvs-stage': 'anthropic' })
+    '/api/gemini/v1beta/models/gemini-3.5-flash-lite:generateContent': () => reply(403, '{"error":{"type":"forbidden","message":"Request not allowed"}}',
+      { 'x-mvs-stage': 'gemini' })
   }));
-  assert.match(find(steps, 'Reaching Claude').detail, /Request not allowed/);
+  assert.match(find(steps, 'Reaching the AI').detail, /Request not allowed/);
 });
 
 test('a request cut off mid-flight points at the network', async () => {
   const steps = await runSelfTest(stub({
     '/api/session': () => reply(200, { signedIn: true }, FROM_WORKER),
-    '/api/anthropic/v1/messages': () => { throw new TypeError('Load failed'); }
+    '/api/gemini/v1beta/models/gemini-3.5-flash-lite:generateContent': () => { throw new TypeError('Load failed'); }
   }));
-  assert.match(find(steps, 'Reaching Claude').detail, /proxy or\s+filter/);
+  assert.match(find(steps, 'Reaching the AI').detail, /proxy or\s+filter/);
 });
 
 test('the report is one block, ready to paste', async () => {
   const steps = await runSelfTest(stub({
     '/api/session': () => reply(200, { signedIn: true }, FROM_WORKER),
-    '/api/anthropic/v1/messages': () => reply(200, {}, { 'x-mvs-stage': 'anthropic' })
+    '/api/gemini/v1beta/models/gemini-3.5-flash-lite:generateContent': () => reply(200, {}, { 'x-mvs-stage': 'gemini' })
   }));
   const report = asReport(steps);
   assert.match(report, /connection check/);

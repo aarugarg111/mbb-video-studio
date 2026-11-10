@@ -17,7 +17,14 @@
  * to, outside team mode.
  */
 
-export type ProviderId = 'anthropic' | 'gemini' | 'grok';
+import * as yaml from 'js-yaml';
+/* Shared with the command line, so the two cannot disagree about which laptop
+   screen stands in for which phone screen. */
+import { recastShape } from '../../src/shape.js';
+import { catalogue } from '../../screens/index.js';
+import { explain } from './errors';
+
+export type ProviderId = 'gemini';
 
 export type Provider = {
   id: ProviderId;
@@ -32,18 +39,26 @@ export type Provider = {
   free: string;
 };
 
-/* GEMINI IS FIRST, and first here means default - providerById falls back to
- * PROVIDERS[0] and the picker opens on it. It leads because it is the only
- * one of the three with a free tier big enough to run the studio on, and the
- * studio's whole running cost is this one call.
+/* GEMINI IS THE ONLY ONE.
+ *
+ * The studio used to offer three - Claude against a schema, Gemini and Grok
+ * against a briefing - and the whole running cost of the tool was whichever
+ * one it reached for. Gemini has a free tier that covers this comfortably,
+ * so the others were a paid way of doing a job that is already free, kept
+ * around for a choice nobody benefits from making. They are gone, and with
+ * them the Anthropic SDK that used to ship in the page.
+ *
+ * It is a LIST of one rather than a bare constant because the rest of the
+ * studio already asks it questions - which provider a key belongs to, where
+ * to get one, what to default to - and those answers stay the same shape.
+ * Adding a second one back is adding an entry here.
  *
  * The model is Flash-LITE rather than Flash. Google's own model list calls it
- * "the fastest, most cost-effective" of its generation, and this job is the
- * one that suits it: not writing, but reading a script into a fixed
- * vocabulary of screens that is handed to it in the prompt, with the
- * studio's validator behind it to catch anything it gets wrong. Flash-Lite
- * also takes the "minimal" thinking level, which the bigger Flash does not -
- * see buildRequest. */
+ * "the fastest, most cost-effective" of its generation, and this job suits
+ * it: not writing, but reading a script into a fixed vocabulary of screens
+ * handed to it in the prompt, with the studio's validator behind it. It also
+ * takes the "minimal" thinking level, which the bigger Flash does not - see
+ * buildRequest. */
 export const PROVIDERS: Provider[] = [
   {
     id: 'gemini',
@@ -53,27 +68,7 @@ export const PROVIDERS: Provider[] = [
     where: 'aistudio.google.com',
     whereUrl: 'https://aistudio.google.com/apikey',
     defaultModel: 'gemini-3.5-flash-lite',
-    free: 'Free tier. The fastest of them, and what the studio opens on.'
-  },
-  {
-    id: 'anthropic',
-    name: 'Claude',
-    looksLike: /^sk-ant-/,
-    hint: 'sk-ant-…',
-    where: 'console.anthropic.com',
-    whereUrl: 'https://console.anthropic.com/settings/keys',
-    defaultModel: 'claude-haiku-5-5',
-    free: 'Paid, but pennies a script. Reads it against the studio’s own schema.'
-  },
-  {
-    id: 'grok',
-    name: 'Grok',
-    looksLike: /^xai-/,
-    hint: 'xai-…',
-    where: 'console.x.ai',
-    whereUrl: 'https://console.x.ai',
-    defaultModel: 'grok-4',
-    free: 'Has free credits. Good enough for a shot list.'
+    free: 'Free tier, and the fastest of them. Nothing here costs anything to run.'
   }
 ];
 
@@ -141,19 +136,7 @@ export function buildRequest(
     };
   }
 
-  if (id === 'grok') {
-    return {
-      url: 'https://api.x.ai/v1/chat/completions',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-      body: JSON.stringify({
-        model,
-        temperature: 0.2,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    };
-  }
-
-  throw new Error(`${id} is read through the studio's own path, not this one.`);
+  throw new Error(`There is no request builder for ${id}.`);
 }
 
 /* The answer, whatever it is wrapped in. */
@@ -170,13 +153,55 @@ export function extractText(id: ProviderId, payload: unknown): string {
     throw new Error(why ? `Gemini stopped: ${why}.` : 'Gemini sent nothing back.');
   }
 
-  if (id === 'grok') {
-    const text = data?.choices?.[0]?.message?.content ?? '';
-    if (typeof text === 'string' && text.trim()) return text;
-    throw new Error('Grok sent nothing back.');
-  }
-
   throw new Error(`No reader for ${id}.`);
+}
+
+/* The shot list, moved onto the shape the picker actually asked for.
+ *
+ * This used to happen only on the Claude path, and the reason it was written
+ * there is a documented failure rather than a precaution: a shot list came
+ * back on PHONE screens whatever the picker said, because the script's own
+ * "Internal team adds: UI" markers name phone screens and the model follows
+ * the script in front of it. Asking is a request; this is the part that
+ * cannot be ignored.
+ *
+ * When Claude was removed, that left the only remaining path - this one -
+ * merely asking. So it moved here. It is the same recastShape the command
+ * line uses, so a clip rendered in the studio and the same recipe rendered
+ * from a terminal cannot disagree about which screen is the laptop one.
+ *
+ * Deliberately NOT run through src/recipe.js first. That would normalise the
+ * recipe - filling in every default - and hand the person checking the shot
+ * list a page of YAML they did not write. Only the screens and taps are
+ * touched here; everything else stays in the model's own words, and the real
+ * validation happens where it always did, one step later.
+ *
+ * Anything unparseable is returned untouched rather than thrown away: the
+ * validator reports a broken recipe far better than this could, and a recipe
+ * this cannot read is exactly the one somebody needs to see. */
+export function castToShape(
+  recipeText: string, shape?: string
+): { recipe: string; unsupported: string[] } {
+  if (!shape) return { recipe: recipeText, unsupported: [] };
+
+  let doc: { shots?: unknown } | null;
+  try {
+    doc = yaml.load(recipeText) as { shots?: unknown } | null;
+  } catch {
+    return { recipe: recipeText, unsupported: [] };
+  }
+  if (!doc || !Array.isArray(doc.shots)) return { recipe: recipeText, unsupported: [] };
+
+  const { recipe, dropped } = recastShape(doc, shape, catalogue() as Record<string, string[]>);
+  return {
+    recipe: yaml.dump(recipe),
+    /* A tap with no equivalent on the other shape is REPORTED, never quietly
+       dropped - the person checking the shot list is the one who can decide
+       whether it mattered. */
+    unsupported: (dropped as string[]).map(
+      d => `${d} - no equivalent on a ${shape}, so that tap is left out`
+    )
+  };
 }
 
 /* The shot list out of whatever the model wrapped it in.
@@ -272,10 +297,18 @@ export async function askProvider(
       return askProvider({ id, key, model, prompt }, retried, { ...how, withoutThinking: true });
     }
 
-    throw Object.assign(
+    /* Put through the explainer rather than thrown raw. This used to show
+     * the viewer `403 {"error":{"type":"forbidden",...}}`, which is accurate
+     * and useless: it says nothing about whose key, which step, or what to
+     * do. The explainer was written for the Claude path and outlived it -
+     * most of what it knows is about HTTP and about the person reading the
+     * screen, not about a vendor. */
+    const raw = Object.assign(
       new Error(`${response.status} ${detail.slice(0, 600)}`),
       { status: response.status }
     );
+    const { message, detail: full } = explain(raw, Boolean(how.baseUrl));
+    throw Object.assign(new Error(message), { status: response.status, detail: full });
   }
 
   return recipeFromText(extractText(id, await response.json()));
@@ -317,7 +350,7 @@ export function migrateKey(store: KeyStore): void {
     store.removeItem(LEGACY_SLOT);
     if (!old) return;
     const id = providerOfKey(old)
-      ?? (PROVIDERS.find(p => p.id === store.getItem(PROVIDER_SLOT))?.id ?? 'anthropic');
+      ?? PROVIDERS[0].id;
     if (!readKey(store, id)) writeKey(store, id, old);
   } catch { /* private mode */ }
 }

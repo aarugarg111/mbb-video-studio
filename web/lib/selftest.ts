@@ -2,7 +2,7 @@
  *
  * The studio works for most people and fails for a few, which means the fault
  * is somewhere along one person's own path to it - their network, something
- * between them and Cloudflare, or Claude refusing that particular request.
+ * between them and Cloudflare, or the AI refusing that particular request.
  * Those look identical from the outside, and two rounds of screenshots did not
  * tell them apart.
  *
@@ -29,29 +29,22 @@ function traceOf(res: Response): string {
   const bits = [
     `HTTP ${res.status}`,
     `answered by: ${stageOf(res)}`,
-    res.headers.get('x-mvs-request-id') && `claude request id: ${res.headers.get('x-mvs-request-id')}`,
-    /* Where the studio called Claude FROM. Anthropic refuses whole regions at
-       its own edge, and the studio pins its call to one that is served - so a
-       report carrying no region came from a studio deployed before that fix,
-       which is a different thing to go and look at. */
-    stageOf(res) === 'anthropic' && (
-      res.headers.get('x-mvs-egress')
-        ? `called claude from: ${res.headers.get('x-mvs-egress')}`
-        : 'called claude from: wherever the viewer is - this studio is not pinned, so redeploy it'
-    ),
-    res.headers.get('x-mvs-cf-ray') && `cloudflare ray (claude side): ${res.headers.get('x-mvs-cf-ray')}`,
+    /* The egress region used to be reported here too. Anthropic refused whole
+       regions at its own edge and the studio pinned its call to one that was
+       served; none of that exists now, so a line about it would be noise in
+       the one place somebody is trying to read quickly. */
     res.headers.get('cf-ray') && `cloudflare ray: ${res.headers.get('cf-ray')}`
   ].filter(Boolean);
   return bits.join(' · ');
 }
 
-/* The smallest request that still goes the whole way to Claude. It costs a
- * fraction of a paisa, which is worth it to find out whether the path works
- * at all. */
+/* The smallest request that still goes the whole way to Google. It is a
+ * single token on the free tier, which costs nothing at all and is worth it
+ * to find out whether the path works. */
+const PING_MODEL = 'gemini-3.5-flash-lite';
 const PING = {
-  model: 'claude-opus-5-5',
-  max_tokens: 1,
-  messages: [{ role: 'user', content: 'hi' }]
+  contents: [{ role: 'user', parts: [{ text: 'hi' }] }],
+  generationConfig: { maxOutputTokens: 1 }
 };
 
 export async function runSelfTest(fetchImpl: typeof fetch = fetch): Promise<Step[]> {
@@ -71,7 +64,7 @@ export async function runSelfTest(fetchImpl: typeof fetch = fetch): Promise<Step
         'rather than the studio itself. ' + String((err as Error)?.message ?? err)
     });
     steps.push({ name: 'Signed in', outcome: 'skipped', detail: 'Not checked - the studio was not reachable.' });
-    steps.push({ name: 'Reaching Claude', outcome: 'skipped', detail: 'Not checked - the studio was not reachable.' });
+    steps.push({ name: 'Reaching the AI', outcome: 'skipped', detail: 'Not checked - the studio was not reachable.' });
     return steps;
   }
 
@@ -103,37 +96,43 @@ export async function runSelfTest(fetchImpl: typeof fetch = fetch): Promise<Step
   });
 
   if (!signedIn) {
-    steps.push({ name: 'Reaching Claude', outcome: 'skipped', detail: 'Not checked - not signed in.' });
+    steps.push({ name: 'Reaching the AI', outcome: 'skipped', detail: 'Not checked - not signed in.' });
     return steps;
   }
 
   /* 3. The hop that has actually been failing. */
   try {
-    const res = await fetchImpl('/api/anthropic/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify(PING)
-    });
+    const res = await fetchImpl(
+      `/api/gemini/v1beta/models/${PING_MODEL}:generateContent`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(PING)
+      }
+    );
 
     if (res.ok) {
-      steps.push({ name: 'Reaching Claude', outcome: 'ok', detail: traceOf(res) });
+      steps.push({ name: 'Reaching the AI', outcome: 'ok', detail: traceOf(res) });
     } else {
       const body = await res.text();
-      const reachedClaude = Boolean(res.headers.get('x-mvs-request-id'));
+      /* The Worker stamps its own stage on anything it answers itself, so a
+         reply carrying "gemini" got past the Worker and came from Google. */
+      const reachedGoogle = res.headers.get('x-mvs-stage') === 'gemini';
       steps.push({
-        name: 'Reaching Claude',
+        name: 'Reaching the AI',
         outcome: 'failed',
         detail:
           `${traceOf(res)} - ` +
-          (reachedClaude
-            ? 'Claude itself refused this. That is the key, its credit, or what it is allowed to use.'
-            : 'this never reached Claude - something in between refused it first.') +
+          (reachedGoogle
+            ? 'Google itself refused this. That is the key, its quota, or what it is allowed to use.'
+            : 'this never reached Google - the Worker refused it first. If it says the ' +
+              'key is not configured, GEMINI_API_KEY is not set on the Worker.') +
           `\n${body.slice(0, 400)}`
       });
     }
   } catch (err) {
     steps.push({
-      name: 'Reaching Claude',
+      name: 'Reaching the AI',
       outcome: 'failed',
       detail:
         'The request never completed. On a company network this is usually a proxy or ' +
