@@ -142,3 +142,36 @@ test('a worker with no gemini key says so, so the studio can fall back', async (
     assert.equal(cap.seen.url, undefined, 'it must not call Google without a key');
   } finally { cap.restore(); }
 });
+
+/* A secret that exists but holds a space.
+ *
+ * `wrangler secret list` shows it exactly like a real key, so the only thing
+ * that can tell them apart is what the Worker does with it. Untrimmed, the
+ * blank went to Google and came back as Google's own refusal - which reads
+ * like a key that is wrong rather than one that was never typed. */
+test('a gemini key that is present but blank counts as missing', async () => {
+  const cap = captureUpstream();
+  try {
+    for (const blank of ['', '   ', '\n', '\t ']) {
+      const res = await worker.fetch(
+        post(GEM_PATH, {}, await signedInCookie()),
+        { ...GEM_ENV, GEMINI_API_KEY: blank }
+      );
+      assert.equal(res.status, 501, JSON.stringify(blank));
+      assert.match((await res.json()).error, /gemini-not-configured/);
+      assert.equal(cap.seen.url, undefined, 'a blank key must never reach Google');
+    }
+  } finally { cap.restore(); }
+});
+
+test('a real key is still passed on, trimmed of what a terminal added', async () => {
+  const cap = captureUpstream();
+  try {
+    const res = await worker.fetch(
+      post(GEM_PATH, {}, await signedInCookie()),
+      { ...GEM_ENV, GEMINI_API_KEY: '  AIzaREAL\n' }
+    );
+    assert.notEqual(res.status, 501);
+    assert.equal(cap.seen.headers['x-goog-api-key'], 'AIzaREAL');
+  } finally { cap.restore(); }
+});

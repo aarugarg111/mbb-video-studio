@@ -348,3 +348,28 @@ test('something it cannot read is passed on untouched, not thrown away', () => {
   const noShots = 'video: t\n';
   assert.equal(castToShape(noShots, 'laptop').recipe, noShots);
 });
+
+/* 501 is this studio's own Worker saying it has no key. Retrying it waits a
+ * second and a half to be told the same permanent thing twice. */
+test('a Worker with no key configured is not retried', async () => {
+  const realFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls++;
+    return {
+      ok: false,
+      status: 501,
+      text: async () => '{"error":"gemini-not-configured","detail":"This Worker has no GEMINI_API_KEY set."}'
+    } as unknown as Response;
+  }) as typeof fetch;
+
+  try {
+    await assert.rejects(
+      askProvider({ id: 'gemini', key: '', model: 'm', prompt: 'B' }, false, { baseUrl: 'https://x' }),
+      /not finished being set up/
+    );
+    assert.equal(calls, 1, 'asked once');
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});

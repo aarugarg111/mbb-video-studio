@@ -111,6 +111,27 @@ export function explain(error: unknown, teamMode: boolean): Explained {
     };
   }
 
+  /* Before the 5xx branches below, not after them, which is where this used
+   * to be. The Worker answers "no GEMINI_API_KEY set" with a 501, so a
+   * missing key fell through to "Google had a problem at its end. Try again
+   * in a minute." It is not Google, it will not come right in a minute, and
+   * waiting is the one thing that cannot help - the key has to be set. The
+   * truth was sitting in the detail underneath the whole time, contradicted
+   * by the sentence on top. */
+  if (
+    text.includes('not finished being set up') ||
+    text.includes('gemini-not-configured') ||
+    text.includes('no gemini_api_key')
+  ) {
+    return {
+      message:
+        'This studio is not finished being set up — its Google key is missing or empty. ' +
+        'Send this to Aryan; it is a setting on the server, not anything you did, and ' +
+        'trying again will not help until it is set.',
+      detail
+    };
+  }
+
   if (status === 429 || text.includes('rate_limit')) {
     return {
       message: 'Too many scripts at once for the free tier. Wait a minute and try again — nothing is broken, and nothing is being charged.',
@@ -128,13 +149,6 @@ export function explain(error: unknown, teamMode: boolean): Explained {
   if (status !== null && status >= 500) {
     return {
       message: 'Google had a problem at its end. Try again in a minute.',
-      detail
-    };
-  }
-
-  if (text.includes('not finished being set up')) {
-    return {
-      message: 'This studio is not finished being set up. Send this to Aryan — it is a missing setting, not anything you did.',
       detail
     };
   }

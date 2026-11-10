@@ -121,7 +121,14 @@ async function geminiProxy(request, env, pathname) {
   if (!await verifySession(readCookie(request), env.SESSION_SECRET)) {
     return json({ error: 'Your session has expired. Sign in again.' }, 401);
   }
-  if (!env.GEMINI_API_KEY) {
+  /* Trimmed, so a secret that exists but holds nothing but a space counts
+   * as missing. `wrangler secret put` keeps whatever the terminal hands it,
+   * and a secret that is present-but-blank LISTS exactly like a real one -
+   * so the only thing that tells them apart is what the Worker does with it.
+   * Untrimmed, a blank key went to Google and came back as its own confusing
+   * refusal instead of the plain sentence below. */
+  const key = String(env.GEMINI_API_KEY ?? '').trim();
+  if (!key) {
     return json({ error: 'gemini-not-configured', detail: 'This Worker has no GEMINI_API_KEY set.' }, 501);
   }
 
@@ -143,7 +150,7 @@ async function geminiProxy(request, env, pathname) {
     `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body: JSON.stringify(body)
     }
   );

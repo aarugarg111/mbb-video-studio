@@ -308,7 +308,14 @@ export async function askProvider(
      *
      * Only the statuses that mean "not now" rather than "not ever": a 401 or
      * a 400 asked again is the same answer with the viewer kept waiting. */
-    if (!how.afterWaiting && (response.status === 429 || response.status >= 500)) {
+    const notNow =
+      response.status === 429 ||
+      /* 500, 502, 503, 504 - but NOT 501, which is this studio's own Worker
+       * saying it has no key configured. Retrying that waits a second and a
+       * half to be told the same permanent thing twice. */
+      (response.status >= 500 && response.status !== 501);
+
+    if (!how.afterWaiting && notNow && !detail.includes('not-configured')) {
       await new Promise(resolve => setTimeout(resolve, 1200));
       return askProvider({ id, key, model, prompt }, retried, { ...how, afterWaiting: true });
     }

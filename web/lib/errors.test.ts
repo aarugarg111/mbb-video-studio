@@ -156,3 +156,28 @@ test('google saying the key is wrong is reported as the key, not as raw JSON', (
   assert.match(explain(badKey, false).message, /saved in this browser/);
   assert.match(explain(badKey, true).message, /send this to Aryan/);
 });
+
+/* The report that came back from the live studio, verbatim. The sentence on
+ * top and the detail underneath said different things, and the sentence was
+ * the wrong one: it sent somebody to wait a minute for a missing key. */
+test('a Worker with no key set is a setup problem, not Google having a moment', () => {
+  const asSeen = Object.assign(
+    new Error('501 {"error":"gemini-not-configured","detail":"This Worker has no GEMINI_API_KEY set."}'),
+    { status: 501 }
+  );
+  const { message } = explain(asSeen, true);
+  assert.match(message, /not finished being set up/);
+  assert.match(message, /key is missing or empty/);
+  assert.ok(!/Google had a problem/.test(message), 'it is not Google');
+  assert.ok(!/in a minute/.test(message), 'and a minute will not fix it');
+  assert.match(message, /will not help until it is set/, 'says plainly that waiting is useless');
+});
+
+test('a real Google 5xx still reads as Google, and still says to retry', () => {
+  /* The branch above must not swallow the transient ones it sits in front of. */
+  for (const status of [500, 502, 503, 504]) {
+    const { message } = explain(Object.assign(new Error(`${status} upstream`), { status }), true);
+    assert.match(message, /Google/, String(status));
+    assert.match(message, /try again/i, String(status));
+  }
+});
