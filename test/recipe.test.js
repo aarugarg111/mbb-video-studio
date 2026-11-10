@@ -596,3 +596,71 @@ shots:
   assert.match(nowhere.errors.join(' '), /nowhere called "the-moon"/);
   assert.match(nowhere.errors.join(' '), /mobile-number/, 'and it should say what there is');
 });
+
+/* A bill sent from the laptop arrives on the customer's phone, and that is
+ * the one device mix that is right.
+ *
+ * The studio used to warn about it. The warning did real harm rather than
+ * none: a script ending "show the WhatsApp chat screen with the invoice
+ * attached" got a studio telling the writer the clip was wrong, and shot
+ * lists came back with the WhatsApp screen left out altogether - the payoff
+ * of a sharing video dropped to satisfy a warning. There is no WhatsApp Web
+ * screen in this studio and there should not be: the chat belongs to the
+ * customer, not to the owner's desk. */
+const realCatalogue = () => catalogue();
+
+test('a laptop clip may finish on the customer getting it', () => {
+  const laptopThenWhatsApp = [
+    'video: t',
+    'business:',
+    '  name: PRIME HARDWARE',
+    'party:',
+    '  name: VERMA CONSTRUCTIONS',
+    'items:',
+    '  - { name: CEMENT BAGS 50KG, rate: 400, qty: 100 }',
+    'shots:',
+    '  - screen: mbb-desktop-invoice',
+    '    duration: 3.0',
+    '    actions:',
+    '      - { at: 1.4, do: tap, target: share }',
+    '  - screen: wa-chat',
+    '    duration: 3.0',
+    ''
+  ].join('\n');
+
+  const { recipe, warnings, errors } = parse(laptopThenWhatsApp, realCatalogue());
+  assert.equal(errors, undefined);
+  assert.equal(recipe.shots.length, 2, 'the WhatsApp screen stays');
+  assert.ok(
+    !(warnings ?? []).some(w => /cuts between a laptop and a phone/.test(w)),
+    'the one legitimate mix should not be warned about'
+  );
+});
+
+test('a clip that wanders between the two shapes is still called out', () => {
+  /* The warning earns its place everywhere else - a laptop shot in the middle
+     of a phone clip really does read as two films spliced together. */
+  const wandering = [
+    'video: t',
+    'business:',
+    '  name: PRIME HARDWARE',
+    'party:',
+    '  name: VERMA CONSTRUCTIONS',
+    'items:',
+    '  - { name: CEMENT BAGS 50KG, rate: 400, qty: 100 }',
+    'shots:',
+    '  - screen: home',
+    '    duration: 2.0',
+    '  - screen: mbb-desktop-invoice',
+    '    duration: 2.0',
+    '  - screen: home',
+    '    duration: 2.0',
+    ''
+  ].join('\n');
+
+  const { warnings } = parse(wandering, realCatalogue());
+  assert.ok(
+    (warnings ?? []).some(w => /cuts between a laptop and a phone/.test(w)),
+    'a clip that hops between shapes mid-thought should still be flagged'
+  );
+});

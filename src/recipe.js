@@ -547,7 +547,23 @@ export function parse(text, catalogue, options = {}) {
    * different videos spliced together. Both render perfectly well, which is
    * why this is worth saying out loud. */
   const shapes = new Set(recipe.shots.map(shot => deviceOf(SCREENS[shot.screen])));
-  if (shapes.size > 1) {
+
+  /* One mix is not a mistake: a bill sent from the laptop and ARRIVING on the
+   * customer's phone. There is no WhatsApp Web screen in this studio and there
+   * should not be - the chat belongs to the customer, not to the owner's
+   * desk - so a laptop clip whose script ends "show the WhatsApp chat with the
+   * invoice attached" has to finish on a phone, and that is the right film.
+   *
+   * Warning about it was doing real harm rather than none. A script asking for
+   * exactly that got a studio telling the writer the clip was wrong, and shot
+   * lists came back with the WhatsApp screen left out altogether - the payoff
+   * of a sharing video, dropped to satisfy a warning. */
+  const tail = recipe.shots.map(s => s.screen);
+  const whatsappEnding = tail.length > 1 &&
+    tail[tail.length - 1].startsWith('wa-') &&
+    tail.slice(0, -1).every(name => deviceOf(SCREENS[name]) === 'desktop');
+
+  if (shapes.size > 1 && !whatsappEnding) {
     warnings.push(
       'This clip cuts between a laptop and a phone. Both render, but on video it reads ' +
       'as two different films spliced together. Keep to one, unless the script really ' +

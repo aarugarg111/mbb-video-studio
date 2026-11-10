@@ -1,0 +1,51 @@
+video: prime-hardware
+
+business:
+  name: PRIME HARDWARE
+  gstin: 09ABCDE1234F1Z5
+  address: Transport Nagar, Kanpur, Uttar Pradesh, 208023
+
+party:
+  name: VERMA CONSTRUCTIONS
+  phone: 98765 43210
+  address: Civil Lines, Kanpur, Uttar Pradesh, 208001
+
+invoice:
+  number: 4418
+  theme: none
+
+items:
+  - { name: CEMENT BAGS 50KG, rate: 400, qty: 100, gst: 18, unit: BAG, purchase: 340, stock: 420 }
+  - { name: TMT BARS 12MM, rate: 650, qty: 50, gst: 18, unit: PCS, purchase: 560, stock: 180 }
+  - { name: VITRIFIED TILES 2X2, rate: 95, qty: 120, gst: 18, unit: BOX, purchase: 72, stock: 260 }
+
+shots:
+  - screen: mbb-desktop-sales-list
+    duration: 2.6
+    actions:
+      - { at: 1.3, do: tap, target: new-bill }
+
+  - screen: mbb-desktop-create-invoice
+    duration: 11.0
+    actions:
+      - { at: 1.0, do: tap, target: add-item }
+      - { at: 2.0, do: type, target: item-search, text: C, duration: 0.5 }
+      - { at: 3.2, do: addItem, index: 0 }
+      - { at: 4.4, do: addItem, index: 1 }
+      - { at: 5.6, do: addItem, index: 2 }
+      - { at: 7.0, do: tap, target: add-to-bill }
+      - { at: 9.0, do: tap, target: save }
+
+  - screen: mbb-desktop-invoice
+    duration: 3.0
+    actions:
+      - { at: 1.4, do: tap, target: share }
+
+  - screen: mbb-desktop-invoice
+    duration: 2.6
+    actions:
+      - { at: 0.8, do: tap, target: share-whatsapp }
+
+  - screen: wa-chat
+    duration: 3.0
+    actions: []
