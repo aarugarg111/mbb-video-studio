@@ -715,3 +715,31 @@ test('a clip that wanders between the two shapes is still called out', () => {
     'a clip that hops between shapes mid-thought should still be flagged'
   );
 });
+
+/* The CTA is on by default, so "cta && endCard" was true for every recipe
+ * that set an end card - which is exactly what the briefing tells the model
+ * to do when a script closes on a brand line. The recipe set one thing, the
+ * studio's own default supplied the other, and the warning then blamed the
+ * recipe for setting both. Unsatisfiable advice on almost every AI clip, and
+ * it went into the eval as evidence the shot lists were rough. */
+test('brand: an end card alone is not accused of setting a cta as well', () => {
+  const { recipe, warnings } = parse(
+    GOOD + '\nbrand:\n  endCard: { duration: 1.5, tagline: "India ka No.1 Billing App" }\n',
+    CATALOGUE
+  );
+  assert.ok(
+    !(warnings ?? []).some(w => /both cta and endCard/.test(w)),
+    'the recipe set one of the two, so there is nothing to warn about'
+  );
+  /* The tagline still carries across - that is how an end card's words reach
+     a clip whose CTA image is missing. */
+  assert.equal(recipe.brand.cta.tagline, 'India ka No.1 Billing App');
+});
+
+test('brand: setting BOTH really does still warn', () => {
+  const { warnings } = parse(
+    GOOD + '\nbrand:\n  cta: { duration: 2 }\n  endCard: { duration: 1.5, tagline: "x" }\n',
+    CATALOGUE
+  );
+  assert.ok((warnings ?? []).some(w => /both cta and endCard/.test(w)), 'this one asked for two closings');
+});

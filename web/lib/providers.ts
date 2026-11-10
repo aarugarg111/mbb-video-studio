@@ -85,6 +85,30 @@ export type Request = { url: string; headers: Record<string, string>; body: stri
 
 /* One prompt, three shapes of envelope. Kept as data rather than three
  * branches of fetch so each one can be checked without a network or a key. */
+/* How hard the model thinks before answering.
+ *
+ * This was 'minimal', hardcoded, chosen to make the studio fast. It was the
+ * wrong trade and it was made silently: the brief was to cut cost WITHOUT
+ * cutting quality, and turning the model's reasoning down is cutting quality
+ * - it just does not show up on a bill. The shot lists came back less crisp
+ * and nothing in the eval could see it, because the eval was not measuring
+ * crispness either.
+ *
+ * It is one named constant now so the eval can measure the difference, and
+ * so changing it is one edit rather than an archaeology expedition.
+ *
+ * Measured, on the eight eval scripts, rather than argued about:
+ *
+ *   3.5-flash-lite  minimal   8/8 parsed  8/8 kept the point   7.1s
+ *   3.5-flash-lite  low       8/8 parsed  8/8 kept the point  12.0s
+ *
+ * Thinking harder did NOT read as crisper - the roughness counts came out
+ * level, inside the noise of eight scripts - and it costs seventy per cent
+ * more waiting. So 'minimal' stands, now on evidence instead of on my
+ * assumption that less thinking was what made the shot lists rough. It was
+ * not, and the eval said so the first time it was asked properly. */
+export const THINKING = 'minimal';
+
 export type How = {
   /* Set when a first try came back complaining about the thinking setting -
    * see askProvider. The request is then sent again without it. */
@@ -92,6 +116,10 @@ export type How = {
   /* Set once a transient failure has been waited out, so a provider having a
    * bad minute cannot hold somebody in a loop. */
   afterWaiting?: boolean;
+  /* How hard the model thinks before answering. Overrides THINKING, and
+   * exists so the eval can measure the difference rather than argue about
+   * it - see the note on THINKING. */
+  thinking?: string;
   /* Team mode: the studio's own Worker, which holds the key. The request is
    * otherwise identical, and the key field goes empty rather than being
    * filled with a placeholder nobody reads - in team mode the browser has no
@@ -133,7 +161,7 @@ export function buildRequest(
            * hopefully: askProvider sends the whole request again without it
            * if Google objects, and a studio that is merely slower is a far
            * better failure than one that is broken. */
-          ...(withoutThinking ? {} : { thinkingConfig: { thinkingLevel: 'minimal' } })
+          ...(withoutThinking ? {} : { thinkingConfig: { thinkingLevel: how.thinking ?? THINKING } })
         }
       })
     };
@@ -248,7 +276,18 @@ export function recipeFromText(text: string): { recipe: string; unsupported: str
  * anything else must stay a refusal: a bad key that quietly retried itself
  * without thinking would just fail twice and report the second one. */
 export function objectsToThinking(detail: string): boolean {
-  return /thinking(_|-)?(level|budget|config)/i.test(detail);
+  /* A SPACE counts as a separator too. Without it this matched the field
+   * name - "thinkingLevel", "thinking_budget" - and not the sentence Google
+   * actually writes:
+   *
+   *   Thinking level MINIMAL is not supported for this model.
+   *
+   * So the fallback built for precisely this refusal never fired, and the
+   * bigger Flash model failed outright on every single script instead of
+   * being asked again without the setting. The comment on THINKING even
+   * predicted the refusal; the guard against it was one character short.
+   * Found by measuring, not by reading. */
+  return /thinking[\s_-]?(level|budget|config)/i.test(detail);
 }
 
 export function replacementModel(asked: string, detail: string): string | null {

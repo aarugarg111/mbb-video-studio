@@ -37,7 +37,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
-import { askProvider, providerById, castToShape } from './lib/providers.ts';
+import { askProvider, providerById, castToShape, THINKING } from './lib/providers.ts';
 import { briefingFor } from './lib/briefing.ts';
 import { dropImpossible } from './lib/possible.ts';
 import { parse } from '../src/recipe.js';
@@ -89,17 +89,32 @@ type Arm = {
  * if it is ever needed again. */
 const MODELS = (process.env.MODELS ?? providerById('gemini').defaultModel).split(',');
 
-const ARMS: Arm[] = MODELS.map(model => ({
-  label: model.trim(),
+/* And how hard each of them thinks. The studio ran on 'minimal' because it
+ * was fast, which is a quality cut that never appears on a bill - so it is an
+ * arm here rather than an opinion. Both are free; the difference is seconds.
+ *
+ *   MODELS=gemini-3.5-flash-lite,gemini-3.8-flash THINKING=minimal,low \
+ *     npm run eval
+ */
+const THINKING_LEVELS = (process.env.THINKING ?? THINKING).split(',');
+
+const ARMS: Arm[] = MODELS.flatMap(m => THINKING_LEVELS.map(t => ({
+  model: m.trim(),
+  thinking: t.trim()
+}))).map(({ model, thinking }) => ({
+  /* Short enough for the table, and it has to name BOTH - the whole point is
+     telling two settings of one model apart. */
+  label: `${model.replace(/^gemini-/, '')} ${thinking}`,
   free: true,
   run: async (script, shape) => {
     /* The real path, not a tidied-up one: the same briefing the studio hands
        anybody pasting into a chat window, and the same shape-casting
        afterwards. An eval of a path nobody uses proves nothing. */
-    const { recipe } = await askProvider({
-      id: 'gemini', key: geminiKey, model: model.trim(),
-      prompt: briefingFor(script, { shape })
-    });
+    const { recipe } = await askProvider(
+      { id: 'gemini', key: geminiKey, model, prompt: briefingFor(script, { shape }) },
+      false,
+      { thinking }
+    );
     /* The same two repairs the studio makes, in the same order. An eval of a
        path nobody uses proves nothing - but a repair that is counted and not
        SHOWN is worse than that: the score goes up and what the model got

@@ -4,7 +4,7 @@ import { parse } from '../../src/recipe.js';
 import { catalogue, scrollables } from '../../screens/index.js';
 import {
   PROVIDERS, providerById, providerOfKey, buildRequest, extractText, recipeFromText,
-  readKey, writeKey, migrateKey, keySlotFor, replacementModel, askProvider,
+  readKey, writeKey, migrateKey, keySlotFor, replacementModel, askProvider, THINKING,
   objectsToThinking, castToShape
 } from './providers';
 
@@ -108,12 +108,24 @@ test('every provider says where to get a key and what it costs', () => {
   assert.equal(PROVIDERS[0].id, 'gemini', 'the studio opens on the free provider');
 });
 
-test('the gemini call asks for as little thinking as the model allows', () => {
+test('the gemini call asks for the amount of thinking the studio settled on', () => {
+  /* This used to pin 'minimal' and was named for it - "as little thinking as
+     the model allows". That was the wrong trade, made to be fast: turning the
+     model's reasoning down is a quality cut that never shows up on a bill,
+     and the shot lists came back less crisp for it. The level is a named
+     constant now, and this tracks the constant rather than re-asserting a
+     number, so the decision lives in ONE place and the eval can measure it. */
   const body = JSON.parse(buildRequest('gemini', 'AIza-x', 'gemini-3.5-flash-lite', 'hi').body);
   assert.equal(
-    body.generationConfig.thinkingConfig.thinkingLevel, 'minimal',
-    'Flash models think by default, and this job does not need it'
+    body.generationConfig.thinkingConfig.thinkingLevel, THINKING,
+    'the request must ask for whatever the studio settled on'
   );
+
+  /* And it is overridable per call, which is how the eval compares them. */
+  const harder = JSON.parse(
+    buildRequest('gemini', 'AIza-x', 'gemini-3.5-flash-lite', 'hi', { thinking: 'high' }).body
+  );
+  assert.equal(harder.generationConfig.thinkingConfig.thinkingLevel, 'high');
 
   /* Dropped on request, because the setting is an optimisation and never a
      requirement - a slower clip beats no clip. */
@@ -143,7 +155,7 @@ test('team mode sends the gemini call to the worker, and the key stays there', (
   /* The whole point of team mode: the browser never holds a key, so it must
      not be sending an empty one either. */
   assert.ok(!('x-goog-api-key' in team.headers), 'the browser must not send a key header in team mode');
-  assert.equal(JSON.parse(team.body).generationConfig.thinkingConfig.thinkingLevel, 'minimal');
+  assert.equal(JSON.parse(team.body).generationConfig.thinkingConfig.thinkingLevel, THINKING);
 });
 
 /* A fake localStorage, which is all these need. */
@@ -372,4 +384,23 @@ test('a Worker with no key configured is not retried', async () => {
   } finally {
     globalThis.fetch = realFetch;
   }
+});
+
+/* The sentence Google actually writes, from a real eval run. The detector
+ * matched the FIELD name and not the prose, so the fallback built for exactly
+ * this refusal never fired and the bigger Flash model failed on all eight
+ * scripts instead of being asked again without the setting. */
+test('the thinking fallback fires on the words Google really uses', () => {
+  assert.ok(
+    objectsToThinking('Thinking level MINIMAL is not supported for this model. Please retry'),
+    'a space is a separator too - this is what cost 8 of 8'
+  );
+  /* And the shapes it already handled. */
+  for (const said of ['thinkingLevel', 'thinking_budget is invalid', 'thinking-config unknown', 'Thinking Budget']) {
+    assert.ok(objectsToThinking(said), said);
+  }
+  /* Without catching everything that merely mentions thinking - dropping the
+     setting on an unrelated refusal would hide the real problem. */
+  assert.ok(!objectsToThinking('the model was thinking about something else'));
+  assert.ok(!objectsToThinking('API key not valid'));
 });

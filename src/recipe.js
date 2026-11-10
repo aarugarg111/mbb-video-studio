@@ -296,7 +296,20 @@ export function parse(text, catalogue, options = {}) {
         }
       }
       if (recipe.brand.cta && recipe.brand.endCard) {
-        warnings.push('brand sets both cta and endCard. The CTA closes the clip; the endCard is used only for the tagline when the CTA image is missing.');
+        /* The warning only when the recipe really did set BOTH.
+         *
+         * A CTA is on by default, so "cta && endCard" was true for every
+         * recipe that set an end card - which is exactly what the briefing
+         * tells the model to do when a script closes on a brand line. The
+         * recipe set one thing, the studio's own default supplied the other,
+         * and then this blamed the recipe for setting both. Unsatisfiable
+         * advice, on almost every clip the AI produced, and it went straight
+         * into the eval as evidence that the shot lists were rough. */
+        if (Object.hasOwn(brand, 'cta')) {
+          warnings.push('brand sets both cta and endCard. The CTA closes the clip; the endCard is used only for the tagline when the CTA image is missing.');
+        }
+        /* The tagline still carries across either way - that is how the end
+           card's words reach a clip whose CTA image is missing. */
         recipe.brand.cta.tagline = recipe.brand.endCard.tagline;
       }
     }
