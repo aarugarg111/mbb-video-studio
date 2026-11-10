@@ -42,12 +42,13 @@ const CROPPED_BY_THE_FRAME = [
   'mbb-desktop-items / create-sales-invoice',
   'mbb-desktop-low-stock / create-sales-invoice',
   'mbb-desktop-parties / create-sales-invoice',
-  /* The Reports page is the other way round. Its camera sits LEFT, on the
-   * report names a script actually taps, which keeps the rail's button in
-   * frame and pushes the CA Reports Sharing button off the right edge. Same
-   * cause - a laptop is wider than a Reel - at the opposite end. */
-  'mbb-desktop-report-list / ca-sharing',
   'mbb-desktop-reports / create-sales-invoice',
+  /* The report holds its TABLE on camera (focus.fit) and lets the rest of the
+   * width go, so in a Reel the rail goes off one side and the last of the
+   * three toolbar buttons off the other. A shot that taps Print PDF still
+   * pans to it - the fit band leaves room for that - but it sits tight
+   * against the right edge there. In a square or a widescreen it is central. */
+  'mbb-desktop-reports / print-pdf',
   'mbb-desktop-sales-list / create-sales-invoice',
   'mbb-desktop-scan / create-sales-invoice'
 ];

@@ -28,7 +28,7 @@ export const url = 'mybillbook.in/app/reports/dashboard';
 
 /* Where the camera rests: the Favourite column and the head of the GST one,
  * which is the half of the page a script ever points at. */
-export const focus = { x: 300, y: 200 };
+export const focus = { x: 300, y: 200, fit: 'whole' };
 
 /* Coordinates are in the desktop's 720x405 space and are MEASURED. */
 export const targets = {

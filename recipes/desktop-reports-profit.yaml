@@ -41,4 +41,6 @@ shots:
     actions:
       - { at: 1.6, do: tap, target: change-range }
       - { at: 3.2, do: tap, target: pick-range }
-      - { at: 6.0, do: tap, target: net-profit }
+      # The payoff. The report holds its whole table on camera (focus.fit),
+      # so this lands on the figure WITH its name and the rows above it.
+      - { at: 6.0, do: zoom, target: net-profit, to: 1.8 }

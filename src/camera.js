@@ -1,5 +1,5 @@
 import { deviceOf, viewportFor } from './device.js';
-import { ASPECTS, DEFAULT_ASPECT, stageAreaHeight, scaleFor } from './aspect.js';
+import { ASPECTS, DEFAULT_ASPECT, DESKTOP_BOX, stageAreaHeight, scaleFor } from './aspect.js';
 
 /* Where the camera is, as two CSS transforms: one for the layers inside the
  * viewport, one for the window the viewport sits in.
@@ -40,7 +40,19 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
  * How far in it rests is the SHAPE's business, not the screen's: the same
  * window needs a shove to fill a Reel and none at all to fill a widescreen.
  * A screen that names its own scale still wins, because it is saying
- * something about that page rather than about the picture. */
+ * something about that page rather than about the picture.
+ *
+ * A screen may also say how much of ITSELF must STAY across the picture, as
+ * `fit`: a width in the screen's own pixels, or 'whole' for the whole window.
+ * That is a floor, and it binds the shot's zoom as well as the resting
+ * position - see maxScale below.
+ *
+ * It exists because the push-in is a trade and on some screens it is the
+ * wrong one. A 16:9 window in a 9:16 picture is a band with a lot of nothing
+ * above and below, so it is pushed in until it fills the frame and its sides
+ * leave it. For most screens that is right: what matters is in the middle.
+ * For a TABLE it is wrong at BOTH ends - a report is a name on the left and a
+ * figure on the right, and the push-in takes one of each. */
 export function restingCamera(screen, aspect = ASPECTS[DEFAULT_ASPECT]) {
   if (deviceOf(screen) !== 'desktop') return null;
   const box = viewportFor(screen);
@@ -48,8 +60,42 @@ export function restingCamera(screen, aspect = ASPECTS[DEFAULT_ASPECT]) {
   return {
     x: Number(focus.x ?? box.width / 2),
     y: Number(focus.y ?? box.height / 2),
-    scale: Number(focus.scale ?? aspect.framing)
+    scale: Math.min(Number(focus.scale ?? aspect.framing), maxScale(screen, aspect))
   };
+}
+
+/* The furthest in the camera may go on this screen in this shape: the scale
+ * at which `fit` exactly fills the picture. Infinity when the screen has not
+ * asked for anything, so the cap is a no-op everywhere else.
+ *
+ * This is the half of `fit` that matters most, and it is about the ZOOM.
+ * A shot's zoom multiplies the resting position, so "zoom to 2" on a laptop
+ * is 2 x 1.26 = two and a half times in - and the studio's own guidance tells
+ * the model that 2 to 2.5 reads well, because that guidance was written for
+ * phones, where a zoom cannot crop anything that matters. On a laptop table
+ * it cropped away the thing being zoomed TO: the Profit and Loss report
+ * zoomed at Net Profit and showed neither the words "Net Profit" nor the end
+ * of the number. Capping here fixes every such shot at once, including the
+ * ones a model writes later, rather than asking each recipe to know better. */
+export function maxScale(screen, aspect = ASPECTS[DEFAULT_ASPECT]) {
+  const band = fitBand(screen);
+  if (!band) return Infinity;
+  return aspect.width / (band.width * scaleFor(aspect, 'desktop'));
+}
+
+/* The stretch of the screen `fit` is protecting, around the screen's own
+ * focus point. Holding the WIDTH is only half of it: a zoom names its own
+ * point and the camera goes there, so a cap that kept 440px on screen still
+ * showed the wrong 440 - the Net Profit zoom held every figure and cut the
+ * names off the front of every row. The band says which 440. */
+export function fitBand(screen) {
+  const focus = screen?.focus ?? {};
+  if (focus.fit == null) return null;
+  const width = focus.fit === 'whole' ? DESKTOP_BOX.width : Number(focus.fit);
+  if (!Number.isFinite(width) || width <= 0) return null;
+  const box = viewportFor(screen);
+  const centre = Number(focus.x ?? box.width / 2);
+  return { width, lo: centre - width / 2, hi: centre + width / 2 };
 }
 
 /* The shot's own zoom, over the resting position rather than instead of it: a
@@ -59,7 +105,10 @@ export function cameraAt(screen, zoom, aspect = ASPECTS[DEFAULT_ASPECT]) {
   const resting = restingCamera(screen, aspect);
   if (!zoom) return resting;
   if (!resting) return zoom;
-  return { x: zoom.x, y: zoom.y, scale: resting.scale * zoom.scale };
+  return {
+    x: zoom.x, y: zoom.y,
+    scale: Math.min(resting.scale * zoom.scale, maxScale(screen, aspect))
+  };
 }
 
 /* The transform for the layers inside the viewport. Phones only - see above. */
@@ -82,10 +131,16 @@ export function windowTransform(screen, zoom, taps = [], aspect = ASPECTS[DEFAUL
   /* How big the window is drawn in this shape. */
   const drawn = scaleFor(aspect, 'desktop');
 
-  /* How much of the screen is still in frame, in the screen's own pixels. The
-   * window is drawn to the frame's full width, so at rest exactly the width of
-   * it is visible and the push-in eats into that. */
-  const halfW = box.width / 2 / camera.scale;
+  /* How much of the screen is still in frame, in the screen's own pixels.
+   *
+   * This used to read `box.width / 2 / camera.scale`, on the reasoning that
+   * the window is drawn to the frame's full width so exactly its own width is
+   * visible at rest. That is true in the VERTICAL shape and in neither of the
+   * others - 720 screen pixels at 1.45 is 1044 of a 1080 square, and at 2.0 is
+   * 1440 of a 1920 widescreen - so in those two the camera believed less was
+   * on screen than really was. Worked out from the shape, as halfH already
+   * was, it is right in all three. */
+  const halfW = aspect.width / (drawn * camera.scale) / 2;
   const halfH = stageAreaHeight(aspect) / 2 / (drawn * camera.scale);
 
   /* Moved as little as it takes to hold what this shot taps. A laptop window
@@ -98,6 +153,16 @@ export function windowTransform(screen, zoom, taps = [], aspect = ASPECTS[DEFAUL
   for (const tap of taps) {
     if (tap.x < cx - halfW + edge) cx = tap.x + halfW - edge;
     else if (tap.x > cx + halfW - edge) cx = tap.x - halfW + edge;
+  }
+
+  /* Then pulled back onto whatever `fit` is protecting, which outranks both
+   * the zoom's own point and the taps: a screen that said its table must stay
+   * on camera means it even when the shot zooms at one cell of it. */
+  const band = fitBand(screen);
+  if (band) {
+    const lo = band.hi - halfW;
+    const hi = band.lo + halfW;
+    if (lo <= hi) cx = clamp(cx, lo, hi);
   }
 
   /* Clamped to the window's own edges, the way a map pan is: without this a

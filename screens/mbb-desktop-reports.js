@@ -40,7 +40,10 @@ export const device = 'desktop';
 export const url = 'mybillbook.in/app/reports/show?report_type=profit_and_loss';
 
 /* Where the camera rests: the table, which is the whole of this screen. */
-export const focus = { x: 400, y: 215 };
+/* The table is the report. In a Reel the rail is noise, so the camera asks
+ * for the table across the picture and lets the rail go; in a square or a
+ * widescreen the whole window fits anyway and nothing is lost. */
+export const focus = { x: 349, y: 215, fit: 440 };
 
 /* The periods the range menu offers, in the app's order. */
 const RANGES = [
