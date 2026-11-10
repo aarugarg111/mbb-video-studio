@@ -1,52 +1,89 @@
-/* Does the cheap model write as good a shot list as the dear one?
+/* Is the free, fast model as good as the dear one?
  *
- *   ANTHROPIC_API_KEY=sk-ant-... npx tsx eval.mts            (from web/)
- *   ANTHROPIC_API_KEY=sk-ant-... npx tsx eval.mts --one 3    (just one script)
+ *   GEMINI_API_KEY=AIza...  npx tsx eval.mts        (from web/)
+ *   ANTHROPIC_API_KEY=sk-ant-...  npx tsx eval.mts  (adds the Claude arms)
+ *   ...both, to compare all three.  --one 3 for a single script.
  *
- * The studio's whole bill is one call per script, and it was on Opus. Moving
- * it to Haiku is only worth doing if the shot lists hold up, and "I think
- * they will" is not a reason to change what the team's videos are made with.
- * So this puts the SAME scripts through both and prints the difference.
+ * The studio's whole bill is one call per script. It ran on Opus for a year,
+ * doing a job that is not writing but reading a script into a fixed
+ * vocabulary of screens handed to it in the prompt. Gemini's free tier does
+ * that class of work - but "I think it will" is not a reason to change what
+ * the team's videos are made with, so this puts the SAME scripts through
+ * every model there is a key for and prints the difference.
  *
- * It does not score with another model, and it does not ask anybody to read
- * two YAML files side by side. Three things decide it, and all three are
- * things the studio already knows how to check:
+ * It does not score with another model and it does not ask anyone to read
+ * two YAML files side by side. Four things decide it, all of them things the
+ * studio already knows how to check:
  *
- *   PARSES   - the recipe survives src/recipe.js, which is the same gate a
- *              hand-written one goes through. A recipe that does not parse is
- *              not a near miss, it is nothing.
- *   SCREENS  - the sequence of screens, which IS the video. Two recipes with
- *              the same screens in the same order are the same clip; a
- *              different screen list is a different clip, whatever else matches.
- *   TAPS     - what gets pressed on each one. The same screens tapped in
- *              different places is the same clip done wrong.
+ *   PARSES   - survives src/recipe.js, the same gate a hand-written shot
+ *              list goes through. A recipe that does not parse is not a near
+ *              miss, it is nothing.
+ *   THE POINT- does it contain the beat the script is FOR? A clip that
+ *              renders and drops the payoff is worse than one that fails
+ *              loudly, and it is the failure nobody notices.
+ *   SCREENS  - the sequence of screens, which IS the video. Same screens in
+ *              the same order is the same clip.
+ *   SECONDS  - how long somebody waits. The reason for picking Flash-Lite
+ *              and turning its thinking down, so it is measured rather than
+ *              asserted.
  *
- * Whoever runs this holds the key. It is read from the environment and goes
- * to Anthropic and nowhere else - this file never prints it and never writes
- * it down.
- *
- * It costs real money to run: two calls per script, one of them on Opus. At
- * eight scripts that is small change, but it is not nothing, and it is the
- * last Opus money the studio should ever need to spend.
+ * Whoever runs this holds the keys. They are read from the environment, sent
+ * to their own provider and nowhere else, never printed and never written
+ * down. The Claude arms cost real money - a few rupees for the lot. The
+ * Gemini arm is free.
  */
 
-import { readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import { join, dirname } from 'node:path';
-import { proposeRecipe, MODEL } from './lib/claude.ts';
+import { proposeRecipe } from './lib/claude.ts';
+import { askProvider, providerById } from './lib/providers.ts';
+import { briefingFor } from './lib/briefing.ts';
 import { parse } from '../src/recipe.js';
 
-const HERE = dirname(fileURLToPath(import.meta.url));
-const DEAR = 'claude-opus-5-5';
-const CHEAP = MODEL;
+const anthropicKey = process.env.ANTHROPIC_API_KEY;
+const geminiKey = process.env.GEMINI_API_KEY;
 
-const key = process.env.ANTHROPIC_API_KEY;
-if (!key) {
+if (!anthropicKey && !geminiKey) {
   console.error(
-    'Set ANTHROPIC_API_KEY first. It is read from the environment, sent to\n' +
-    'Anthropic and nowhere else, and never written down by this script.'
+    'Set GEMINI_API_KEY (free, from aistudio.google.com/apikey) or\n' +
+    'ANTHROPIC_API_KEY, or both to compare them. Keys are read from the\n' +
+    'environment, go to their own provider and nowhere else, and are never\n' +
+    'written down by this script.'
   );
   process.exit(1);
+}
+
+type Arm = {
+  label: string;
+  free: boolean;
+  run: (script: string, shape: string) => Promise<string>;
+};
+
+/* The arms, in the order the studio would reach for them. */
+const ARMS: Arm[] = [];
+
+if (geminiKey) {
+  const model = providerById('gemini').defaultModel;
+  ARMS.push({
+    label: `gemini (${model})`,
+    free: true,
+    run: async (script, shape) => (await askProvider({
+      id: 'gemini', key: geminiKey, model,
+      /* The same briefing the studio hands anybody pasting into a chat
+         window - this must be the real path, not a tidied-up one. */
+      prompt: briefingFor(script, { shape })
+    })).recipe
+  });
+}
+
+if (anthropicKey) {
+  for (const model of ['claude-haiku-5-5', 'claude-opus-5-5']) {
+    ARMS.push({
+      label: `claude (${model.replace('claude-', '')})`,
+      free: false,
+      run: async (script, shape) => (await proposeRecipe({
+        apiKey: anthropicKey, script, model, details: { shape }
+      })).recipe
+    });
+  }
 }
 
 /* The scripts. Eight, chosen to cover what the studio is actually asked for
@@ -122,103 +159,68 @@ const only = process.argv.includes('--one')
   : null;
 const chosen = only == null ? SCRIPTS : [SCRIPTS[only]].filter(Boolean);
 
-/* The two things that make a shot list the clip it is. */
-const screensOf = (yamlText: string) => {
-  const { recipe } = parse(yamlText);
-  return recipe.shots.map((s: { screen: string }) => s.screen);
-};
-const tapsOf = (yamlText: string) => {
-  const { recipe } = parse(yamlText);
-  return recipe.shots.flatMap((s: { screen: string; actions?: { do: string; target?: string }[] }) =>
-    (s.actions ?? []).filter(a => a.do === 'tap').map(a => `${s.screen}/${a.target}`));
-};
+const screensOf = (yamlText: string): string[] =>
+  parse(yamlText).recipe.shots.map((s: { screen: string }) => s.screen);
 
-const same = (a: string[], b: string[]) => a.length === b.length && a.every((v, i) => v === b[i]);
+type Tally = { parsed: number; kept: number; seconds: number; failed: string[] };
+const tally: Record<string, Tally> = {};
+for (const a of ARMS) tally[a.label] = { parsed: 0, kept: 0, seconds: 0, failed: [] };
 
-async function run(model: string, script: string, shape: string) {
-  const started = Date.now();
-  try {
-    const { recipe } = await proposeRecipe({
-      apiKey: key, script, model, details: { shape }
-    });
-    return { ok: true as const, recipe, seconds: (Date.now() - started) / 1000 };
-  } catch (err) {
-    return { ok: false as const, why: (err as Error).message, seconds: (Date.now() - started) / 1000 };
-  }
-}
-
-const rows: string[] = [];
-let agreed = 0, cheapParsed = 0, cheapHadWants = 0;
+console.log(`\n${chosen.length} script(s) through ${ARMS.length} model(s).\n`);
 
 for (const t of chosen) {
-  process.stdout.write(`\n${t.name} (${t.shape})\n`);
+  console.log(`${t.name}  (${t.shape})`);
 
-  const [cheap, dear] = await Promise.all([
-    run(CHEAP, t.script, t.shape),
-    run(DEAR, t.script, t.shape)
-  ]);
-
-  if (!cheap.ok) {
-    console.log(`  CHEAP FAILED  ${cheap.why}`);
-    rows.push(`${t.name.padEnd(24)} cheap failed`);
-    continue;
-  }
-  if (!dear.ok) {
-    console.log(`  (the dear one failed: ${dear.why} - comparing against nothing)`);
-  }
-
-  let cheapScreens: string[] = [], cheapTaps: string[] = [];
-  try {
-    cheapScreens = screensOf(cheap.recipe);
-    cheapTaps = tapsOf(cheap.recipe);
-    cheapParsed++;
-  } catch (err) {
-    console.log(`  CHEAP DID NOT PARSE  ${(err as Error).message}`);
-    rows.push(`${t.name.padEnd(24)} cheap did not parse`);
-    continue;
-  }
-
-  /* Did it put the beat in that the script is FOR? A clip that renders and
-     leaves out the payoff is worse than one that fails loudly. */
-  const missing = t.wants.filter(w => !cheapScreens.includes(w));
-  if (!missing.length) cheapHadWants++;
-
-  let verdict = 'no comparison';
-  if (dear.ok) {
+  for (const arm of ARMS) {
+    const started = Date.now();
+    let recipe: string;
     try {
-      const dearScreens = screensOf(dear.recipe);
-      const dearTaps = tapsOf(dear.recipe);
-      const screensMatch = same(cheapScreens, dearScreens);
-      const tapsMatch = same(cheapTaps, dearTaps);
-      if (screensMatch && tapsMatch) { verdict = 'identical'; agreed++; }
-      else if (screensMatch) verdict = 'same screens, different taps';
-      else verdict = 'different screens';
-      console.log(`  cheap: ${cheapScreens.join(' -> ')}`);
-      console.log(`  dear : ${dearScreens.join(' -> ')}`);
-    } catch {
-      verdict = 'the dear one did not parse';
+      recipe = await arm.run(t.script, t.shape);
+    } catch (err) {
+      const seconds = (Date.now() - started) / 1000;
+      tally[arm.label].seconds += seconds;
+      tally[arm.label].failed.push(t.name);
+      console.log(`  ${arm.label.padEnd(26)} FAILED  ${(err as Error).message.slice(0, 120)}`);
+      continue;
     }
-  } else {
-    console.log(`  cheap: ${cheapScreens.join(' -> ')}`);
-  }
+    const seconds = (Date.now() - started) / 1000;
+    tally[arm.label].seconds += seconds;
 
-  console.log(
-    `  ${verdict}${missing.length ? `  | MISSING THE POINT: ${missing.join(', ')}` : ''}` +
-    `  | ${cheap.seconds.toFixed(1)}s vs ${dear.seconds.toFixed(1)}s`
-  );
-  rows.push(
-    `${t.name.padEnd(24)} ${verdict.padEnd(30)}${missing.length ? 'missing ' + missing.join(',') : ''}`
-  );
+    let screens: string[];
+    try {
+      screens = screensOf(recipe);
+      tally[arm.label].parsed++;
+    } catch (err) {
+      tally[arm.label].failed.push(t.name);
+      console.log(`  ${arm.label.padEnd(26)} DID NOT PARSE  ${(err as Error).message.slice(0, 100)}`);
+      continue;
+    }
+
+    const missing = t.wants.filter(w => !screens.includes(w));
+    if (!missing.length) tally[arm.label].kept++;
+
+    console.log(
+      `  ${arm.label.padEnd(26)} ${seconds.toFixed(1)}s  ${screens.join(' > ')}` +
+      `${missing.length ? `\n  ${' '.repeat(26)} MISSING THE POINT: ${missing.join(', ')}` : ''}`
+    );
+  }
+  console.log('');
 }
 
-console.log(`\n${'-'.repeat(72)}`);
-for (const r of rows) console.log('  ' + r);
+console.log('-'.repeat(74));
 console.log(
-  `\n  ${cheapParsed}/${chosen.length} parsed, ` +
-  `${cheapHadWants}/${chosen.length} kept the beat the script is for, ` +
-  `${agreed}/${chosen.length} identical to ${DEAR}.`
+  `  ${'model'.padEnd(26)} ${'parsed'.padEnd(8)} ${'kept the point'.padEnd(16)} avg seconds`
 );
+for (const arm of ARMS) {
+  const s = tally[arm.label];
+  console.log(
+    `  ${arm.label.padEnd(26)} ${`${s.parsed}/${chosen.length}`.padEnd(8)} ` +
+    `${`${s.kept}/${chosen.length}`.padEnd(16)} ${(s.seconds / chosen.length).toFixed(1)}` +
+    `${arm.free ? '   (free)' : ''}`
+  );
+}
 console.log(
-  '\n  "different screens" is not automatically worse - look at the two lines\n' +
-  '  above it and decide. "MISSING THE POINT" always is.\n'
+  '\n  A different screen list is not automatically worse - read the lines\n' +
+  '  above and decide. "MISSING THE POINT" always is: that is the beat the\n' +
+  '  script was written for, dropped from a clip that still renders.\n'
 );
