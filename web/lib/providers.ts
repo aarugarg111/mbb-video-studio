@@ -40,8 +40,8 @@ export const PROVIDERS: Provider[] = [
     hint: 'sk-ant-…',
     where: 'console.anthropic.com',
     whereUrl: 'https://console.anthropic.com/settings/keys',
-    defaultModel: 'claude-opus-5-5',
-    free: 'Paid. Reads the script against the studio’s own schema.'
+    defaultModel: 'claude-haiku-5-5',
+    free: 'Paid, but pennies a script. Reads it against the studio’s own schema.'
   },
   {
     id: 'gemini',

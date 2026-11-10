@@ -68,15 +68,32 @@ test('the api key is added by the worker and never comes from the browser', asyn
   } finally { cap.restore(); }
 });
 
-test('the model is pinned, whatever the browser asks for', async () => {
+test('an unknown model falls back to the cheap one, never to a costly one', async () => {
   const cap = captureUpstream();
   try {
     await worker.fetch(
       post('/api/anthropic/v1/messages', { model: 'something-expensive' }, await signedInCookie()),
       ENV
     );
-    assert.equal(cap.seen.body.model, 'claude-opus-5-5');
+    assert.equal(cap.seen.body.model, 'claude-haiku-5-5');
   } finally { cap.restore(); }
+});
+
+/* The pin became a LIST so the eval can put the same scripts through both and
+ * show the difference. It is still not a free choice: anything off the list
+ * lands on the cheap default above, so the worst a password-holder can do is
+ * ask for the model that every request used to cost. */
+test('a model on the list is honoured, so the two can be compared', async () => {
+  for (const model of ['claude-haiku-5-5', 'claude-opus-5-5']) {
+    const cap = captureUpstream();
+    try {
+      await worker.fetch(
+        post('/api/anthropic/v1/messages', { model }, await signedInCookie()),
+        ENV
+      );
+      assert.equal(cap.seen.body.model, model, `${model} is on the list and must go through`);
+    } finally { cap.restore(); }
+  }
 });
 
 test('max_tokens is capped, whatever the browser asks for', async () => {

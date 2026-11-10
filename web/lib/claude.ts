@@ -106,8 +106,26 @@ export function splitRecipe(
   return { recipe: yaml.dump(recipe), unsupported: [...(unsupported ?? []), ...notes] };
 }
 
+/* The model that works the shot list out.
+ *
+ * This was Opus, the dearest model there is, and it is the ONLY thing in the
+ * studio anybody pays for - drawing the screens, rendering and encoding are
+ * ordinary code and cost nothing however many clips get made. So the entire
+ * bill was one call, on the most expensive model, doing the cheapest kind of
+ * work: filling a fixed schema in from a script, against a catalogue of
+ * screens handed to it. The effort below was already set to "low", which is
+ * that same judgement written down and then not acted on.
+ *
+ * Structured outputs - the thing that makes the answer safe to use at all -
+ * are available on every model, so nothing is given up by moving off Opus.
+ * It is a parameter rather than a constant so eval.mjs can put the same
+ * scripts through both and show the difference, instead of anyone having to
+ * take my word for it. */
+export const MODEL = 'claude-haiku-5-5';
+
 export async function proposeRecipe(
-  { apiKey, script, details }: { apiKey?: string; script: string; details: unknown }
+  { apiKey, script, details, model = MODEL }:
+    { apiKey?: string; script: string; details: unknown; model?: string }
 ): Promise<{ recipe: string; unsupported: string[] }> {
   /* Two ways to reach Anthropic, and the request below is identical either
    * way. In team mode the studio posts to its own Worker, which holds the key
@@ -124,9 +142,15 @@ export async function proposeRecipe(
   let response;
   try {
     response = await client.messages.parse({
-      model: 'claude-opus-5-5',
+      model,
       max_tokens: 16000,
-      system: SYSTEM,
+      /* The instruction block is 6,000-odd tokens of screen catalogue and
+       * rules, it is byte-identical on every call, and it was being re-sent
+       * and re-charged in full every time anybody made a clip. Cached, a
+       * repeat call pays about a tenth for it. The schema below has to stay
+       * fixed for the cache to hold, and it does - it is generated from the
+       * screens, not from the script. */
+      system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
       messages: [{
         role: 'user',
         content: `Overrides (may be empty - anything absent comes from the script):\n` +

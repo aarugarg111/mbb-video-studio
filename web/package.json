@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "test": "tsc --noEmit && tsx --test \"lib/**/*.test.ts\"",
-    "build:team": "node scripts/copy-kit.mjs && node scripts/build-team.mjs"
+    "build:team": "node scripts/copy-kit.mjs && node scripts/build-team.mjs",
+    "eval": "tsx eval.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.132.1",

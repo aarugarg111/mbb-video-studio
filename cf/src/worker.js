@@ -21,9 +21,17 @@ const UPSTREAM = 'https://api.anthropic.com/v1/messages';
 const RENDER_TIMEOUT_MS = 120000;
 
 /* Pinned here rather than trusted from the browser. Whoever has the team
- * password can reach this endpoint, and without these two lines they could
- * also point it at any model and any length - on Aryan's bill. */
-const ALLOWED_MODEL = 'claude-opus-5-5';
+ * password can reach this endpoint, and without these lines they could also
+ * point it at any model and any length - on Aryan's bill.
+ *
+ * A LIST rather than a single name, so the eval can put the same scripts
+ * through both and compare instead of anyone guessing. Anything NOT on the
+ * list falls back to the default, which is the cheap one: a request naming
+ * some other model gets Haiku rather than a 400, and never a surprise bill.
+ * The worst anyone holding the password can now do is ask for Opus, which is
+ * what every single request cost before this list existed. */
+const DEFAULT_MODEL = 'claude-haiku-5-5';
+const ALLOWED_MODELS = new Set([DEFAULT_MODEL, 'claude-opus-5-5']);
 const MAX_TOKENS = 16000;
 
 const json = (body, status = 200, headers = {}) =>
@@ -104,7 +112,7 @@ async function proxy(request, env) {
   let body;
   try { body = await request.json(); } catch { return json({ error: 'Expected JSON.' }, 400); }
 
-  body.model = ALLOWED_MODEL;
+  body.model = ALLOWED_MODELS.has(body.model) ? body.model : DEFAULT_MODEL;
   body.max_tokens = Math.min(Number(body.max_tokens) || MAX_TOKENS, MAX_TOKENS);
   /* Streaming would have to be piped back verbatim; the studio does not use it
    * and allowing it here would only add a path nothing exercises. */
