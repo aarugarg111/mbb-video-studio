@@ -19,8 +19,9 @@ export const name = 'mbb-desktop-report-list';
  * because a made-up report name in a creator's video is a feature the viewer
  * will go looking for and not find.
  *
- * Drawn light, like every other laptop screen here. The recording is in the
- * app's dark skin - see the note in mbb-desktop-reports.js.
+ * Drawn light, like every other screen here, and that is settled rather than
+ * assumed - see the note in mbb-desktop-reports.js. The recording is dark
+ * because the account it was made on is.
  */
 export const device = 'desktop';
 export const url = 'mybillbook.in/app/reports/dashboard';

@@ -31,8 +31,10 @@ export const name = 'mbb-desktop-reports';
  *
  * Still different from the recording, on purpose: the recording is in the
  * app's DARK skin, because that is what the account it was made on is set to.
- * Every laptop screen in the studio is drawn light, as the phone screens are,
- * and one recording is not a reason to re-skin the whole app.
+ * Every screen in the studio is drawn LIGHT and stays that way - asked and
+ * settled, not a guess. Recordings will keep arriving dark, since they come
+ * off that account; that is not a reason to re-skin anything. Match the
+ * LAYOUT of a recording, never its theme.
  */
 export const device = 'desktop';
 export const url = 'mybillbook.in/app/reports/show?report_type=profit_and_loss';
