@@ -39,6 +39,9 @@ export const SCREENS = {
   'share-sheet': ['contact-0', 'contact-1', 'send'],
   'wa-attach': ['caption', 'send'],
   'wa-chat': ['back', 'attachment'],
+  /* WhatsApp Web, where a laptop's share lands. The phone attaches a PDF;
+     the desktop opens a browser tab with the message already written. */
+  'wa-web': ['send', 'attach'],
   /* myCashFlo - a different product, so its screens are named apart. */
   'mcf-dashboard': ['call-personally', 'outstanding', 'nav-parties', 'nav-automations'],
   'mcf-parties': ['setup-automation', 'search', 'filter-overdue', 'party-row-0', 'party-row-1', 'nav-dashboard', 'nav-automations'],

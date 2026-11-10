@@ -1865,3 +1865,60 @@
   font-size: 11px; font-weight: 600; color: var(--mbb-primary);
 }
 .bo-act .ico { color: var(--mbb-primary); }
+
+/* --- WhatsApp Web (wa-web) -------------------------------------------------
+   The browser tab the laptop's share opens. Dark like the real thing, and
+   built from the same --wa-* tokens the phone's WhatsApp screens use, so the
+   two agree about what WhatsApp looks like. */
+.wwscreen { display: flex; background: var(--wa-ground); color: var(--wa-text); font-size: 9px; }
+
+.ww-rail { width: 26px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 12px; background: var(--wa-ground); border-right: 1px solid var(--wa-hairline); }
+.ww-rail .ico { color: var(--wa-text-muted); }
+.ww-rail .ico.on { color: var(--wa-green); }
+
+.ww-list { width: 228px; flex: none; display: flex; flex-direction: column; border-right: 1px solid var(--wa-hairline); }
+.ww-listhead { display: flex; align-items: center; padding: 10px 12px 6px; }
+.ww-ttl { flex: 1; font-size: 13px; font-weight: 700; }
+.ww-listhead .ico { color: var(--wa-text-muted); }
+.ww-search { margin: 2px 10px 6px; padding: 5px 9px; border-radius: 7px; background: var(--wa-field); color: var(--wa-text-muted); display: flex; align-items: center; gap: 6px; font-size: 8px; }
+.ww-pills { display: flex; gap: 5px; padding: 0 10px 7px; }
+.ww-pills .pl { padding: 2px 8px; border-radius: 999px; background: var(--wa-field); color: var(--wa-text-muted); font-size: 7.5px; }
+.ww-pills .pl.on { background: var(--wa-bubble-out); color: var(--wa-green); }
+
+.ww-row { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-top: 1px solid var(--wa-hairline); }
+.ww-row.on { background: var(--wa-field); }
+.ww-rowtx { flex: 1; min-width: 0; }
+.ww-rownm { font-size: 8.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ww-rowlast { margin-top: 2px; font-size: 7.5px; color: var(--wa-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.ww-av { width: 22px; height: 22px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: var(--wa-text); background: var(--wa-avatar-a); }
+.ww-av.b { background: var(--wa-avatar-b); }
+.ww-av.c { background: var(--wa-avatar-c); }
+.ww-av.sm { width: 20px; height: 20px; font-size: 8px; }
+
+.ww-chat { flex: 1; display: flex; flex-direction: column; background: var(--wa-chat); min-width: 0; }
+.ww-chathead { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--wa-ground); border-bottom: 1px solid var(--wa-hairline); }
+.ww-who { flex: 1; min-width: 0; }
+.ww-who .n { font-size: 9.5px; font-weight: 700; }
+.ww-who .s { font-size: 7.5px; color: var(--wa-text-muted); }
+.ww-chathead .ico { color: var(--wa-text-muted); }
+
+.ww-wall { flex: 1; padding: 10px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; overflow: hidden; }
+.ww-day { padding: 2px 9px; border-radius: 6px; background: var(--wa-ground-deep); color: var(--wa-text-muted); font-size: 7px; }
+
+.ww-bubble { align-self: flex-end; max-width: 250px; padding: 6px 8px 4px; border-radius: 8px; background: var(--wa-bubble-out); }
+.ww-card, .ww-preview { padding: 5px 7px; border-radius: 6px; background: var(--wa-bubble-inner); margin-bottom: 4px; }
+.ww-cardk { font-size: 7.5px; font-weight: 700; }
+.ww-cardl { margin-top: 1px; font-size: 7px; color: var(--wa-text-muted); word-break: break-all; }
+.ww-msg { font-size: 8px; line-height: 1.45; white-space: pre-line; }
+.ww-stamp { margin-top: 2px; text-align: right; font-size: 6.5px; color: var(--wa-text-muted); }
+.ww-stamp .tick { color: var(--wa-tick); }
+
+.ww-compose { padding: 7px 12px; background: var(--wa-ground); border-top: 1px solid var(--wa-hairline); display: flex; align-items: center; gap: 8px; }
+.ww-compose.tall { flex-direction: column; align-items: stretch; gap: 5px; }
+.ww-compose .ico { color: var(--wa-text-muted); }
+.ww-composerow { display: flex; align-items: flex-end; gap: 8px; }
+.ww-field { flex: 1; padding: 6px 9px; border-radius: 7px; background: var(--wa-field); font-size: 8px; line-height: 1.45; white-space: pre-line; }
+.ww-field.empty { color: var(--wa-text-muted); }
+.ww-send { width: 22px; height: 22px; flex: none; border-radius: 999px; background: var(--wa-green); display: flex; align-items: center; justify-content: center; }
+.ww-send .ico { color: var(--wa-ground); }

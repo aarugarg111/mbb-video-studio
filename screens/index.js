@@ -16,6 +16,7 @@ import * as createItem from './create-item.js';
 import * as shareSheet from './share-sheet.js';
 import * as waAttach from './wa-attach.js';
 import * as waChat from './wa-chat.js';
+import * as waWeb from './wa-web.js';
 import * as mcfDashboard from './mcf-dashboard.js';
 import * as mcfParties from './mcf-parties.js';
 import * as mcfParty from './mcf-party.js';
@@ -69,6 +70,7 @@ export const SCREENS = {
   [shareSheet.name]: shareSheet,
   [waAttach.name]: waAttach,
   [waChat.name]: waChat,
+  [waWeb.name]: waWeb,
   [mcfDashboard.name]: mcfDashboard,
   [mcfParties.name]: mcfParties,
   [mcfParty.name]: mcfParty,

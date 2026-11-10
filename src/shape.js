@@ -27,6 +27,8 @@ const ON_A_LAPTOP = {
   'scan-reading': 'mbb-desktop-scan-reading',
   'scan-done': 'mbb-desktop-scan-done',
   'share-sheet': 'mbb-desktop-invoice',
+  /* The laptop has its own WhatsApp: a browser tab, not somebody's handset. */
+  'wa-chat': 'wa-web',
   parties: 'mbb-desktop-parties',
   items: 'mbb-desktop-items',
   /* A laptop has no separate low-stock page; it is the Items page with the
@@ -58,6 +60,7 @@ const ON_A_PHONE = {
   'mbb-desktop-low-stock': 'low-stock',
   'mbb-desktop-create-invoice': 'create-invoice',
   'mbb-desktop-invoice': 'invoice-created',
+  'wa-web': 'wa-chat',
   'mbb-desktop-purchase': 'create-purchase',
   'mcf-desktop': 'mcf-parties',
   'mcf-desktop-dashboard': 'mcf-dashboard',
@@ -115,7 +118,10 @@ const SAME_BUTTON = {
   'create-party': 'create-party',
   'low-stock': 'low-stock',
   'setup-automation': 'setup-automation',
-  share: 'share'
+  share: 'share',
+  /* Sending the bill is one button in two interfaces. */
+  send: 'send',
+  attachment: 'attach'
 };
 
 /* The same table read backwards, for a laptop shot list recast onto a phone. */

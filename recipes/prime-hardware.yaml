@@ -36,16 +36,18 @@ shots:
       - { at: 7.0, do: tap, target: add-to-bill }
       - { at: 9.0, do: tap, target: save }
 
+  # Share and the option chosen from it are ONE shot. Two shots of one screen
+  # start the screen again, so the menu opened by the first tap would be shut
+  # before the second - which is how this clip used to lose its own share menu.
   - screen: mbb-desktop-invoice
-    duration: 3.0
+    duration: 5.6
     actions:
       - { at: 1.4, do: tap, target: share }
+      - { at: 3.8, do: tap, target: share-whatsapp }
 
-  - screen: mbb-desktop-invoice
-    duration: 2.6
+  # Where the laptop's share actually goes: WhatsApp Web, in a tab on the same
+  # machine, with the message already written. Not a phone - this is a desk.
+  - screen: wa-web
+    duration: 4.0
     actions:
-      - { at: 0.8, do: tap, target: share-whatsapp }
-
-  - screen: wa-chat
-    duration: 3.0
-    actions: []
+      - { at: 1.8, do: tap, target: send }

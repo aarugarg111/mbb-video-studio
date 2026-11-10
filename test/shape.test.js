@@ -38,13 +38,24 @@ test('a screen with no laptop version is left as it is', () => {
      That was wrong: the laptop app has the whole flow, and a clip that cut
      away to a phone to scan a bill was showing a different story from the one
      the script asked for. */
-  assert.equal(screenOnShape('wa-chat', 'laptop'), 'wa-chat');
+  /* It used to say this of WhatsApp, on the grounds that WhatsApp is somebody
+     else's app and only ever a phone. That was wrong too, and expensively: a
+     screen recording of the real thing shows the desktop app's share opening
+     WhatsApp WEB in a browser tab on the same machine. Believing otherwise
+     left a laptop clip with nowhere to finish, and the sharing beat - the
+     point of the video - was dropped rather than drawn. */
+  assert.equal(screenOnShape('wa-chat', 'laptop'), 'wa-web');
+  assert.equal(screenOnShape('wa-web', 'phone'), 'wa-chat');
+
+  /* The customer's own phone ringing is a phone and nothing else: there is no
+     desk version of being telephoned. */
+  assert.equal(screenOnShape('mcf-ai-ringing', 'laptop'), 'mcf-ai-ringing');
   const { recipe } = recastShape(
-    { video: 'x', shots: [{ screen: 'wa-chat', duration: 2, actions: [] }] },
+    { video: 'x', shots: [{ screen: 'mcf-ai-ringing', duration: 2, actions: [] }] },
     'laptop',
     CAT
   );
-  assert.equal(recipe.shots[0].screen, 'wa-chat');
+  assert.equal(recipe.shots[0].screen, 'mcf-ai-ringing');
 });
 
 test('Scan & Record is the whole flow on a laptop too', () => {
@@ -252,8 +263,8 @@ test('a laptop share is the laptop share, not the phone one', () => {
   const { recipe, dropped } = recastShape(phone, 'laptop', CAT);
   const screens = recipe.shots.map(s => s.screen);
 
-  assert.deepEqual(screens, ['mbb-desktop-invoice', 'wa-chat'],
-    'the laptop does its sharing on the invoice, then the customer receives it');
+  assert.deepEqual(screens, ['mbb-desktop-invoice', 'wa-web'],
+    'the laptop shares on the invoice, then hands over to WhatsApp Web');
 
   /* Both halves of the menu land in the one shot, in order: the menu has to be
      open before the option in it can be chosen. */
@@ -265,9 +276,9 @@ test('a laptop share is the laptop share, not the phone one', () => {
   assert.ok(dropped.some(d => d.includes('wa-attach')),
     'the studio should say the attach sheet was left out, not drop it silently');
 
-  /* The customer's phone stays. It is the payoff, and it is true whichever
-     machine sent the bill. */
-  assert.ok(screens.includes('wa-chat'));
+  /* The WhatsApp beat stays - it is the payoff - and on a laptop it is the
+     browser tab, not a handset appearing in the middle of a desk recording. */
+  assert.ok(screens.includes('wa-web'));
 });
 
 test('a phone share is left alone', () => {

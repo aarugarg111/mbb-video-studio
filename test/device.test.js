@@ -37,7 +37,10 @@ test('every screen built before this one is unchanged', () => {
       'mbb-desktop-theme-store',
       'mcf-desktop', 'mcf-desktop-automations', 'mcf-desktop-dashboard',
       'mcf-desktop-history',
-      'tally-receivables'
+      'tally-receivables',
+      /* WhatsApp Web: a browser tab on the same laptop, which is where the
+         desktop app's share actually goes. */
+      'wa-web'
     ],
     'only the screens that asked for it are desktop screens'
   );
