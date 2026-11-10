@@ -397,6 +397,8 @@
   --dsk-in:     #1E7A46;  /* money coming in                    */
   --dsk-out:    #D1453B;  /* money going out                    */
   --dsk-new:    #DC2626;  /* the "New" tag beside AI Collections */
+  --dsk-star:   #F0B429;  /* a starred report on the Reports page */
+  --dsk-shade:  #F7F8FB;  /* Gross Profit and Net Profit rows     */
 }
 
 /* The Mira AI autofill panel and the empty form it fills. */

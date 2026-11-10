@@ -1,0 +1,44 @@
+# The laptop's Profit and Loss report, reached the way the app reaches it:
+# the Reports page first, then the report. Built from the screen recording
+# "Reports MBB Desktop".
+#
+# Spoken over it, roughly 16 seconds:
+#   "Mahine ke end mein hisaab lagane ki zaroorat nahi. myBillBook mein
+#    Reports kholo - yahan har report pehle se bani hui hai. Profit And Loss
+#    pe click karo, mahina choose karo, aur neeche Net Profit - poora hisaab,
+#    do second mein. Excel chahiye toh mail bhi kar sakte ho."
+
+video: desktop-reports-profit
+aspect: 16x9
+
+business:
+  name: PRIME HARDWARE
+  gstin: 09ABCDE1234F1Z5
+  address: Transport Nagar, Kanpur, Uttar Pradesh, 208023
+
+party:
+  name: VERMA CONSTRUCTIONS
+  phone: 98765 43210
+
+invoice:
+  number: 4418
+
+items:
+  - { name: CEMENT BAGS 50KG, rate: 400, qty: 100, gst: 18, unit: BAG, purchase: 340, stock: 420 }
+  - { name: TMT BARS 12MM, rate: 650, qty: 50, gst: 18, unit: PCS, purchase: 560, stock: 180 }
+  - { name: VITRIFIED TILES 2X2, rate: 95, qty: 120, gst: 18, unit: BOX, purchase: 72, stock: 260 }
+
+shots:
+  # Every report the app already keeps, before one is opened.
+  - screen: mbb-desktop-report-list
+    duration: 4.5
+    actions:
+      - { at: 2.6, do: tap, target: open-profit-loss }
+
+  # The report, then the period, then the figure the script is about.
+  - screen: mbb-desktop-reports
+    duration: 9.0
+    actions:
+      - { at: 1.6, do: tap, target: change-range }
+      - { at: 3.2, do: tap, target: pick-range }
+      - { at: 6.0, do: tap, target: net-profit }

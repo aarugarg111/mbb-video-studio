@@ -83,7 +83,8 @@ export const SCREENS = {
      flow, wider interface - a laptop clip starts where a phone clip starts. */
   'mbb-desktop-dashboard': ['create-sales-invoice', 'to-collect', 'to-pay', 'transactions', 'collections'],
   'mbb-desktop-sales-list': ['new-bill', 'create-sales-invoice', 'bill-row-0', 'change-range', 'total-sales'],
-  'mbb-desktop-reports': ['create-sales-invoice', 'change-range', 'net-profit', 'excel'],
+  'mbb-desktop-report-list': ['create-sales-invoice', 'ca-sharing', 'open-balance-sheet', 'open-profit-loss', 'open-low-stock'],
+  'mbb-desktop-reports': ['create-sales-invoice', 'change-range', 'email-excel', 'excel', 'print-pdf', 'net-profit', 'pick-range'],
   'mbb-desktop-create-item': ['item-name', 'hsn', 'tab-stock', 'batching', 'save'],
   'mbb-desktop-create-party': ['party-name', 'party-phone', 'type-supplier', 'opening-balance', 'gstin', 'save'],
   /* The Theme Store on a laptop puts the picker BESIDE the bill instead of in

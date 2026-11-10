@@ -32,7 +32,7 @@ test('every screen built before this one is unchanged', () => {
       'mbb-desktop-dashboard', 'mbb-desktop-invoice',
       'mbb-desktop-items', 'mbb-desktop-low-stock',
       'mbb-desktop-parties', 'mbb-desktop-purchase',
-      'mbb-desktop-reports', 'mbb-desktop-sales-list',
+      'mbb-desktop-report-list', 'mbb-desktop-reports', 'mbb-desktop-sales-list',
       'mbb-desktop-scan', 'mbb-desktop-scan-done', 'mbb-desktop-scan-reading',
       'mbb-desktop-theme-store',
       'mcf-desktop', 'mcf-desktop-automations', 'mcf-desktop-dashboard',

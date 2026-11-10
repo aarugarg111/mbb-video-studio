@@ -28,6 +28,10 @@ export const icons = {
   trash: (s = 26) => svg(s, '<path d="M5 7h14M10 4h4M7 7l1 13h8l1-13M10 11l4 5M14 11l-4 5"/>', 'stroke-width="1.8"'),
   more: (s = 26) => svg(s, '<circle cx="12" cy="5" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="19" r="1.6" fill="currentColor"/>'),
   print: (s = 26) => svg(s, '<path d="M7 9V4h10v5M7 17H4v-7h16v7h-3M7 14h10v6H7z"/>', 'stroke-width="1.7"'),
+  /* The Reports page marks a favourite with a solid star, and offers the
+   * report by email beside the download. */
+  star: (s = 14) => svg(s, '<path d="M12 3.4l2.7 5.5 6.1.9-4.4 4.3 1 6-5.4-2.8-5.4 2.8 1-6L3.2 9.8l6.1-.9z" fill="currentColor" stroke="none"/>'),
+  mail: (s = 14) => svg(s, '<rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M4.5 7.5l7.5 5.5 7.5-5.5"/>', 'stroke-width="1.7"'),
   download: (s = 26) => svg(s, '<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>', 'stroke-width="1.8"'),
   share: (s = 26) => svg(s, '<circle cx="6" cy="12" r="2.4"/><circle cx="17" cy="6" r="2.4"/><circle cx="17" cy="18" r="2.4"/><path d="M8.2 11l6.6-3.8M8.2 13l6.6 3.8"/>', 'stroke-width="1.7"'),
   /* Items and Create New Item screens. */

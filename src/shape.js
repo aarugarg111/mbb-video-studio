@@ -54,6 +54,9 @@ const ON_A_PHONE = {
   'mbb-desktop-dashboard': 'home',
   'mbb-desktop-sales-list': 'sales-list',
   'mbb-desktop-reports': 'profit-loss',
+  /* The phone has no report DIRECTORY - it goes straight to the report - so
+     the page in front of the report folds into the report itself. */
+  'mbb-desktop-report-list': 'profit-loss',
   'mbb-desktop-create-item': 'create-item',
   'mbb-desktop-parties': 'parties',
   'mbb-desktop-items': 'items',

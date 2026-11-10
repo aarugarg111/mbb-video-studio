@@ -42,6 +42,11 @@ const CROPPED_BY_THE_FRAME = [
   'mbb-desktop-items / create-sales-invoice',
   'mbb-desktop-low-stock / create-sales-invoice',
   'mbb-desktop-parties / create-sales-invoice',
+  /* The Reports page is the other way round. Its camera sits LEFT, on the
+   * report names a script actually taps, which keeps the rail's button in
+   * frame and pushes the CA Reports Sharing button off the right edge. Same
+   * cause - a laptop is wider than a Reel - at the opposite end. */
+  'mbb-desktop-report-list / ca-sharing',
   'mbb-desktop-reports / create-sales-invoice',
   'mbb-desktop-sales-list / create-sales-invoice',
   'mbb-desktop-scan / create-sales-invoice'

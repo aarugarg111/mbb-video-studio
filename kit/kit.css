@@ -1450,20 +1450,44 @@
 .mb-pill.paid { background: var(--dsk-paid-bg); color: var(--dsk-in); }
 .mb-pill.unpaid { background: var(--dsk-unpaid-bg); color: var(--dsk-out); }
 
-/* Profit and Loss on a laptop: the report down the left, the one figure the
- * video is about down the right. */
-.rep-body { flex: 1; min-height: 0; display: flex; gap: 10px; }
-.rep-table { flex: 1; min-width: 0; padding: 9px 11px; border-radius: 8px; background: var(--dsk-card); border: 1px solid var(--dsk-rule); }
-.rep-head { margin: 7px 0 4px; font-size: 8px; font-weight: 700; color: var(--dsk-muted); letter-spacing: .06em; text-transform: uppercase; }
-.rep-head:first-child { margin-top: 0; }
-.rep-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 9.5px; }
-.rep-row span:last-child { font-weight: 600; }
-.rep-row.strong { font-size: 11px; font-weight: 700; }
-.rep-rule { height: 1px; margin: 6px 0; background: var(--dsk-rule); }
-.rep-hero { flex: none; width: 196px; padding: 14px 12px; border-radius: 8px; background: var(--dsk-card); border: 1px solid var(--dsk-in-edge); display: flex; flex-direction: column; justify-content: center; }
-.rep-hero-k { font-size: 9px; color: var(--dsk-muted); }
-.rep-hero-v { margin-top: 5px; font-size: 24px; font-weight: 700; color: var(--dsk-in); }
-.rep-hero-s { margin-top: 5px; font-size: 7.5px; color: var(--dsk-muted); }
+/* The Profit and Loss report on a laptop. One table, headed Particulars and
+ * Amount, with Gross Profit and Net Profit shaded - no cards, no columns.
+ * The table stops short of the right edge, as the real one does. */
+.rep-back { color: var(--dsk-muted); }
+.rep-fav { display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; background: var(--dsk-active); font-size: 8.5px; font-weight: 600; }
+.rep-fav .ico { color: var(--dsk-star); }
+
+.rep-range { position: relative; }
+.rep-menu { position: absolute; left: 0; top: calc(100% + 4px); z-index: 4; width: 150px; padding: 4px 0; border-radius: 8px; background: var(--dsk-panel); border: 1px solid var(--dsk-rule); box-shadow: 0 6px 16px var(--dsk-scrim); }
+.rep-opt { padding: 5px 10px; font-size: 8.5px; color: var(--dsk-muted); }
+.rep-opt.on { color: var(--dsk-ink); font-weight: 600; background: var(--dsk-page); }
+
+.rep-tools { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.rep-tool { display: flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 6px; border: 1px solid var(--dsk-rule); font-size: 8.5px; font-weight: 600; white-space: nowrap; }
+.rep-tool .ico { color: var(--dsk-muted); }
+
+.rep-sheet { width: 74%; border-radius: 8px; background: var(--dsk-card); border: 1px solid var(--dsk-rule); overflow: hidden; }
+.rep-row { display: flex; align-items: center; padding: 6px 10px; font-size: 9px; border-bottom: 1px solid var(--dsk-rule); }
+.rep-row:last-child { border-bottom: 0; }
+.rep-row.head { font-size: 7.5px; font-weight: 700; color: var(--dsk-muted); letter-spacing: .05em; }
+.rep-row.strong { font-weight: 700; background: var(--dsk-shade); }
+.rep-k { flex: 1; min-width: 0; }
+.rep-v { flex: none; width: 26%; }
+
+/* The Reports page: five groups of reports in three columns. */
+.rl-filters { display: flex; align-items: center; gap: 6px; }
+.rl-filter-k { font-size: 8.5px; color: var(--dsk-muted); }
+.rl-chip { padding: 4px 10px; border-radius: 20px; border: 1px solid var(--dsk-rule); background: var(--dsk-panel); font-size: 8.5px; white-space: nowrap; }
+
+.rl-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--dsk-rule); border: 1px solid var(--dsk-rule); border-radius: 8px; overflow: hidden; align-content: start; }
+.rl-col { padding: 7px 9px 9px; background: var(--dsk-card); }
+.rl-head { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; padding-bottom: 5px; font-size: 8px; font-weight: 600; color: var(--dsk-muted); border-bottom: 1px solid var(--dsk-rule); }
+.rl-row { display: flex; align-items: center; gap: 5px; padding: 4px 2px; font-size: 8.5px; }
+.rl-nm { min-width: 0; margin-right: auto; }
+.rl-star { flex: none; color: var(--dsk-star); }
+.rl-less { display: flex; align-items: center; gap: 4px; padding: 4px 2px; font-size: 8.5px; color: var(--dsk-link); }
+.rl-find { display: flex; align-items: center; gap: 4px; margin-left: auto; font-size: 8px; color: var(--dsk-muted); }
+.rl-key { padding: 1px 5px; border-radius: 4px; background: var(--dsk-page); border: 1px solid var(--dsk-rule); }
 
 /* Create Item on a laptop: a window over the Items page. */
 .ci-win { position: absolute; left: 150px; right: 150px; top: 44px; bottom: 36px; display: flex; flex-direction: column; border-radius: 10px; background: var(--dsk-modal); border: 1px solid var(--dsk-rule); overflow: hidden; }
