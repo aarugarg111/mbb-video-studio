@@ -85,7 +85,16 @@ export function explain(error: unknown, teamMode: boolean): Explained {
     return { message: 'Your sign-in has expired. Sign in again and the script will still be here.', detail };
   }
 
-  if (status === 401 || text.includes('authentication_error') || text.includes('invalid x-api-key')) {
+  /* Google answers a bad key with 400 and "API key not valid", not with 401 -
+   * so going by status alone sent the commonest thing to be wrong all the way
+   * to the catch-all at the bottom, and showed the viewer a wall of JSON. */
+  if (
+    status === 401 ||
+    text.includes('authentication_error') ||
+    text.includes('invalid x-api-key') ||
+    text.includes('api key not valid') ||
+    text.includes('api_key_invalid')
+  ) {
     return {
       message: `Google would not accept the key. ${keyHolder}`,
       detail

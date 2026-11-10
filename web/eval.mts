@@ -39,6 +39,7 @@ import { join, dirname } from 'node:path';
 import { askProvider, providerById, castToShape } from './lib/providers.ts';
 import { briefingFor } from './lib/briefing.ts';
 import { parse } from '../src/recipe.js';
+import { catalogue, scrollables } from '../screens/index.js';
 
 /* The key, from the environment or - failing that - from cf/.dev.vars, which
  * is where the Worker's local copy already lives and which git ignores.
@@ -58,6 +59,7 @@ function keyFromDevVars(): string {
   }
 }
 
+const HERE = dirname(fileURLToPath(import.meta.url));
 const geminiKey = process.env.GEMINI_API_KEY || keyFromDevVars();
 
 if (!geminiKey) {
@@ -173,12 +175,50 @@ const only = process.argv.includes('--one')
   : null;
 const chosen = only == null ? SCRIPTS : [SCRIPTS[only]].filter(Boolean);
 
-const screensOf = (yamlText: string): string[] =>
-  parse(yamlText).recipe.shots.map((s: { screen: string }) => s.screen);
+/* The studio's own validator, called the way the studio calls it.
+ *
+ * This used to be `parse(yamlText)` with no catalogue, and parse takes the
+ * catalogue as its SECOND argument - so every script in the run came back
+ * "DID NOT PARSE: Cannot convert undefined or null to object" and the report
+ * read 0/8. That is a JavaScript error from inside the harness wearing the
+ * costume of a verdict on the model, which is the worst thing a measurement
+ * can do: it was about to be evidence for a decision about which AI to use. */
+function screensOf(yamlText: string): string[] {
+  const { recipe, errors } = parse(yamlText, catalogue(), { scrollable: scrollables() });
+  /* A recipe the studio would refuse is a failure, and WHY it refused is the
+     useful half - "no such screen: foo" says what the model got wrong. */
+  if (errors?.length) throw new Error(errors.join('; '));
+  return recipe.shots.map((s: { screen: string }) => s.screen);
+}
 
 type Tally = { parsed: number; kept: number; seconds: number; failed: string[] };
 const tally: Record<string, Tally> = {};
 for (const a of ARMS) tally[a.label] = { parsed: 0, kept: 0, seconds: 0, failed: [] };
+
+/* The harness checks ITSELF before it judges anything.
+ *
+ * The first run of this reported 0/8 - "DID NOT PARSE" on every script - and
+ * it was not the model. parse() takes the screen catalogue as its second
+ * argument and was being called without it, so every recipe died inside the
+ * harness and the report blamed Gemini in a table somebody was about to make
+ * a decision from. A measurement that can fail silently in its own favour is
+ * worse than no measurement.
+ *
+ * So one of the repo's own recipes goes through the same path first. It is
+ * known good - it renders - so anything wrong here is the harness. */
+try {
+  const known = readFileSync(join(HERE, '..', 'recipes', 'desktop-reports-profit.yaml'), 'utf8');
+  const got = screensOf(castToShape(known, 'laptop').recipe);
+  if (!got.length) throw new Error('a known-good recipe produced no screens');
+} catch (err) {
+  console.error(
+    '\nThe harness is broken, so nothing was asked of any model and nothing\n' +
+    'was spent. A recipe from this repo, which renders, did not survive the\n' +
+    'eval\'s own path:\n\n  ' + (err as Error).message + '\n\n' +
+    'Fix that before reading anything into a score.\n'
+  );
+  process.exit(1);
+}
 
 console.log(`\n${chosen.length} script(s) through ${ARMS.length} model(s).\n`);
 

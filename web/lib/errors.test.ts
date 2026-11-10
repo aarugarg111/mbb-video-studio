@@ -143,3 +143,16 @@ test('a 403 that DID reach Claude is still reported as a key problem', () => {
   };
   assert.match(explain(fromClaude, true).message, /key being turned off|out of credit/);
 });
+
+test('google saying the key is wrong is reported as the key, not as raw JSON', () => {
+  /* Google uses 400 for this, where Anthropic used 401. Going by status alone
+     sent the single most likely problem to the catch-all, which prints the
+     error envelope - accurate and useless. */
+  const badKey = {
+    status: 400,
+    message: '400 {"error":{"code":400,"message":"API key not valid. Please pass a valid API key.","status":"INVALID_ARGUMENT"}}'
+  };
+  assert.match(explain(badKey, false).message, /would not accept the key/);
+  assert.match(explain(badKey, false).message, /saved in this browser/);
+  assert.match(explain(badKey, true).message, /send this to Aryan/);
+});
