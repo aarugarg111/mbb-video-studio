@@ -103,6 +103,66 @@ async function renderProxy(request, env, pathname) {
   });
 }
 
+/* The same arrangement as the Anthropic proxy, for Google: the browser builds
+ * the whole request and this adds the key.
+ *
+ * It exists because team mode had no way to reach the free provider at all.
+ * The studio on Pages has let people bring a Gemini key for a while - it has
+ * a free tier, and the studio's entire running cost is this one call - but
+ * the team build routed everything to Anthropic, so the one deployment the
+ * team actually uses was the one that had to pay.
+ *
+ * Without GEMINI_API_KEY set this answers 501 and says so plainly, rather
+ * than calling Google without a key and passing on whatever Google says
+ * about that. The studio reads the 501 and falls back to Claude, so a Worker
+ * deployed without the secret keeps working and merely costs money. */
+const GEMINI_MODELS = new Set(['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-3.6-flash']);
+const GEMINI_DEFAULT = 'gemini-3.5-flash-lite';
+
+async function geminiProxy(request, env, pathname) {
+  if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405);
+  if (!await verifySession(readCookie(request), env.SESSION_SECRET)) {
+    return json({ error: 'Your session has expired. Sign in again.' }, 401);
+  }
+  if (!env.GEMINI_API_KEY) {
+    return json({ error: 'gemini-not-configured', detail: 'This Worker has no GEMINI_API_KEY set.' }, 501);
+  }
+
+  /* Only generateContent, and only on a model from the list. The path is
+   * built here from the matched model rather than passed through, so nothing
+   * from the browser reaches Google's URL - a password-holder cannot point
+   * this at another endpoint or another project's model. */
+  const asked = decodeURIComponent(
+    pathname.match(/^\/api\/gemini\/v1beta\/models\/([^:]+):generateContent$/)?.[1] ?? ''
+  );
+  if (!asked) return json({ error: 'Only generateContent is proxied.' }, 404);
+  const model = GEMINI_MODELS.has(asked) ? asked : GEMINI_DEFAULT;
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Expected JSON.' }, 400); }
+  delete body.stream;
+
+  const upstream = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+      body: JSON.stringify(body)
+    }
+  );
+
+  /* Passed through as-is, for the same reason the Anthropic one is: the page
+   * already knows how to read Google's error shapes, and the retry that
+   * drops the thinking setting depends on seeing Google's own words. */
+  return new Response(upstream.body, {
+    status: upstream.status,
+    headers: {
+      'Content-Type': upstream.headers.get('Content-Type') || 'application/json',
+      'x-mvs-stage': 'gemini'
+    }
+  });
+}
+
 async function proxy(request, env) {
   if (request.method !== 'POST') return json({ error: 'Use POST.' }, 405);
   if (!await verifySession(readCookie(request), env.SESSION_SECRET)) {
@@ -244,6 +304,7 @@ export default {
         });
       }
       if (pathname === '/api/anthropic/v1/messages') return proxy(request, env);
+      if (pathname.startsWith('/api/gemini/')) return geminiProxy(request, env, pathname);
       if (pathname.startsWith('/api/render')) return renderProxy(request, env, pathname);
       return json({ error: 'No such endpoint.' }, 404);
     }

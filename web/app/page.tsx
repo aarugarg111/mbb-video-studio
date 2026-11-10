@@ -10,8 +10,37 @@ import { zipBlobs } from '@/lib/zip';
 
 /* The picker's fourth button: cut the same shot list in all three shapes. */
 const ALL = 'all';
+
+/* Team mode asks the FREE provider first.
+ *
+ * Everyone signed in shares Aryan's keys, so team mode is the one place
+ * where nobody using it sees what it costs - which is exactly where the
+ * cheap path belongs. Gemini has a free tier, it goes through the studio's
+ * own validator like every other provider, and the Worker holds the key.
+ *
+ * Claude is the fallback, and ONLY when the Worker says it has no Gemini key
+ * set. A quota error or a bad key is not a reason to quietly start spending
+ * money - those are raised, so somebody fixes the free path rather than
+ * paying for a year without noticing it broke. */
+async function askTeam(brief: string, script: string, details: unknown) {
+  try {
+    return await askProvider(
+      {
+        id: 'gemini',
+        key: '',
+        model: providerById('gemini').defaultModel,
+        prompt: brief
+      },
+      false,
+      { baseUrl: proxyBaseUrl() }
+    );
+  } catch (e) {
+    if (!/gemini-not-configured/.test(String((e as Error)?.message ?? ''))) throw e;
+    return proposeRecipe({ script, details });
+  }
+}
 import { proposeRecipe } from '@/lib/claude';
-import { TEAM_MODE, signIn, signOut, isSignedIn } from '@/lib/team';
+import { TEAM_MODE, signIn, signOut, isSignedIn, proxyBaseUrl } from '@/lib/team';
 import { renderVideo } from '@/lib/render';
 import { canEncode } from '@/lib/encode';
 import { renderRemotely, canRenderRemotely } from '@/lib/render-remote';
@@ -100,7 +129,9 @@ export default function Page() {
   /* Whose AI reads the script. The studio's own path asks Claude against a
    * schema; the others are sent the same briefing a person would paste into a
    * chat window, and answer with YAML. Both end at the same validator. */
-  const [provider, setProvider] = useState<ProviderId>('anthropic');
+  /* PROVIDERS[0], not a name written out again here. The default lives in
+   * one place and it is the free one. */
+  const [provider, setProvider] = useState<ProviderId>(PROVIDERS[0].id);
   const stageRef = useRef<HTMLDivElement>(null);
   const urlRef = useRef('');
   /* Every object URL this run handed out, so they can all be released. */
@@ -113,7 +144,7 @@ export default function Page() {
       try {
         migrateKey(localStorage);
         const saved = localStorage.getItem(PROVIDER_NAME);
-        const its = PROVIDERS.find(p => p.id === saved)?.id ?? 'anthropic';
+        const its = PROVIDERS.find(p => p.id === saved)?.id ?? PROVIDERS[0].id;
         setProvider(its);
         setApiKey(readKey(localStorage, its));
       } catch { /* private mode */ }
@@ -299,6 +330,8 @@ export default function Page() {
         ...(shape ? { shape } : {})
       };
 
+      const brief = briefingFor(script, { business, party, theme, shape });
+
       const proposed = onOwnKey
         ? await askProvider({
             id: provider,
@@ -306,9 +339,11 @@ export default function Page() {
             model: providerById(provider).defaultModel,
             /* The same briefing the studio hands to somebody pasting into a
              * chat window. One set of instructions, whoever reads them. */
-            prompt: briefingFor(script, { business, party, theme, shape })
+            prompt: brief
           })
-        : await proposeRecipe({ ...(TEAM_MODE ? {} : { apiKey }), script, details });
+        : TEAM_MODE
+          ? await askTeam(brief, script, details)
+          : await proposeRecipe({ apiKey, script, details });
       setRecipe(proposed.recipe);
       setUnsupported(proposed.unsupported);
       setStep('check');

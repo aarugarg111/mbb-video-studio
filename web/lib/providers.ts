@@ -32,7 +32,29 @@ export type Provider = {
   free: string;
 };
 
+/* GEMINI IS FIRST, and first here means default - providerById falls back to
+ * PROVIDERS[0] and the picker opens on it. It leads because it is the only
+ * one of the three with a free tier big enough to run the studio on, and the
+ * studio's whole running cost is this one call.
+ *
+ * The model is Flash-LITE rather than Flash. Google's own model list calls it
+ * "the fastest, most cost-effective" of its generation, and this job is the
+ * one that suits it: not writing, but reading a script into a fixed
+ * vocabulary of screens that is handed to it in the prompt, with the
+ * studio's validator behind it to catch anything it gets wrong. Flash-Lite
+ * also takes the "minimal" thinking level, which the bigger Flash does not -
+ * see buildRequest. */
 export const PROVIDERS: Provider[] = [
+  {
+    id: 'gemini',
+    name: 'Gemini',
+    looksLike: /^AIza/,
+    hint: 'AIza…',
+    where: 'aistudio.google.com',
+    whereUrl: 'https://aistudio.google.com/apikey',
+    defaultModel: 'gemini-3.5-flash-lite',
+    free: 'Free tier. The fastest of them, and what the studio opens on.'
+  },
   {
     id: 'anthropic',
     name: 'Claude',
@@ -42,16 +64,6 @@ export const PROVIDERS: Provider[] = [
     whereUrl: 'https://console.anthropic.com/settings/keys',
     defaultModel: 'claude-haiku-5-5',
     free: 'Paid, but pennies a script. Reads it against the studio’s own schema.'
-  },
-  {
-    id: 'gemini',
-    name: 'Gemini',
-    looksLike: /^AIza/,
-    hint: 'AIza…',
-    where: 'aistudio.google.com',
-    whereUrl: 'https://aistudio.google.com/apikey',
-    defaultModel: 'gemini-3.8-flash',
-    free: 'Has a free tier. Good enough for a shot list.'
   },
   {
     id: 'grok',
@@ -78,16 +90,53 @@ export type Request = { url: string; headers: Record<string, string>; body: stri
 
 /* One prompt, three shapes of envelope. Kept as data rather than three
  * branches of fetch so each one can be checked without a network or a key. */
-export function buildRequest(id: ProviderId, key: string, model: string, prompt: string): Request {
+export type How = {
+  /* Set when a first try came back complaining about the thinking setting -
+   * see askProvider. The request is then sent again without it. */
+  withoutThinking?: boolean;
+  /* Team mode: the studio's own Worker, which holds the key. The request is
+   * otherwise identical, and the key field goes empty rather than being
+   * filled with a placeholder nobody reads - in team mode the browser has no
+   * key, which is the entire point of team mode. */
+  baseUrl?: string;
+};
+
+export function buildRequest(
+  id: ProviderId, key: string, model: string, prompt: string, how: How = {}
+): Request {
+  const { withoutThinking = false, baseUrl } = how;
+
   if (id === 'gemini') {
+    const path = `v1beta/models/${encodeURIComponent(model)}:generateContent`;
     return {
-      url: `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+      url: baseUrl ? `${baseUrl}/api/gemini/${path}` : `https://generativelanguage.googleapis.com/${path}`,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(baseUrl ? {} : { 'x-goog-api-key': key })
+      },
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        /* Low temperature: this is transcription of a script into a fixed
-           vocabulary of screens, not writing. */
-        generationConfig: { temperature: 0.2, maxOutputTokens: 8192 }
+        generationConfig: {
+          /* Low temperature: this is transcription of a script into a fixed
+             vocabulary of screens, not writing. */
+          temperature: 0.2,
+          maxOutputTokens: 8192,
+          /* Flash models think before answering and are shipped with it ON -
+           * on 3.8 Flash the default is "medium". Thinking is time the viewer
+           * waits and tokens somebody pays for, and this job does not want
+           * any: the screens it may use are listed in the prompt and the
+           * validator catches whatever it still gets wrong. It is the same
+           * judgement as the "low" effort on the Claude path, which was made
+           * there and then not acted on for a year.
+           *
+           * "minimal" is not offered by every model - the bigger 3.8 Flash
+           * stops at "low" - and the field itself may be renamed under us, as
+           * Google has already renamed models under us once. So it is sent
+           * hopefully: askProvider sends the whole request again without it
+           * if Google objects, and a studio that is merely slower is a far
+           * better failure than one that is broken. */
+          ...(withoutThinking ? {} : { thinkingConfig: { thinkingLevel: 'minimal' } })
+        }
       })
     };
   }
@@ -164,6 +213,16 @@ export function recipeFromText(text: string): { recipe: string; unsupported: str
  * The refusal names the dead model too, so only a name that is not the one
  * just asked for counts. Nothing is retried that is not a 404 about a model:
  * a bad key must stay a bad key. */
+/* Is this refusal about the thinking setting rather than about the request?
+ *
+ * Matched on the field name rather than on a message, because the message is
+ * Google's to reword and the field name is the thing we sent. A refusal about
+ * anything else must stay a refusal: a bad key that quietly retried itself
+ * without thinking would just fail twice and report the second one. */
+export function objectsToThinking(detail: string): boolean {
+  return /thinking(_|-)?(level|budget|config)/i.test(detail);
+}
+
 export function replacementModel(asked: string, detail: string): string | null {
   if (!/model/i.test(detail)) return null;
   const named = [...detail.matchAll(/models\/([A-Za-z0-9][\w.\-]*)/g)].map(m => m[1]);
@@ -176,9 +235,13 @@ export async function askProvider(
   { id, key, model, prompt }: { id: ProviderId; key: string; model: string; prompt: string },
   /* Set when this is already the second try, so a provider that renames a
    * model in a circle cannot keep the page asking forever. */
-  retried = false
+  retried = false,
+  /* withoutThinking is set once the thinking setting has already been
+   * dropped, so a provider that objects to something else cannot send this
+   * round in a circle. */
+  how: How = {}
 ): Promise<{ recipe: string; unsupported: string[] }> {
-  const request = buildRequest(id, key, model, prompt);
+  const request = buildRequest(id, key, model, prompt, how);
 
   let response: Response;
   try {
@@ -198,7 +261,15 @@ export async function askProvider(
 
     if (response.status === 404 && !retried) {
       const instead = replacementModel(model, detail);
-      if (instead) return askProvider({ id, key, model: instead, prompt }, true);
+      if (instead) return askProvider({ id, key, model: instead, prompt }, true, how);
+    }
+
+    /* The thinking setting is an optimisation, never a requirement. If this
+     * model has not got it, or Google has renamed the field again, the right
+     * answer is a slower clip rather than no clip - so it is dropped and the
+     * whole thing asked again, once. */
+    if (!how.withoutThinking && objectsToThinking(detail)) {
+      return askProvider({ id, key, model, prompt }, retried, { ...how, withoutThinking: true });
     }
 
     throw Object.assign(

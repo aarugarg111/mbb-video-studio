@@ -4,7 +4,8 @@ import { parse } from '../../src/recipe.js';
 import { catalogue, scrollables } from '../../screens/index.js';
 import {
   PROVIDERS, providerById, providerOfKey, buildRequest, extractText, recipeFromText,
-  readKey, writeKey, migrateKey, keySlotFor, replacementModel, askProvider
+  readKey, writeKey, migrateKey, keySlotFor, replacementModel, askProvider,
+  objectsToThinking
 } from './providers';
 
 test('a key goes to the provider it came from', () => {
@@ -105,7 +106,54 @@ test('every provider says where to get a key and what it costs', () => {
     assert.match(p.whereUrl, /^https:\/\//, `${p.id} has no link to its keys`);
     assert.equal(providerById(p.id).id, p.id);
   }
-  assert.equal(providerById('nonsense').id, 'anthropic', 'an unknown id falls back to the studio own path');
+  /* First in the list IS the default - providerById falls back to it and the
+   * picker opens on it - and the default has to be the free one. The studio's
+   * entire running cost is the single call this chooses the provider for, so
+   * a change that quietly puts a paid model back in front should fail here
+   * before anybody finds it on a bill. */
+  assert.equal(
+    providerById('nonsense').id, 'gemini',
+    'an unknown id falls back to the first provider, which must be the free one'
+  );
+  assert.equal(PROVIDERS[0].id, 'gemini', 'the studio opens on the free provider');
+});
+
+test('the gemini call asks for as little thinking as the model allows', () => {
+  const body = JSON.parse(buildRequest('gemini', 'AIza-x', 'gemini-3.5-flash-lite', 'hi').body);
+  assert.equal(
+    body.generationConfig.thinkingConfig.thinkingLevel, 'minimal',
+    'Flash models think by default, and this job does not need it'
+  );
+
+  /* Dropped on request, because the setting is an optimisation and never a
+     requirement - a slower clip beats no clip. */
+  const plain = JSON.parse(
+    buildRequest('gemini', 'AIza-x', 'gemini-3.5-flash-lite', 'hi', { withoutThinking: true }).body
+  );
+  assert.equal(plain.generationConfig.thinkingConfig, undefined);
+  assert.equal(plain.generationConfig.temperature, 0.2, 'only the thinking setting is dropped');
+});
+
+test('only a complaint about thinking makes the studio drop it and retry', () => {
+  assert.ok(objectsToThinking('Invalid JSON payload received. Unknown name "thinkingLevel"'));
+  assert.ok(objectsToThinking('thinking_level is not supported for this model'));
+  assert.ok(objectsToThinking('generationConfig.thinkingConfig: unsupported'));
+  /* A bad key that retried itself would fail twice and report the second. */
+  assert.ok(!objectsToThinking('API key not valid. Please pass a valid API key.'));
+  assert.ok(!objectsToThinking('Quota exceeded for this project.'));
+});
+
+test('team mode sends the gemini call to the worker, and the key stays there', () => {
+  const direct = buildRequest('gemini', 'AIza-secret', 'gemini-3.5-flash-lite', 'hi');
+  assert.match(direct.url, /^https:\/\/generativelanguage\.googleapis\.com\//);
+  assert.equal(direct.headers['x-goog-api-key'], 'AIza-secret');
+
+  const team = buildRequest('gemini', '', 'gemini-3.5-flash-lite', 'hi', { baseUrl: 'https://studio.example' });
+  assert.equal(team.url, 'https://studio.example/api/gemini/v1beta/models/gemini-3.5-flash-lite:generateContent');
+  /* The whole point of team mode: the browser never holds a key, so it must
+     not be sending an empty one either. */
+  assert.ok(!('x-goog-api-key' in team.headers), 'the browser must not send a key header in team mode');
+  assert.equal(JSON.parse(team.body).generationConfig.thinkingConfig.thinkingLevel, 'minimal');
 });
 
 /* A fake localStorage, which is all these need. */

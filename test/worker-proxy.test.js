@@ -190,3 +190,52 @@ test('a key stored with a trailing newline is still sent as the key', async () =
     assert.equal(cap.seen.headers['x-api-key'], ENV.ANTHROPIC_API_KEY);
   } finally { cap.restore(); }
 });
+
+/* The Gemini route: the same arrangement as the Anthropic one, for the free
+ * provider. It exists because team mode could not reach the free path at
+ * all - the studio on Pages has taken a Gemini key for a while, but the team
+ * build sent everything to Anthropic, so the one deployment the team
+ * actually uses was the only one that had to pay. */
+const GEM_PATH = '/api/gemini/v1beta/models/gemini-3.5-flash-lite:generateContent';
+const GEM_ENV = { ...ENV, GEMINI_API_KEY: 'AIza-the-real-one' };
+
+test('gemini is refused without a session, like everything else', async () => {
+  const cap = captureUpstream();
+  try {
+    const res = await worker.fetch(post(GEM_PATH, { contents: [] }), GEM_ENV);
+    assert.equal(res.status, 401);
+    assert.equal(cap.seen.url, undefined, 'an unauthenticated call must never reach Google');
+  } finally { cap.restore(); }
+});
+
+test('the gemini key is added by the worker and never comes from the browser', async () => {
+  const cap = captureUpstream();
+  try {
+    await worker.fetch(post(GEM_PATH, { contents: [] }, await signedInCookie()), GEM_ENV);
+    assert.equal(cap.seen.headers['x-goog-api-key'], GEM_ENV.GEMINI_API_KEY);
+    assert.match(cap.seen.url, /^https:\/\/generativelanguage\.googleapis\.com\//);
+  } finally { cap.restore(); }
+});
+
+/* The URL is BUILT from the matched model, never passed through, so nobody
+ * holding the team password can point this at another endpoint. */
+test('an unknown gemini model falls back rather than reaching Google', async () => {
+  const cap = captureUpstream();
+  try {
+    await worker.fetch(
+      post('/api/gemini/v1beta/models/gemini-9-enormous:generateContent', {}, await signedInCookie()),
+      GEM_ENV
+    );
+    assert.match(cap.seen.url, /gemini-3\.5-flash-lite:generateContent$/);
+  } finally { cap.restore(); }
+});
+
+test('a worker with no gemini key says so, so the studio can fall back', async () => {
+  const cap = captureUpstream();
+  try {
+    const res = await worker.fetch(post(GEM_PATH, {}, await signedInCookie()), ENV);
+    assert.equal(res.status, 501);
+    assert.match((await res.json()).error, /gemini-not-configured/);
+    assert.equal(cap.seen.url, undefined, 'it must not call Google without a key');
+  } finally { cap.restore(); }
+});

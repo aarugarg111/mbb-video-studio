@@ -49,6 +49,26 @@ npx wrangler secret put SESSION_SECRET
   be told over a call.
 - `SESSION_SECRET` — not typed by anyone; it only signs the login cookie.
 
+**3. Set the Gemini key.** Technically optional, but this is the secret that
+decides what the studio costs to run:
+
+```
+npx wrangler secret put GEMINI_API_KEY
+```
+
+- `GEMINI_API_KEY` — a free key from
+  [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
+
+With it set, every script is read on Gemini's **free tier** and the
+Anthropic key is never touched. Without it the Worker answers "gemini not
+configured" and the studio falls back to Claude — so a Worker deployed
+without this still works, it just spends money for no reason.
+
+Only a MISSING key causes that fallback. If Gemini is configured but
+refuses — quota gone, key revoked — the studio reports it rather than
+quietly switching to the paid one, so you hear about it while it is still
+cheap to fix instead of on a bill a year later.
+
 **Two more secrets, only if you set up a render machine** so the studio
 works on phones and in Safari. `worker/README.md` covers the machine itself;
 these two tell the Worker where it is:
@@ -130,6 +150,7 @@ Create `cf/.dev.vars` (git-ignored) with test values:
 
 ```
 ANTHROPIC_API_KEY = "sk-ant-..."
+GEMINI_API_KEY = "AIza..."
 TEAM_PASSWORD = "test-password"
 SESSION_SECRET = "anything-long"
 ```
