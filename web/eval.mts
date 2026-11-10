@@ -33,17 +33,42 @@
  * Gemini arm is free.
  */
 
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { join, dirname } from 'node:path';
 import { askProvider, providerById, castToShape } from './lib/providers.ts';
 import { briefingFor } from './lib/briefing.ts';
 import { parse } from '../src/recipe.js';
 
-const geminiKey = process.env.GEMINI_API_KEY;
+/* The key, from the environment or - failing that - from cf/.dev.vars, which
+ * is where the Worker's local copy already lives and which git ignores.
+ *
+ * Reading the file matters more than it looks. Asking somebody to put a
+ * secret in front of a command is asking them to get the syntax right on
+ * their own shell - and the bash form I handed over first is a syntax error
+ * in PowerShell, which is what this machine runs. It also leaves the key in
+ * the shell history. If it is already on disk for the Worker, use that. */
+function keyFromDevVars(): string {
+  try {
+    const text = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'cf', '.dev.vars'), 'utf8');
+    const line = text.split('\n').find(l => l.trim().startsWith('GEMINI_API_KEY'));
+    return line ? (line.split('=')[1] ?? '').trim().replace(/^["']|["']$/g, '') : '';
+  } catch {
+    return '';
+  }
+}
+
+const geminiKey = process.env.GEMINI_API_KEY || keyFromDevVars();
 
 if (!geminiKey) {
   console.error(
-    'Set GEMINI_API_KEY - free, from aistudio.google.com/apikey. It is read\n' +
-    'from the environment, sent to Google and nowhere else, and never written\n' +
-    'down by this script.'
+    'No Gemini key found. Either put one in cf/.dev.vars as\n' +
+    '  GEMINI_API_KEY = "AIza..."\n' +
+    'or set it for this terminal first:\n' +
+    '  PowerShell:  $env:GEMINI_API_KEY = "AIza..."\n' +
+    '  bash:        export GEMINI_API_KEY=AIza...\n' +
+    'A free key comes from aistudio.google.com/apikey. It is sent to Google\n' +
+    'and nowhere else, and is never printed or written down by this script.'
   );
   process.exit(1);
 }
