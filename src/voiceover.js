@@ -56,12 +56,31 @@ export function voiceLines(recipe) {
   const lines = [];
 
   (recipe?.shots ?? []).forEach((shot, i) => {
+    const start = starts[i];
+    const endOfShot = start + (Number(shot.duration) || 0);
+
+    /* What the recipe asks to be SAID over this shot - the instructions in a
+     * support clip, voiced so somebody stuck in the app can follow along
+     * without reading. These are the lines Customer Support needs; the
+     * transcript below is a different thing, the dialogue of one particular
+     * screen. A clip can have either, and a how-to has these. */
+    for (const line of shot.say ?? []) {
+      const at = start + Number(line.at ?? 0);
+      if (at >= endOfShot) continue;
+      lines.push({
+        at,
+        until: Math.min(at + LINE_SECONDS, endOfShot),
+        speaker: 'Narrator',
+        text: line.text,
+        /* Spoken, always. The whole point of an instruction is being heard. */
+        voiced: true,
+        instruction: true
+      });
+    }
+
     const screen = SCREENS[shot.screen];
     const transcript = screen?.TRANSCRIPT;
     if (!Array.isArray(transcript)) return;
-
-    const start = starts[i];
-    const endOfShot = start + (Number(shot.duration) || 0);
 
     for (const line of transcript) {
       const at = start + line.at;

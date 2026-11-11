@@ -1,0 +1,79 @@
+# A how-to clip for Customer Support to send a customer who is stuck.
+#
+# Not an ad. An ad is silent, fast, and sells; this explains, and it is
+# spoken, because somebody holding a phone in a shop cannot read subtitles
+# while following along in the app at the same time.
+#
+# What that changes about the pacing:
+#
+#   Shots are LONGER. An ad can cut the moment a tap lands; a customer has to
+#   find the same button on their own screen before the next thing happens.
+#
+#   One instruction per screen. Two sentences over one screen is somebody
+#   pausing the video.
+#
+#   It ends on the result, with no call to action. They already have the app;
+#   they are stuck in it. brand.cta is off for that reason - a download
+#   button at the end of a help video is an advert aimed at a customer.
+#
+# The spoken lines are Hinglish because that is what the customer is called
+# in, and they are written to be HEARD, not read: short, plain, and each one
+# naming the thing to tap in the words that are printed on it.
+
+video: help-make-a-bill
+aspect: "9:16"
+
+business:
+  name: SHARMA TRADERS
+  gstin: 09ABCDE1234F1Z5
+  address: Sadar Bazar, Kanpur, Uttar Pradesh, 208001
+
+party:
+  name: RAMESH KUMAR
+  phone: 98765 43210
+
+invoice:
+  number: 1042
+
+items:
+  - { name: SUGAR 5KG, rate: 260, qty: 2, gst: 5, unit: PKT }
+  - { name: TATA SALT 1KG, rate: 28, qty: 5, gst: 5, unit: PKT }
+
+brand:
+  # No download card: the person watching this already has the app.
+  cta: false
+  endCard: null
+
+shots:
+  # Where they already are, so they know the clip is about their screen.
+  - screen: home
+    duration: 5.2
+    say: Bill banane ke liye, neeche Create Sales Invoice pe tap karo
+    actions:
+      - { at: 4.2, do: tap, target: create-invoice-cta }
+
+  # Choosing the customer. The pause before the tap is deliberate - this is
+  # the step people get stuck on.
+  - screen: create-bill
+    duration: 5.0
+    say: Party Name mein customer ka naam daalo, ya list se chuno
+    actions:
+      - { at: 3.8, do: tap, target: party-field }
+
+  - screen: create-invoice
+    duration: 8.0
+    say:
+      # Quoted, and they have to be: a comma inside an unquoted flow mapping
+      # ends the value, so this line arrived as "Ab items add karo - naam"
+      # and the rest of the sentence was read as a key and thrown away.
+      - { at: 0.5, text: "Ab items add karo - naam, rate aur quantity" }
+      - { at: 5.0, text: "Phir neeche Generate Bill pe tap karo" }
+    actions:
+      - { at: 1.8, do: addItem, index: 0 }
+      - { at: 3.0, do: addItem, index: 1 }
+      - { at: 6.9, do: tap, target: generate-bill }
+
+  # The result, held long enough to be sure it worked.
+  - screen: invoice-created
+    duration: 6.5
+    say: Bas - bill ban gaya. Share karke customer ko bhej sakte ho

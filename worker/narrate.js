@@ -98,14 +98,22 @@ export function troublesWith(lines, clipSeconds, slack = 0.05) {
       );
     }
 
-    /* Past the end of its OWN SHOT is the one that matters, and it is not the
-     * same as running past the clip. The screen has already cut away, so the
-     * voice carries on over whatever came next - audio belonging to the wrong
-     * picture. This is how the AI call screen turned out to need more than
-     * the 9s its own note claimed: that note was a guess at how long a line
-     * takes to say, and a real voice takes longer. */
+    /* Past the end of its own shot - but only for a line the SCREEN is
+     * showing.
+     *
+     * Dialogue belongs to its picture: the AI call is on screen having the
+     * conversation, so a voice continuing after the cut is audio over the
+     * wrong picture. That is how that screen turned out to need more than
+     * the 9s its own note claimed.
+     *
+     * An INSTRUCTION is the opposite. A narrator explaining a screen is not
+     * in the picture, and carrying a sentence across a cut is how a how-to
+     * is meant to sound - the words finish while the next screen is already
+     * being shown. Warning about it on a support clip buried the two faults
+     * that mattered (two sentences at once, and a last line cut off) in five
+     * complaints about something that is correct. */
     const overrun = ends - line.shotEnds;
-    if (Number.isFinite(line.shotEnds) && overrun > slack) {
+    if (!line.instruction && Number.isFinite(line.shotEnds) && overrun > slack) {
       said.push(
         `line ${i + 1} runs ${overrun.toFixed(1)}s past the end of its shot. The clip has cut ` +
         'away by then, so the voice plays over the next screen. Give that shot at least ' +

@@ -43,6 +43,10 @@ const MAX_VIDEO_SECONDS = 45;
 const MIN_READABLE_SECONDS = 1.0;
 const MAX_DEAD_AIR_SECONDS = 2.0;
 const MIN_ACTION_GAP_SECONDS = 0.6;
+/* How long after a cut a narrator starts talking. Speaking across the cut
+ * itself means the first word lands while the viewer is still taking in a new
+ * screen, and it is the word that says which screen it is. */
+const SAY_LEAD = 0.4;
 
 /* Themes the recipe may name. 'none', 'warm' and the sixteen festive slugs are built in; the CLI adds the
  * PNG names it finds in kit/themes. Kept as a parameter so this file stays
@@ -587,7 +591,81 @@ export function parse(text, catalogue, options = {}) {
       );
     }
 
-    recipe.shots.push({ screen: shot.screen, duration, actions });
+    /* What is SAID over this shot.
+     *
+     * This is for the clips Customer Support sends a customer who is stuck:
+     * the same app screens, with a voice explaining what to do. A creator ad
+     * stays silent - the creator records their own voice over it - so a shot
+     * says nothing unless it is asked to.
+     *
+     * Three ways to write it, because a how-to is usually one sentence per
+     * screen and occasionally two:
+     *
+     *   say: Reports kholo                     one line, just after the cut
+     *   say: [Reports kholo, Profit and Loss]  several, spread through
+     *   say:
+     *     - { at: 1.5, text: Yahan tap karo }  placed exactly
+     *
+     * Timed against the shot, like an action's "at", so moving a shot moves
+     * what is said over it. */
+    const said = [];
+    if (shot.say != null) {
+      const raw = Array.isArray(shot.say) ? shot.say : [shot.say];
+      raw.forEach((line, k) => {
+        const at = `${where}, say ${k + 1}`;
+        const text = typeof line === 'string' ? line : line?.text;
+        if (typeof text !== 'string' || text.trim() === '') {
+          errors.push(`${at}: needs words to say, got ${JSON.stringify(line)}.`);
+          return;
+        }
+
+        /* Anything else in the mapping is a mistake worth naming, because of
+         * one mistake in particular. A comma inside an unquoted YAML flow
+         * mapping ENDS the value, so
+         *
+         *   - { at: 0.5, text: Ab items add karo - naam, rate aur quantity }
+         *
+         * arrives as text "Ab items add karo - naam" with the rest of the
+         * sentence parsed as a key of its own - half a spoken instruction,
+         * silently. It cost nothing to notice and would have been very hard
+         * to spot by watching, since the clip plays perfectly. */
+        if (typeof line === 'object' && line !== null) {
+          for (const key of Object.keys(line)) {
+            if (key !== 'at' && key !== 'text') {
+              warnings.push(
+                `${at}: "${key}" is not part of a spoken line and is ignored. If a comma ` +
+                'belongs in the words, put the whole line in quotes - otherwise YAML reads ' +
+                'everything after it as a new setting.'
+              );
+            }
+          }
+        }
+
+        /* Unplaced lines are spread across the shot rather than stacked at
+         * the start: a voice is not a caption and two sentences at once is
+         * nothing anybody can follow. SAY_LEAD keeps the first one off the
+         * cut itself. */
+        const placed = typeof line === 'string' || line.at == null
+          ? SAY_LEAD + k * ((duration - SAY_LEAD) / Math.max(1, raw.length))
+          : Number(line.at);
+
+        if (!Number.isFinite(placed) || placed < 0) {
+          errors.push(`${at}: "at" must be a number of seconds, zero or more, got ${JSON.stringify(line.at)}.`);
+          return;
+        }
+        if (placed >= duration) {
+          errors.push(
+            `${at}: starts at ${placed}s but ${where} is only ${duration}s long, so it would ` +
+            'never be heard.'
+          );
+          return;
+        }
+        said.push({ at: Number(placed.toFixed(3)), text: text.trim() });
+      });
+      said.sort((a, b) => a.at - b.at);
+    }
+
+    recipe.shots.push({ screen: shot.screen, duration, actions, say: said });
   });
 
   /* Sending the invoice is the payoff of a sharing script, so the delivered
