@@ -228,8 +228,11 @@ test('the support how-to has no voice timing faults left', async () => {
   for (const l of lines) assert.ok(l.instruction, 'all of them are instructions');
 
   /* Measured speech lengths from the synthesiser, in order. The clip was
-     re-timed around these, so this is the arithmetic that keeps it right. */
-  const spoken = [5.0, 4.7, 4.3, 3.2, 6.0];
+     re-timed around these, so this is the arithmetic that keeps it right.
+     English, because the voices installed are English and Hinglish words read
+     by an English voice come out wrong - so the lines were rewritten and the
+     clip re-timed again around their new lengths. */
+  const spoken = [4.7, 4.8, 4.8, 3.1, 6.1];
   const placed = lines.map((l, i) => ({
     at: l.at, length: spoken[i], shotEnds: Infinity, shotSeconds: 0, instruction: true
   }));

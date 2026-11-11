@@ -16,9 +16,13 @@
 #   they are stuck in it. brand.cta is off for that reason - a download
 #   button at the end of a help video is an advert aimed at a customer.
 #
-# The spoken lines are Hinglish because that is what the customer is called
-# in, and they are written to be HEARD, not read: short, plain, and each one
-# naming the thing to tap in the words that are printed on it.
+# The spoken lines are English for now - the only voices installed are
+# English ones, and Hinglish words read by an English voice come out wrong.
+# Written to be HEARD rather than read: short, plain, one step each, and
+# every one naming the thing to tap in the words printed on the button.
+#
+# Hindi and Hinglish are a swap later: the words live here in the recipe and
+# the voice is chosen at narration time, so neither knows about the other.
 
 video: help-make-a-bill
 aspect: "9:16"
@@ -48,7 +52,7 @@ shots:
   # Where they already are, so they know the clip is about their screen.
   - screen: home
     duration: 5.2
-    say: Bill banane ke liye, neeche Create Sales Invoice pe tap karo
+    say: To make a bill, tap Create Sales Invoice at the bottom
     actions:
       - { at: 4.2, do: tap, target: create-invoice-cta }
 
@@ -56,18 +60,18 @@ shots:
   # the step people get stuck on.
   - screen: create-bill
     duration: 5.0
-    say: Party Name mein customer ka naam daalo, ya list se chuno
+    say: Enter the customer name in Party Name, or pick them from the list
     actions:
       - { at: 3.8, do: tap, target: party-field }
 
   - screen: create-invoice
-    duration: 8.0
+    duration: 8.5
     say:
       # Quoted, and they have to be: a comma inside an unquoted flow mapping
       # ends the value, so this line arrived as "Ab items add karo - naam"
       # and the rest of the sentence was read as a key and thrown away.
-      - { at: 0.5, text: "Ab items add karo - naam, rate aur quantity" }
-      - { at: 5.0, text: "Phir neeche Generate Bill pe tap karo" }
+      - { at: 0.5, text: "Now add your items - the name, the rate and the quantity" }
+      - { at: 5.5, text: "Then tap Generate Bill at the bottom" }
     actions:
       - { at: 1.8, do: addItem, index: 0 }
       - { at: 3.0, do: addItem, index: 1 }
@@ -75,5 +79,5 @@ shots:
 
   # The result, held long enough to be sure it worked.
   - screen: invoice-created
-    duration: 6.5
-    say: Bas - bill ban gaya. Share karke customer ko bhej sakte ho
+    duration: 6.8
+    say: That is it - the bill is ready. Tap Share to send it to your customer

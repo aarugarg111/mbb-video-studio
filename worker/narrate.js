@@ -50,6 +50,19 @@ const FFMPEG = process.env.FFMPEG ?? 'ffmpeg';
  * PowerShell string with its own quotes doubled - these lines are Hinglish
  * and contain apostrophes, and an unescaped one would end the string and
  * turn the rest of a sentence into commands. */
+/* Which voices this machine has. Printed with the result, because "the voice
+ * sounded wrong" is unanswerable without knowing which one spoke - and the
+ * set differs from one machine to the next, so a clip made here and a clip
+ * made on somebody else's desk can sound different for no visible reason. */
+export async function voicesHere() {
+  const { stdout } = await run('powershell', ['-NoProfile', '-NonInteractive', '-Command',
+    'Add-Type -AssemblyName System.Speech; ' +
+    '(New-Object System.Speech.Synthesis.SpeechSynthesizer).GetInstalledVoices() | ' +
+    'ForEach-Object { $_.VoiceInfo.Name + " (" + $_.VoiceInfo.Culture + ")" }'
+  ]);
+  return String(stdout).split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+}
+
 async function speak(text, outPath, { voice, rate = 0 } = {}) {
   const quoted = String(text).replace(/'/g, "''");
   const pick = voice ? `$s.SelectVoice('${voice.replace(/'/g, "''")}');` : '';
@@ -236,9 +249,12 @@ async function main() {
   for (const l of lines) {
     console.log(`  ${l.at.toFixed(1)}s  (${l.seconds.toFixed(1)}s)  ${l.text}`);
   }
-  console.log('\nThe voice is the one installed on this machine. These lines are');
-  console.log('Hinglish, so the accent is wrong - what this shows is that a voice');
-  console.log('lands on the same second the words appear on screen.\n');
+
+  const installed = await voicesHere().catch(() => []);
+  console.log(`\n  voice: ${process.env.VOICE ?? `the system default, of ${installed.join(', ')}`}`);
+  console.log('\nThe words live in the recipe and the voice is picked here, so neither');
+  console.log('knows about the other: a Hindi voice is a swap, not a rewrite. Set');
+  console.log('VOICE to one of the names above to use a different one.\n');
 }
 
 if (process.argv[1] && process.argv[1].endsWith('narrate.js')) {
