@@ -16,6 +16,7 @@
 
 import { z } from 'zod';
 import { SYSTEM } from './claude';
+import { HELP_SYSTEM } from './help';
 import { RecipeSchema, SCREENS, ACTIONS } from './schema';
 import { TRADES } from '../../src/shelves.js';
 
@@ -25,6 +26,11 @@ export interface Details {
   theme?: string;
   /* '' | 'phone' | 'laptop' - which shape the clip is filmed in. */
   shape?: string;
+  /* 'ad' (the default) or 'help'. An advert for a creator to voice over, or
+   * a narrated how-to for Customer Support to send a stuck customer. They
+   * are different jobs with opposite rules, so they get different
+   * instructions - see help.ts. */
+  mode?: string;
 }
 
 /* A chat window has no structured-output mode, so the briefing asks for YAML
@@ -109,7 +115,13 @@ export function briefingFor(script: string, details: Details = {}): string {
         : null
   ].filter(Boolean);
 
-  return `${SYSTEM}
+  /* Everything below the instructions - the screens, the actions, the shape -
+   * is the same for both jobs, because it describes the renderer and there is
+   * only one renderer. Only the instructions and the last line differ: an
+   * advert is handed a script, a help clip is handed somebody's problem. */
+  const help = details.mode === 'help';
+
+  return `${help ? HELP_SYSTEM : SYSTEM}
 
 SCREENS YOU MAY USE, AND WHAT CAN BE TAPPED ON EACH:
 
@@ -149,12 +161,20 @@ items:
   - { name: SUGAR 5KG, rate: 310, qty: 2, gst: 5, unit: PKT }
 shots:
   - screen: home
-    duration: 2.5
+    duration: ${help ? '5.2' : '2.5'}${help ? '\n    say: To make a bill, tap Create Sales Invoice at the bottom' : ''}
     actions:
-      - { at: 1.2, do: tap, target: create-invoice-cta }
+      - { at: ${help ? '4.2' : '1.2'}, do: tap, target: create-invoice-cta }
+${help ? `
+Note the shape of that shot, because it is the shape of all of them: "say" is
+one spoken line, and the tap comes LATE - after the instruction has been said.
 
-${overrides.length ? `USE THESE EXACTLY, WHATEVER THE SCRIPT SAYS:\n${overrides.join('\n')}\n` : ''}
-SCRIPT:
+A line with a comma in it must be quoted, or YAML ends the value at the comma
+and the rest of the sentence is silently thrown away:
+
+    say: "Now add your items - the name, the rate and the quantity"
+` : ''}
+${overrides.length ? `USE THESE EXACTLY, WHATEVER THE ${help ? 'PROBLEM' : 'SCRIPT'} SAYS:\n${overrides.join('\n')}\n` : ''}
+${help ? "THE CUSTOMER'S PROBLEM, AS SUPPORT WROTE IT DOWN" : 'SCRIPT'}:
 
 ${script}`;
 }

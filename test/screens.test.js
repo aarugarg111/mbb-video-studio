@@ -34,7 +34,14 @@ test('screens use tokens, never raw hex colours', () => {
 
 test('catalogue maps every screen to its target names', () => {
   const c = catalogue();
-  assert.deepEqual(c.home, ['create-invoice-cta', 'received-payment', 'reports']);
+  assert.deepEqual(c.home, [
+    'create-invoice-cta', 'received-payment', 'reports',
+    /* The bottom nav. It was drawn without ids for as long as this screen
+       existed - visible and unpressable - and a help clip asked "how do I
+       add a party" answered "tap Parties at the bottom" while tapping
+       Reports, because the honest target did not exist to choose. */
+    'nav-dashboard', 'nav-parties', 'nav-items', 'nav-for-you', 'nav-more'
+  ]);
 });
 
 /* These labels are the live app's own wording. If someone "translates" them

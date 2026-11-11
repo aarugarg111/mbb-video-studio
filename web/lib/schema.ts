@@ -9,7 +9,14 @@ import { z } from 'zod';
  * model can never propose the screen. */
 
 export const SCREENS = {
-  home: ['create-invoice-cta', 'received-payment', 'reports'],
+  /* The bottom nav is tappable and the model has to be told so. Asked how to
+     add a party, a help clip said "tap Parties at the bottom" and tapped
+     Reports - because this list did not mention nav-parties, and a model can
+     only choose from what it is shown. The screen drew the nav all along. */
+  home: [
+    'create-invoice-cta', 'received-payment', 'reports',
+    'nav-dashboard', 'nav-parties', 'nav-items', 'nav-for-you', 'nav-more'
+  ],
   'create-bill': ['party-field', 'add-items', 'scan-record'],
   'create-invoice': ['item-search', 'add-item-0', 'add-item-1', 'generate-bill'],
   'invoice-created': ['share', 'done'],
@@ -194,6 +201,13 @@ export const RecipeSchema = z.object({
     z.object({
       screen: z.enum(SCREEN_NAMES),
       duration: z.number(),
+      /* What is SAID over this shot.
+       *
+       * Empty for a creator ad - those are silent on purpose, because the
+       * creator records their own voice over them. One plain instruction per
+       * shot for a help clip, which is the entire point of a help clip.
+       * Optional, so an ad's shape is unchanged by its being here. */
+      say: z.array(z.string()).optional(),
       actions: z.array(
         z.object({
           at: z.number(),

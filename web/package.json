@@ -10,7 +10,8 @@
     "start": "next start",
     "test": "tsc --noEmit && tsx --test \"lib/**/*.test.ts\"",
     "build:team": "node scripts/copy-kit.mjs && node scripts/build-team.mjs",
-    "eval": "tsx eval.mts"
+    "eval": "tsx eval.mts",
+    "help": "tsx help.mts"
   },
   "dependencies": {
     "fflate": "^0.8.3",

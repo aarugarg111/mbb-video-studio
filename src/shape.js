@@ -190,9 +190,24 @@ export function joinRepeats(shots) {
         ...(last.actions ?? []),
         ...(shot.actions ?? []).map(a => ({ ...a, at: Number((Number(a.at) + offset).toFixed(3)) }))
       ];
+      /* What is SAID moves with the actions, by the same offset and for the
+       * same reason. It did not, so a help clip whose last two steps sat on
+       * one screen lost its final instruction without a word: the shot it
+       * belonged to was folded into the one before and the narration went
+       * with it. Everything else about a joined shot was carried over - `say`
+       * was simply newer than this function, and nothing here was watching
+       * for a field it had never heard of. */
+      last.say = [
+        ...(last.say ?? []),
+        ...(shot.say ?? []).map(s => ({ ...s, at: Number((Number(s.at) + offset).toFixed(3)) }))
+      ];
       last.duration = Number((last.duration + shot.duration).toFixed(3));
     } else {
-      joined.push({ ...shot, actions: shot.actions ? [...shot.actions] : undefined });
+      joined.push({
+        ...shot,
+        actions: shot.actions ? [...shot.actions] : undefined,
+        say: shot.say ? [...shot.say] : undefined
+      });
     }
   }
   return joined;

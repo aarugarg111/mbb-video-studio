@@ -238,3 +238,73 @@ test('the support how-to has no voice timing faults left', async () => {
   }));
   assert.deepEqual(troublesWith(placed, totalDuration(recipe)), []);
 });
+
+/* The one that makes a help clip actively harmful.
+ *
+ * Asked "how do I add a party", the studio produced a clip that said "tap
+ * Parties at the bottom" while the ring landed on Reports - because the home
+ * screen has no Parties button and the model reached for the nearest target
+ * rather than admit it. Both halves were individually valid: a real target
+ * and a sensible sentence. Together they teach a customer the wrong button,
+ * which is worse than sending nothing, and nothing looked at the two
+ * together. */
+test('saying one button and tapping another is reported', () => {
+  const { warnings } = parse(
+    'video: help\nshots:\n  - screen: home\n    duration: 5\n' +
+    '    say: To add a customer, tap Parties at the bottom\n' +
+    '    actions:\n      - { at: 3.5, do: tap, target: reports }\n',
+    CATALOGUE, HOW
+  );
+  const said = (warnings ?? []).filter(w => /teaches the wrong thing/.test(w));
+  assert.equal(said.length, 1, (warnings ?? []).join(' / '));
+  assert.match(said[0], /taps reports/, 'it names what was actually pressed');
+});
+
+test('naming the button that is pressed is not reported', () => {
+  const { warnings } = parse(
+    'video: help\nshots:\n  - screen: home\n    duration: 5\n' +
+    '    say: To make a bill, tap Create Sales Invoice at the bottom\n' +
+    '    actions:\n      - { at: 3.5, do: tap, target: create-invoice-cta }\n',
+    CATALOGUE, HOW
+  );
+  assert.deepEqual((warnings ?? []).filter(w => /teaches the wrong thing/.test(w)), []);
+});
+
+test('a line is only answerable for the taps that follow it', () => {
+  /* "Now add your items" and "Then tap Generate Bill" live on one shot. The
+     first check compared every line against every tap in the shot and called
+     the items line a mismatch because the shot later tapped Generate Bill -
+     two correct halves reported as a fault. */
+  const { warnings } = parse(
+    'video: help\nshots:\n  - screen: create-invoice\n    duration: 8.5\n' +
+    '    say:\n' +
+    '      - { at: 0.5, text: "Now add your items - the name and the rate" }\n' +
+    '      - { at: 5.5, text: "Then tap Generate Bill at the bottom" }\n' +
+    '    actions:\n' +
+    '      - { at: 1.8, do: addItem, index: 0 }\n' +
+    '      - { at: 6.9, do: tap, target: generate-bill }\n' +
+    'items:\n  - { name: SUGAR 5KG, rate: 260, qty: 2, gst: 5, unit: PKT }\n',
+    CATALOGUE, HOW
+  );
+  assert.deepEqual((warnings ?? []).filter(w => /teaches the wrong thing/.test(w)), []);
+});
+
+/* Folding two shots of one screen into one carried the actions and dropped
+ * the narration, so a help clip whose last two steps shared a screen lost its
+ * final instruction in silence. */
+test('joining two shots of one screen keeps what is said over both', () => {
+  const { recipe } = parse(
+    'video: help\nshots:\n' +
+    '  - screen: create-party\n    duration: 5\n    say: Type the name here\n' +
+    '  - screen: create-party\n    duration: 5\n    say: Then tap Save\n' +
+    '    actions:\n      - { at: 3.5, do: tap, target: save }\n',
+    CATALOGUE, HOW
+  );
+  assert.equal(recipe.shots.length, 1, 'the two shots are folded into one');
+
+  const lines = voiceLines(recipe);
+  assert.equal(lines.length, 2, 'and BOTH instructions survive');
+  assert.match(lines[1].text, /tap Save/);
+  /* The second one moves by the first shot's length, like the actions do. */
+  assert.ok(lines[1].at >= 5, `the second line should land in the second half, got ${lines[1].at}`);
+});

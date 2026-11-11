@@ -15,7 +15,19 @@ export const targets = {
   /* The Reports tile. A day-takings script goes Dashboard -> Reports -> Profit
    * and Loss; without this tap the video cut straight from the sales list to
    * the report, and nothing on screen explained how it got there. */
-  'reports': { x: 287, y: 377 }
+  'reports': { x: 287, y: 377 },
+  /* The bottom nav. It was drawn and not tappable, which is how a help clip
+   * asked "where do I add a party" came back saying "tap Reports at the
+   * bottom": the honest path did not exist as a target, so the model reached
+   * for the nearest one that did. A button the app has and the studio draws
+   * must be pressable, or every clip that needs it is a guess.
+   *
+   * Measured, not estimated - see measure-targets.mjs. */
+  'nav-dashboard': { x: 39, y: 812 },
+  'nav-parties': { x: 117, y: 812 },
+  'nav-items': { x: 195, y: 812 },
+  'nav-for-you': { x: 273, y: 812 },
+  'nav-more': { x: 351, y: 812 }
 };
 
 /* Laid out from reference/frames/mbb-dashboard.png. Labels are the app's own
@@ -110,7 +122,7 @@ export function render(data, state) {
   </div>
 
   <div class="bottomnav">
-    ${nav.map((label, i) => `<div class="${i === 0 ? 'on' : ''}">${label}</div>`).join('')}
+    ${nav.map((label, i) => `<div class="${i === 0 ? 'on' : ''}" id="nav-${label.toLowerCase().replace(/ /g, '-')}">${label}</div>`).join('')}
   </div>
 </div>`;
 }

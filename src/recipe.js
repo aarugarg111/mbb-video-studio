@@ -665,6 +665,52 @@ export function parse(text, catalogue, options = {}) {
       said.sort((a, b) => a.at - b.at);
     }
 
+    /* Does the voice name the button the finger presses?
+     *
+     * A help clip answered "how do I add a party" with "tap Parties at the
+     * bottom" while the ring landed on Reports - because the home screen has
+     * no Parties button and the model reached for the nearest target rather
+     * than admit it. Both halves were individually valid: a real target, a
+     * sensible sentence. Together they teach a customer the wrong button,
+     * which is worse than sending nothing, and nothing in the studio looked
+     * at the two together.
+     *
+     * The check is deliberately loose - one word of the target's name has to
+     * turn up in what is said. Buttons are named after their own labels, so
+     * "Create Sales Invoice" carries "create", "Party Name" carries "party",
+     * "tap Save" carries "save". It catches a sentence about a different
+     * button entirely, which is the failure, and stays quiet about wording. */
+    said.forEach((line, k) => {
+      const spokenWords = line.text.toLowerCase();
+      /* Only the taps this line is actually about: the ones between it and
+       * the next thing said. Checking every line against every tap in the
+       * shot called "Now add your items" a mismatch because the same shot
+       * later tapped Generate Bill - two correct halves, reported as a
+       * fault. A sentence answers for what happens after it, nothing else. */
+      const until = said[k + 1]?.at ?? duration;
+      const tapped = actions.filter(a =>
+        (a.do === 'tap' || a.do === 'type') && a.target &&
+        Number(a.at) >= line.at && Number(a.at) < until
+      );
+      /* Nothing pressed while this is being said - an instruction about
+       * typing, or about what is on screen - so there is nothing to disagree
+       * with. */
+      if (!tapped.length) return;
+
+      const named = tapped.some(a =>
+        String(a.target).toLowerCase().split('-')
+          .filter(part => part.length > 2 && part !== 'cta' && part !== 'btn')
+          .some(part => spokenWords.includes(part))
+      );
+      if (!named) {
+        warnings.push(
+          `${where}: it says "${line.text}" and taps ${tapped.map(a => a.target).join(', ')}. ` +
+          'If the voice names a different button from the one the finger presses, the clip ' +
+          'teaches the wrong thing - check which is right.'
+        );
+      }
+    });
+
     recipe.shots.push({ screen: shot.screen, duration, actions, say: said });
   });
 
