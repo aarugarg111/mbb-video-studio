@@ -20,14 +20,24 @@ export const targets = {
   'mute': { x: 65, y: 790 }
 };
 
-/* How long this screen needs to be on camera for what it shows to land.
- * the exchange writes itself across the shot and ends on the commitment being noted - under this and the last line never lands.
+/* How long this screen needs to be on camera for what it shows to land: the
+ * exchange writes itself across the shot and ends on the commitment being
+ * noted, so cut short, the last line never lands.
  *
- * It was a sentence in the briefing, which means it held only for as long
- * as the model chose to follow it. Here it is a property of the screen,
- * so the briefing states it from the data and the studio can check it.
- * Same idea as `scrolls`: the screen knows, nobody else does. */
-export const needsSeconds = 9;
+ * It was a sentence in the briefing, which means it held only for as long as
+ * the model chose to follow it. Here it is a property of the screen, so the
+ * briefing states it from the data and the studio can check it. Same idea as
+ * `scrolls`: the screen knows, nobody else does.
+ *
+ * It said 9, carried straight over from that sentence - and that number was
+ * a guess at how long a line takes to SAY. Putting a real voice on the clip
+ * measured it: the last line starts 5.4s into the shot and runs 4.9s, so the
+ * shot needs 10.3s, and at 9 the AI is still speaking after the picture has
+ * cut away. 10.5 leaves a little air after the final word, which this shot
+ * wants anyway - the commitment appearing is the payoff. Voices differ, so
+ * worker/narrate.js measures every line against its own shot and says so,
+ * rather than leaving this to be rediscovered by ear. */
+export const needsSeconds = 10.5;
 
 /* The call, as a timetable. Each line appears when the clock reaches it, so
  * the transcript writes itself across the shot instead of arriving whole -

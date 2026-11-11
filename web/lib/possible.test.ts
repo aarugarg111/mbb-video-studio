@@ -133,23 +133,29 @@ test('it never throws, whatever shape the recipe is in', () => {
  * sliced off. The clip still renders and still parses, so nothing in the
  * studio was lining these up; the requirement lived in the briefing as
  * prose, which held for as long as the model chose to follow it. */
-test('a shot too short for what its screen is doing is raised to fit', () => {
-  const timings = screenTimings() as Record<string, number>;
-  assert.ok(timings['mcf-ai-call'] >= 9, 'the AI call declares its own floor');
+/* The floor is read from the screen, never written in here as a number.
+ * These tests pinned 9 and 10, and then a real voice measured the AI call
+ * and the floor moved to 10.5 - so three tests failed for being out of date
+ * rather than for finding anything. The screen is the one place that knows. */
+const FLOOR = (screenTimings() as Record<string, number>)['mcf-ai-call'];
 
-  const tooShort =
-    'video: t\nshots:\n  - screen: mcf-ai-call\n    duration: 3\n';
+test('the AI call screen declares a floor at all, or these prove nothing', () => {
+  assert.ok(Number.isFinite(FLOOR) && FLOOR > 0, 'mcf-ai-call must declare needsSeconds');
+});
+
+test('a shot too short for what its screen is doing is raised to fit', () => {
+  const tooShort = 'video: t\nshots:\n  - screen: mcf-ai-call\n    duration: 3\n';
   const { recipe, dropped } = dropImpossible(tooShort);
 
-  assert.match(recipe, /duration: 9/, 'raised to what the screen needs');
+  assert.match(recipe, new RegExp(`duration: ${FLOOR}`), 'raised to what the screen needs');
   assert.equal(dropped.length, 1);
-  assert.match(dropped[0], /needs about 9s/);
+  assert.match(dropped[0], new RegExp(`needs about ${FLOOR}s`));
   assert.match(dropped[0], /raised/, 'and it is reported, never silent');
   assert.deepEqual(validate(recipe).errors ?? [], []);
 });
 
 test('a shot already long enough is left exactly alone', () => {
-  const fine = 'video: t\nshots:\n  - screen: mcf-ai-call\n    duration: 10\n';
+  const fine = `video: t\nshots:\n  - screen: mcf-ai-call\n    duration: ${FLOOR + 0.5}\n`;
   const { recipe, dropped } = dropImpossible(fine);
   assert.deepEqual(dropped, []);
   assert.equal(recipe, fine, 'byte for byte');
@@ -162,5 +168,8 @@ test('the validator says so too, for a recipe written by hand', () => {
     'video: t\nshots:\n  - screen: mcf-ai-call\n    duration: 3\n',
     catalogue(), howToValidate()
   ) as { warnings?: string[] };
-  assert.ok((warnings ?? []).some(w => /needs about 9s/.test(w)), (warnings ?? []).join(' / '));
+  assert.ok(
+    (warnings ?? []).some(w => new RegExp(`needs about ${FLOOR}s`).test(w)),
+    (warnings ?? []).join(' / ')
+  );
 });

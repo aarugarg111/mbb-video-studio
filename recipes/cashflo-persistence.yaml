@@ -43,7 +43,7 @@ shots:
   # The other number, which answers. The screen knows it is the alternate one
   # because mcf-ai-noanswer persists that choice into this shot.
   - screen: mcf-ai-call
-    duration: 9.5
+    duration: 10.5
     actions: []
 
   # What has been tried, in order, and the one that worked.

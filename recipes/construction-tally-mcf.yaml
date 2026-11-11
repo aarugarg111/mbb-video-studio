@@ -69,7 +69,7 @@ shots:
   # Long enough for the whole exchange: the last line lands at 5.4s and the
   # commitment at 7.4s.
   - screen: mcf-ai-call
-    duration: 9.5
+    duration: 10.5
 
   # The party's own page, with the call now on its record - this is where an
   # owner checks what the AI actually got out of them.

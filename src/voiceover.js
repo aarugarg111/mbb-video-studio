@@ -16,10 +16,22 @@
 
 import { SCREENS } from '../screens/index.js';
 
-/* How long a line stays up. A spoken Hinglish sentence of this length runs a
- * little under three seconds, and a caption that leaves before the voice does
- * reads as a mistake. */
-const LINE_SECONDS = 2.8;
+/* How long a line stays up.
+ *
+ * This said "a spoken Hinglish sentence of this length runs a little under
+ * three seconds" and set 2.8 on that basis. Then a voice was actually put on
+ * a clip, and the AI call's two lines came out at 3.8s and 4.9s - so the
+ * caption was leaving the screen a second or two BEFORE the voice finished
+ * saying it, which is precisely the mistake the old comment was guarding
+ * against. The guess was simply wrong, in the direction it feared.
+ *
+ * 4.2 is nearer what those two measured, and still short enough that the
+ * next line does the clamping rather than this. It remains an estimate and
+ * has to: the caption file is written beside a SILENT clip, before anybody
+ * has chosen a voice, so there is no audio here to measure. Lines are still
+ * trimmed where the next one starts and where the shot ends, so a longer
+ * guess cannot put two captions on screen at once. */
+const LINE_SECONDS = 4.2;
 
 /* Where each shot begins. The timeline locates a moment by walking the shots
  * and subtracting as it goes, so this walks them the same way - one source of
