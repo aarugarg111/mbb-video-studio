@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CODEC, keyFrameEvery, timestampFor, canEncode } from './encode';
+import { CODEC, keyFrameEvery, timestampFor, canEncode, durationFor, writeChunk } from './encode';
 
 test('the codec is baseline h264, which plays everywhere', () => {
   assert.equal(CODEC, 'avc1.42002a');
@@ -19,6 +19,59 @@ test('a keyframe lands every second', () => {
 
 test('frame zero is always a keyframe', () => {
   assert.equal(0 % keyFrameEvery(30), 0);
+});
+
+/* --- every frame has to say how long it lasts --- */
+
+test('a frame lasts one tick of the frame rate', () => {
+  assert.equal(durationFor(30), 33_333);
+  assert.equal(durationFor(25), 40_000);
+});
+
+test('a chunk with no duration is still written, at one frame', () => {
+  /* The render died at the first frame with "addVideoChunkRaw's fourth
+     argument (duration) must be a non-negative real number" - the script was
+     finished and the clip was lost. A VideoFrame built without a duration
+     encodes to a chunk whose duration is null. */
+  const raw: unknown[][] = [];
+  const muxer = {
+    addVideoChunk: () => assert.fail('a null duration must not reach addVideoChunk'),
+    addVideoChunkRaw: (...args: unknown[]) => { raw.push(args); }
+  };
+  const chunk = {
+    type: 'key' as const,
+    timestamp: 0,
+    duration: null,
+    byteLength: 3,
+    copyTo: (d: ArrayBufferView) => { new Uint8Array(d.buffer as ArrayBuffer).set([1, 2, 3]); }
+  };
+
+  writeChunk(muxer, chunk, undefined, durationFor(30));
+
+  assert.equal(raw.length, 1);
+  assert.deepEqual([...(raw[0][0] as Uint8Array)], [1, 2, 3]);
+  assert.equal(raw[0][1], 'key');
+  assert.equal(raw[0][2], 0);
+  assert.equal(raw[0][3], 33_333);
+});
+
+test('a chunk that knows its own duration is left alone', () => {
+  let written = 0;
+  const muxer = {
+    addVideoChunk: () => { written += 1; },
+    addVideoChunkRaw: () => assert.fail('no need to rebuild a chunk that is already complete')
+  };
+  const chunk = {
+    type: 'delta' as const,
+    timestamp: 33_333,
+    duration: 33_333,
+    byteLength: 1,
+    copyTo: () => {}
+  };
+
+  writeChunk(muxer, chunk, undefined, durationFor(30));
+
+  assert.equal(written, 1);
 });
 
 /* --- what Safari actually does --- */

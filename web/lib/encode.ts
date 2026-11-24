@@ -8,6 +8,55 @@ export const keyFrameEvery = (fps: number) => fps;
 export const timestampFor = (frame: number, fps: number) =>
   Math.round((frame / fps) * 1_000_000);
 
+/* How long one frame stays on screen, in microseconds.
+ *
+ * Every frame has to carry this and the muxer refuses the chunk without it:
+ * "addVideoChunkRaw's fourth argument (duration) must be a non-negative real
+ * number." A VideoFrame built without a duration encodes to a chunk whose
+ * duration is null, and null is what the muxer was being handed - at the
+ * very first frame, so a finished script died with nothing to show for it. */
+export const durationFor = (fps: number) => Math.round(1_000_000 / fps);
+
+/* Only the parts of a chunk and of the muxer that this touches, so the
+ * decision below can be tested without a browser. */
+type ChunkToWrite = {
+  type: 'key' | 'delta';
+  timestamp: number;
+  duration: number | null;
+  byteLength: number;
+  copyTo(destination: ArrayBufferView): void;
+};
+
+type ChunkSink = {
+  addVideoChunk(chunk: never, meta?: EncodedVideoChunkMetadata): void;
+  addVideoChunkRaw(
+    data: Uint8Array,
+    type: 'key' | 'delta',
+    timestamp: number,
+    duration: number,
+    meta?: EncodedVideoChunkMetadata
+  ): void;
+};
+
+/* The muxer reads the duration off the chunk, so a browser that leaves it
+ * unset takes the render down. We know what it should be - one frame at the
+ * rate we are encoding - so fill it in rather than fail. The frames are
+ * given a duration before they are encoded; this is the net under that. */
+export function writeChunk(
+  muxer: ChunkSink,
+  chunk: ChunkToWrite,
+  meta: EncodedVideoChunkMetadata | undefined,
+  fallbackDuration: number
+): void {
+  if (typeof chunk.duration === 'number' && Number.isFinite(chunk.duration) && chunk.duration >= 0) {
+    muxer.addVideoChunk(chunk as never, meta);
+    return;
+  }
+  const data = new Uint8Array(chunk.byteLength);
+  chunk.copyTo(data);
+  muxer.addVideoChunkRaw(data, chunk.type, chunk.timestamp, fallbackDuration, meta);
+}
+
 /* Whether the objects exist at all. Necessary and nowhere near sufficient:
  * Safari 26 has VideoEncoder and VideoFrame, passes this, and then cannot
  * actually encode H.264 - the failure surfaces deep inside the muxer as
@@ -82,7 +131,12 @@ export async function createEncoder(
         seenConfig = true;
       }
       try {
-        muxer.addVideoChunk(chunk, meta);
+        writeChunk(
+          muxer as unknown as ChunkSink,
+          chunk as unknown as ChunkToWrite,
+          meta,
+          durationFor(fps)
+        );
       } catch (e) {
         failure = e instanceof Error ? e : new Error(String(e));
       }
@@ -114,7 +168,12 @@ export async function createEncoder(
     async addFrame(canvas, index) {
       if (failure) throw failure;
 
-      const frame = new VideoFrame(canvas, { timestamp: timestampFor(index, fps) });
+      /* The duration is not decoration: without it the chunk comes out with
+       * a null duration and the muxer throws it out. */
+      const frame = new VideoFrame(canvas, {
+        timestamp: timestampFor(index, fps),
+        duration: durationFor(fps)
+      });
       encoder.encode(frame, { keyFrame: index % gop === 0 });
       frame.close();
 
