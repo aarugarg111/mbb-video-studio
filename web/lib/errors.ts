@@ -139,9 +139,24 @@ export function explain(error: unknown, teamMode: boolean): Explained {
     };
   }
 
-  if (status === 529 || text.includes('overloaded')) {
+  /* "This model is currently experiencing high demand." Named apart from a
+   * plain server error, because it says something different and useful: it
+   * is not broken, it is not the key, it is not this studio, and it passes.
+   * By the time somebody reads this the studio has already tried three times
+   * over about five seconds AND asked two other models - so "try again in a
+   * minute" is honest advice rather than a shrug, and saying what was
+   * already attempted stops them hammering the button. */
+  if (
+    status === 529 ||
+    text.includes('overloaded') ||
+    text.includes('unavailable') ||
+    text.includes('high demand')
+  ) {
     return {
-      message: 'Google is overloaded at the moment. Try again in a minute — nothing is broken.',
+      message:
+        'The free model is busy right now - a spike in demand, which passes on its own. ' +
+        'The studio already tried several times and asked the other free models too. ' +
+        'Nothing is broken and nothing is being charged; give it a minute and try again.',
       detail
     };
   }

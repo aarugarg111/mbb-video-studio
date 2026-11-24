@@ -4,7 +4,7 @@ import { parse } from '../../src/recipe.js';
 import { catalogue, scrollables } from '../../screens/index.js';
 import {
   PROVIDERS, providerById, providerOfKey, buildRequest, extractText, recipeFromText,
-  readKey, writeKey, migrateKey, keySlotFor, replacementModel, askProvider, THINKING,
+  readKey, writeKey, migrateKey, keySlotFor, replacementModel, askProvider, THINKING, BUSY_FALLBACKS,
   objectsToThinking, castToShape
 } from './providers';
 
@@ -307,7 +307,15 @@ test('a provider down for the minute is reported, not retried forever', async ()
 
   try {
     await assert.rejects(askProvider({ id: 'gemini', key: 'AIzaKEY', model: 'm', prompt: 'B' }), /try again/i);
-    assert.equal(calls, 2, 'twice, then it says so');
+    /* Three attempts on the model asked for, then one each on the two free
+       siblings. It used to be two attempts in all, and a real 503 - "this
+       model is currently experiencing high demand... usually temporary" -
+       outlived both of them. Still bounded: every path ends, and the number
+       is pinned here so changing the policy has to be deliberate. */
+    assert.equal(
+      calls, 3 + BUSY_FALLBACKS.length,
+      'three tries on the model asked for, then one on each free sibling'
+    );
   } finally {
     globalThis.fetch = realFetch;
   }
@@ -403,4 +411,100 @@ test('the thinking fallback fires on the words Google really uses', () => {
      setting on an unrelated refusal would hide the real problem. */
   assert.ok(!objectsToThinking('the model was thinking about something else'));
   assert.ok(!objectsToThinking('API key not valid'));
+});
+
+/* The refusal from the live studio, word for word:
+ *
+ *   503 {"error":{"code":503,"message":"This model is currently experiencing
+ *   high demand. Spikes in demand are usually temporary. Please try again
+ *   later.","status":"UNAVAILABLE"}}
+ *
+ * The studio had waited 1.2 seconds, once, and given up - stopping before
+ * Google had finished saying "temporary". */
+const HIGH_DEMAND =
+  '{"error":{"code":503,"message":"This model is currently experiencing high demand. ' +
+  'Spikes in demand are usually temporary. Please try again later.","status":"UNAVAILABLE"}}';
+
+test('a spike that passes on the third try costs a wait, not the clip', async () => {
+  const realFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = (async () => {
+    calls++;
+    return calls < 3
+      ? { ok: false, status: 503, text: async () => HIGH_DEMAND } as unknown as Response
+      : {
+          ok: true,
+          json: async () => ({ candidates: [{ content: { parts: [{ text: 'video: t\nshots: []\n' }] } }] })
+        } as unknown as Response;
+  }) as typeof fetch;
+
+  try {
+    const { recipe, unsupported } = await askProvider(
+      { id: 'gemini', key: 'AIzaKEY', model: 'gemini-3.5-flash-lite', prompt: 'B' }
+    );
+    assert.match(recipe, /video: t/);
+    assert.equal(calls, 3);
+    assert.deepEqual(unsupported, [], 'the model asked for is the one that answered');
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test('a model that stays busy hands over to a free sibling, and says so', async () => {
+  const realFetch = globalThis.fetch;
+  const asked: string[] = [];
+  globalThis.fetch = (async (url: string) => {
+    asked.push(String(url));
+    /* Only the first model is busy. The others are free and idle, which is
+       the whole point - "this MODEL is experiencing high demand" is not a
+       statement about Google. */
+    if (String(url).includes('gemini-3.5-flash-lite')) {
+      return { ok: false, status: 503, text: async () => HIGH_DEMAND } as unknown as Response;
+    }
+    return {
+      ok: true,
+      json: async () => ({ candidates: [{ content: { parts: [{ text: 'video: t\nshots: []\n' }] } }] })
+    } as unknown as Response;
+  }) as typeof fetch;
+
+  try {
+    const { recipe, unsupported } = await askProvider(
+      { id: 'gemini', key: 'AIzaKEY', model: 'gemini-3.5-flash-lite', prompt: 'B' }
+    );
+    assert.match(recipe, /video: t/, 'a clip from a sibling beats no clip');
+    assert.equal(asked.filter(u => u.includes('gemini-3.5-flash-lite')).length, 3, 'tried three times first');
+    assert.ok(asked[asked.length - 1].includes(BUSY_FALLBACKS[0]), 'then the nearest sibling');
+
+    /* Never silently. A shot list written by a model the studio is not tuned
+       for is exactly the thing somebody should be told about. */
+    assert.equal(unsupported.length, 1);
+    assert.match(unsupported[0], /too busy/);
+    assert.match(unsupported[0], new RegExp(BUSY_FALLBACKS[0]));
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test('the fallback chain never asks the same model twice', async () => {
+  const realFetch = globalThis.fetch;
+  const asked: string[] = [];
+  globalThis.fetch = (async (url: string) => {
+    asked.push(String(url));
+    return { ok: false, status: 503, text: async () => HIGH_DEMAND } as unknown as Response;
+  }) as typeof fetch;
+
+  try {
+    await assert.rejects(
+      askProvider({ id: 'gemini', key: 'AIzaKEY', model: 'gemini-3.5-flash-lite', prompt: 'B' }),
+      /busy right now/
+    );
+    for (const sibling of BUSY_FALLBACKS) {
+      assert.equal(
+        asked.filter(u => u.includes(sibling)).length, 1,
+        `${sibling} should be asked exactly once`
+      );
+    }
+  } finally {
+    globalThis.fetch = realFetch;
+  }
 });

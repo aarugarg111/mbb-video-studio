@@ -175,3 +175,33 @@ test('a real key is still passed on, trimmed of what a terminal added', async ()
     assert.equal(cap.seen.headers['x-goog-api-key'], 'AIzaREAL');
   } finally { cap.restore(); }
 });
+
+/* The fallback models have to be ones the Worker will actually forward.
+ *
+ * In team mode the browser names a model and the Worker checks it against its
+ * own allow-list, quietly substituting the DEFAULT for anything it does not
+ * recognise. So a fallback added to the browser and not here would route
+ * straight back to the model that was too busy - the studio would appear to
+ * try a sibling, wait, and ask the same overloaded model a fourth time. */
+test('every busy-fallback model is one the worker will forward', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const providers = await readFile(new URL('../web/lib/providers.ts', import.meta.url), 'utf8');
+  const worker = await readFile(new URL('../cf/src/worker.js', import.meta.url), 'utf8');
+
+  const declared = providers.match(/BUSY_FALLBACKS\s*=\s*\[([^\]]*)\]/);
+  assert.ok(declared, 'providers.ts no longer declares BUSY_FALLBACKS - update this test');
+  const fallbacks = [...declared[1].matchAll(/'([^']+)'/g)].map(m => m[1]);
+  assert.ok(fallbacks.length, 'there should be at least one fallback');
+
+  const allowed = worker.match(/GEMINI_MODELS\s*=\s*new Set\(\[([^\]]*)\]/);
+  assert.ok(allowed, 'the worker no longer keeps a model allow-list - update this test');
+  const list = [...allowed[1].matchAll(/'([^']+)'/g)].map(m => m[1]);
+
+  for (const model of fallbacks) {
+    assert.ok(
+      list.includes(model),
+      `${model} is a fallback the browser will ask for and the worker will not forward - ` +
+      'it would be silently swapped for the default, which is the model that was busy'
+    );
+  }
+});

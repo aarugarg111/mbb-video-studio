@@ -109,13 +109,28 @@ export type Request = { url: string; headers: Record<string, string>; body: stri
  * not, and the eval said so the first time it was asked properly. */
 export const THINKING = 'minimal';
 
+/* How long to wait before each further attempt when a model says "not now".
+ * Two waits, so three attempts in all, across about five and a half seconds.
+ * Longer each time because a demand spike needs time to pass, and a second
+ * knock at the same instant is the same knock. */
+export const BUSY_WAITS = [1500, 4000];
+
+/* Asked, one attempt each, only when the chosen model stays busy. Both are on
+ * the same free tier and both are on the Worker's allow-list, so neither
+ * costs anything or needs anything deployed. Ordered by how close they are to
+ * what the studio is tuned for. */
+export const BUSY_FALLBACKS = ['gemini-3.6-flash', 'gemini-3.8-flash'];
+
 export type How = {
   /* Set when a first try came back complaining about the thinking setting -
    * see askProvider. The request is then sent again without it. */
   withoutThinking?: boolean;
-  /* Set once a transient failure has been waited out, so a provider having a
-   * bad minute cannot hold somebody in a loop. */
-  afterWaiting?: boolean;
+  /* How many times a transient failure has already been waited out, so a
+   * provider having a bad minute cannot hold somebody in a loop. */
+  tries?: number;
+  /* Models already asked and found busy, so the fallback chain cannot circle
+   * back to one that has already said no. */
+  triedModels?: string[];
   /* How hard the model thinks before answering. Overrides THINKING, and
    * exists so the eval can measure the difference rather than argue about
    * it - see the note on THINKING. */
@@ -354,9 +369,52 @@ export async function askProvider(
        * half to be told the same permanent thing twice. */
       (response.status >= 500 && response.status !== 501);
 
-    if (!how.afterWaiting && notNow && !detail.includes('not-configured')) {
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      return askProvider({ id, key, model, prompt }, retried, { ...how, afterWaiting: true });
+    if (notNow && !detail.includes('not-configured')) {
+      const tries = how.tries ?? 0;
+
+      /* Waiting LONGER each time, and more than once.
+       *
+       * This waited 1.2 seconds and gave up. A real refusal arrived - "this
+       * model is currently experiencing high demand, spikes in demand are
+       * usually temporary" - and the studio had already stopped trying by
+       * the time Google finished saying "temporary". A spike outlasts a
+       * second and a half; that is what a spike is. Three attempts across
+       * about five seconds rides out the common ones, and the whole thing is
+       * free, so the only cost is somebody waiting a few seconds longer for
+       * a clip instead of being told to come back later. */
+      if (tries < BUSY_WAITS.length) {
+        await new Promise(resolve => setTimeout(resolve, BUSY_WAITS[tries]));
+        return askProvider({ id, key, model, prompt }, retried, { ...how, tries: tries + 1 });
+      }
+
+      /* Still busy: ask a different model.
+       *
+       * "This MODEL is experiencing high demand" is about one model, not
+       * about Google. The others on the free tier are sitting there, and a
+       * clip written by a sibling beats no clip - so the last resort is to
+       * ask one of them rather than to give up. One attempt each, and which
+       * one answered is REPORTED, because a shot list quietly written by a
+       * different model than the studio is tuned for is the sort of thing
+       * somebody should be told. */
+      const exhausted = [...(how.triedModels ?? []), model];
+      const sibling = BUSY_FALLBACKS.find(m => !exhausted.includes(m));
+      if (sibling) {
+        const answer = await askProvider(
+          { id, key, model: sibling, prompt },
+          retried,
+          /* Starting at the last wait, so a sibling gets one attempt and the
+             chain cannot keep branching while somebody waits. */
+          { ...how, tries: BUSY_WAITS.length, triedModels: exhausted }
+        );
+        return {
+          ...answer,
+          unsupported: [
+            ...answer.unsupported,
+            `${model} was too busy, so this was written by ${sibling} instead - ` +
+            'check it a little more carefully than usual'
+          ]
+        };
+      }
     }
 
     /* Put through the explainer rather than thrown raw. This used to show
