@@ -118,8 +118,22 @@ export const BUSY_WAITS = [1500, 4000];
 /* Asked, one attempt each, only when the chosen model stays busy. Both are on
  * the same free tier and both are on the Worker's allow-list, so neither
  * costs anything or needs anything deployed. Ordered by how close they are to
- * what the studio is tuned for. */
+ * what the studio is tuned for.
+ *
+ * They are a long shot, and measurement says so. Asked directly, ten times
+ * running: 3.5-flash-lite answered 10/10 while BOTH of these answered 503,
+ * minutes apart, with the same "high demand" text. The bigger free models
+ * are the busy ones. They stay in the chain because they cost nothing and a
+ * clip from a sibling beats no clip - but they are tried AFTER the main
+ * model has had its attempts, and the main model is asked once more after
+ * them, because a sibling being down says nothing about it. */
 export const BUSY_FALLBACKS = ['gemini-3.6-flash', 'gemini-3.8-flash'];
+
+/* How long to wait before going back to the model the studio is tuned for,
+ * after every sibling has also refused. Longer than the earlier waits: by
+ * this point several seconds have already passed, and this is the attempt
+ * that decides whether the viewer gets a clip or an apology. */
+export const LAST_CHANCE_WAIT = 6000;
 
 export type How = {
   /* Set when a first try came back complaining about the thinking setting -
@@ -128,9 +142,13 @@ export type How = {
   /* How many times a transient failure has already been waited out, so a
    * provider having a bad minute cannot hold somebody in a loop. */
   tries?: number;
-  /* Models already asked and found busy, so the fallback chain cannot circle
-   * back to one that has already said no. */
+  /* Models already asked and found busy, in the order they were asked, so
+   * the fallback chain cannot circle back to one that has already said no -
+   * and so the first entry names the model the studio actually wanted. */
   triedModels?: string[];
+  /* Set on the final attempt, back on the model the studio is tuned for,
+   * so that attempt cannot start another round of fallbacks. */
+  lastChance?: boolean;
   /* How hard the model thinks before answering. Overrides THINKING, and
    * exists so the eval can measure the difference rather than argue about
    * it - see the note on THINKING. */
@@ -397,23 +415,38 @@ export async function askProvider(
        * different model than the studio is tuned for is the sort of thing
        * somebody should be told. */
       const exhausted = [...(how.triedModels ?? []), model];
-      const sibling = BUSY_FALLBACKS.find(m => !exhausted.includes(m));
+      const sibling = how.lastChance ? undefined : BUSY_FALLBACKS.find(m => !exhausted.includes(m));
       if (sibling) {
-        const answer = await askProvider(
+        /* Which model answered is stamped on by whichever call succeeds, not
+           wrapped around this one - the chain can come back to the main model
+           below, and a note saying a sibling wrote it would then be a lie. */
+        return askProvider(
           { id, key, model: sibling, prompt },
           retried,
           /* Starting at the last wait, so a sibling gets one attempt and the
              chain cannot keep branching while somebody waits. */
           { ...how, tries: BUSY_WAITS.length, triedModels: exhausted }
         );
-        return {
-          ...answer,
-          unsupported: [
-            ...answer.unsupported,
-            `${model} was too busy, so this was written by ${sibling} instead - ` +
-            'check it a little more carefully than usual'
-          ]
-        };
+      }
+
+      /* Every sibling has refused too. Go back to the model the studio is
+       * tuned for and ask it once more.
+       *
+       * Measured, the day this was written: the two siblings were both down
+       * with "high demand" while the main model answered ten out of ten. So
+       * the chain was spending its last attempts on the models least likely
+       * to answer, AND the refusal the viewer ended up reading was a
+       * sibling's rather than the one they were waiting on. A sibling being
+       * busy is no evidence at all about the main model, and by now more
+       * time has passed than any of the earlier waits. */
+      const firstChoice = how.triedModels?.[0];
+      if (firstChoice && firstChoice !== model && !how.lastChance) {
+        await new Promise(resolve => setTimeout(resolve, LAST_CHANCE_WAIT));
+        return askProvider(
+          { id, key, model: firstChoice, prompt },
+          retried,
+          { ...how, tries: BUSY_WAITS.length, lastChance: true }
+        );
       }
     }
 
@@ -431,7 +464,21 @@ export async function askProvider(
     throw Object.assign(new Error(message), { status: response.status, detail: full });
   }
 
-  return recipeFromText(extractText(id, await response.json()));
+  const answer = recipeFromText(extractText(id, await response.json()));
+
+  /* Say so when a different model than the studio is tuned for wrote this.
+   * Stamped here, by the call that actually got an answer, because the chain
+   * above can come back to the main model after the siblings - and then
+   * nothing unusual has happened and there is nothing to warn about. */
+  const wanted = how.triedModels?.[0];
+  if (wanted && wanted !== model) {
+    answer.unsupported.push(
+      `${wanted} was too busy, so this was written by ${model} instead - ` +
+      'check it a little more carefully than usual'
+    );
+  }
+
+  return answer;
 }
 
 /* Where each key is kept.

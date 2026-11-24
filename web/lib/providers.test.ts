@@ -313,8 +313,8 @@ test('a provider down for the minute is reported, not retried forever', async ()
        outlived both of them. Still bounded: every path ends, and the number
        is pinned here so changing the policy has to be deliberate. */
     assert.equal(
-      calls, 3 + BUSY_FALLBACKS.length,
-      'three tries on the model asked for, then one on each free sibling'
+      calls, 3 + BUSY_FALLBACKS.length + 1,
+      'three tries on the model asked for, one on each free sibling, then one last on the first'
     );
   } finally {
     globalThis.fetch = realFetch;
@@ -480,6 +480,46 @@ test('a model that stays busy hands over to a free sibling, and says so', async 
     assert.equal(unsupported.length, 1);
     assert.match(unsupported[0], /too busy/);
     assert.match(unsupported[0], new RegExp(BUSY_FALLBACKS[0]));
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+test('when the siblings are down too, the model asked for gets one more go', async () => {
+  /* Measured against the live free tier: 3.5-flash-lite answered ten calls
+     out of ten while BOTH siblings returned the same "high demand" 503. The
+     chain was therefore spending its last attempts on the models least
+     likely to answer, and then showing the viewer a SIBLING'S refusal for a
+     model they never asked for. A sibling being busy is no evidence about
+     the main model, and by now several seconds have passed. */
+  const realFetch = globalThis.fetch;
+  const asked: string[] = [];
+  globalThis.fetch = (async (url: string) => {
+    asked.push(String(url));
+    const main = String(url).includes('gemini-3.5-flash-lite');
+    /* The main model comes back on the last attempt; the siblings never do. */
+    if (!main || asked.filter(u => u.includes('gemini-3.5-flash-lite')).length < 4) {
+      return { ok: false, status: 503, text: async () => HIGH_DEMAND } as unknown as Response;
+    }
+    return {
+      ok: true,
+      json: async () => ({ candidates: [{ content: { parts: [{ text: 'video: t\nshots: []\n' }] } }] })
+    } as unknown as Response;
+  }) as typeof fetch;
+
+  try {
+    const { recipe, unsupported } = await askProvider(
+      { id: 'gemini', key: 'AIzaKEY', model: 'gemini-3.5-flash-lite', prompt: 'B' }
+    );
+    assert.match(recipe, /video: t/, 'the spike passed - the clip is not lost');
+    assert.ok(
+      asked[asked.length - 1].includes('gemini-3.5-flash-lite'),
+      'the last knock is on the model the studio is tuned for'
+    );
+    assert.deepEqual(
+      unsupported, [],
+      'the model asked for is the one that answered, so there is nothing to warn about'
+    );
   } finally {
     globalThis.fetch = realFetch;
   }
