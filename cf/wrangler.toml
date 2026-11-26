@@ -1,4 +1,20 @@
 name = "mbb-video-studio"
+
+# WHOSE account this Worker belongs to.
+#
+# Without this line wrangler deploys to whichever account you happen to be
+# logged in as - and it did. A deploy from a laptop signed in to a personal
+# Cloudflare account did not update the team's studio and did not complain:
+# it built a SECOND one, at mbb-video-studio.aryangarg.workers.dev, with no
+# secrets and no way to work, while the team's copy stayed on old code that
+# still crashed at the first frame of every render. Nothing said so. The
+# deploy printed a success and a URL, and the URL was one character from
+# looking right.
+#
+# Pinned, a deploy from the wrong login fails and says so. This is an
+# identifier, not a credential - it does nothing without an account to log
+# in to.
+account_id = "ad44e5c11cffe4eb9edc6b3b32a54c25"
 main = "src/worker.js"
 compatibility_date = "2026-01-01"
 

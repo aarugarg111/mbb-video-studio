@@ -10,6 +10,20 @@ Written down because it was not, and a fault that needed somebody to open
 the studio and read what it said turned into guessing at subdomains. If the
 Worker is ever renamed, change it here.
 
+**Check which Cloudflare account you are logged in as before you deploy:**
+
+```
+npx wrangler whoami
+```
+
+It must say `aryan.garg@flobiz.in`. A deploy signed in as anyone else used
+to succeed and build a SECOND studio on that person's own account - same
+name, nearly the same address, no secrets, no way to work - while the team's
+copy sat on old code. Nothing said so: the deploy printed a success and a
+URL, and the URL was one character from looking right. `account_id` is
+pinned in `wrangler.toml` now, so that deploy fails instead. The check above
+is still the faster way to find out.
+
 The videos are still made in each person's own browser, and the one call
 that turns a script into a shot list runs on Gemini's free tier — so the
 studio costs nothing to run.
