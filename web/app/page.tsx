@@ -98,6 +98,14 @@ export default function Page() {
      it is rarely the person who can fix it, so it has to be copyable. */
   const [errorDetail, setErrorDetail] = useState('');
   const [copiedError, setCopiedError] = useState(false);
+  /* Which step to run again, when the thing that failed is the kind of thing
+   * that passes on its own - a demand spike, the rate limit, a dropped
+   * connection. Empty when trying again would only say the same thing.
+   *
+   * It exists because "give it a minute and try again" was advice with no
+   * button attached: the one that would do it is a screen away, behind the
+   * error, and after a busy model the script is still sitting in the box. */
+  const [retryKind, setRetryKind] = useState<'' | 'read' | 'render'>('');
   /* The connection check, for the machines where the studio does not work. */
   const [checks, setChecks] = useState<CheckStep[] | null>(null);
   const [checking, setChecking] = useState(false);
@@ -148,6 +156,7 @@ export default function Page() {
    * one place and it is the free one. */
   const [provider, setProvider] = useState<ProviderId>(PROVIDERS[0].id);
   const stageRef = useRef<HTMLDivElement>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
   const urlRef = useRef('');
   /* Every object URL this run handed out, so they can all be released. */
   const urlsRef = useRef<string[]>([]);
@@ -177,6 +186,15 @@ export default function Page() {
      * against the ffmpeg one, frame by frame. */
     (window as unknown as { renderVideo?: typeof renderVideo }).renderVideo = renderVideo;
   }, []);
+
+  /* An error nobody scrolls to is an error nobody sees. The sign-in box
+   * learned this the hard way - "nothing happens at all" was a message three
+   * screens below the button - and the fix there was local to sign-in. This
+   * is the same guarantee for every other failure: the block sits at the top
+   * of the page now, and the page comes to it. */
+  useEffect(() => {
+    if (error) errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [error]);
 
   function saveKey() {
     const k = keyDraft.trim();
@@ -256,6 +274,7 @@ export default function Page() {
     setWarnings([]);
     setError('');
     setErrorDetail('');
+    setRetryKind('');
     setByHand(false);
     setProgress({ done: 0, total: 0 });
     setStep('fill');
@@ -330,6 +349,7 @@ export default function Page() {
     setWarnings([]);
     setError('');
     setErrorDetail('');
+    setRetryKind('');
     setStep('check');
   }
 
@@ -337,6 +357,7 @@ export default function Page() {
     setBusy(true);
     setError('');
     setErrorDetail('');
+    setRetryKind('');
     try {
       /* Only send what was filled in - an empty field must not overwrite
        * something the script got right. */
@@ -355,8 +376,13 @@ export default function Page() {
       setUnsupported(proposed.unsupported);
       setStep('check');
     } catch (e) {
+      /* askProvider has already put this through the explainer, so the
+       * message is the readable one. It is asked a second question here -
+       * whether trying the same thing again could work - which it answers
+       * from the status it threw with. */
       setError(e instanceof Error ? e.message : 'Something went wrong.');
       setErrorDetail((e as { detail?: string })?.detail ?? '');
+      setRetryKind(explain(e, TEAM_MODE).retryable ? 'read' : '');
     } finally {
       setBusy(false);
     }
@@ -365,6 +391,7 @@ export default function Page() {
   async function render() {
     setError('');
     setErrorDetail('');
+    setRetryKind('');
     setWarnings([]);
 
     let checked: any;
@@ -444,13 +471,22 @@ export default function Page() {
        * browser's bare "Failed to fetch" - three words naming no file, no
        * step and nothing to do. The explainer has known how to say that in a
        * sentence all along; this path simply never asked it. */
-      const { message, detail } = explain(e, TEAM_MODE);
+      const { message, detail, retryable } = explain(e, TEAM_MODE);
       setError(message || 'The render failed.');
       setErrorDetail(detail);
+      setRetryKind(retryable ? 'render' : '');
       setStep('check');
     } finally {
       setBusy(false);
     }
+  }
+
+  /* Runs the step that failed, from where the error is. Nothing is thrown
+   * away in between: the script, the shot list and every override are still
+   * in state, which is the whole reason this can be one button. */
+  function retryNow() {
+    if (retryKind === 'read') void propose();
+    else if (retryKind === 'render') void render();
   }
 
   const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
@@ -481,6 +517,46 @@ export default function Page() {
         )}
       </header>
       <p className="sub">Paste a creator script. Everything else — the shop, the customer, the items, the theme — is read out of it.</p>
+
+      {/* At the TOP, not the foot. It used to render last, below the form,
+          the shot list and both disclosures, so a failure three screens up
+          announced itself somewhere nobody was looking. */}
+      {error && (
+        <div className="note error" ref={errorRef} role="alert">
+          <p className="said">{error}</p>
+
+          {/* The advice with the button attached to it. "Give it a minute and
+              try again" used to mean scrolling back past the whole form to
+              find the button that does it - and on the shot list screen, past
+              a shot list - which is how a passing fault costs a finished
+              script. Only shown when trying again could actually work: see
+              retryable in lib/errors.ts. */}
+          {retryKind && (
+            <button className="retry" onClick={retryNow} disabled={busy}>
+              {busy
+                ? 'Trying again…'
+                : retryKind === 'read' ? 'Read the script again' : 'Render the video again'}
+            </button>
+          )}
+
+          {/* Shown, not folded away. Twice now a fault has been reported with
+              this collapsed, so the one line that identifies it was missing
+              from the screenshot - which is the page's fault, not the
+              reporter's. The button is here because an error on this screen is
+              nearly always going to be pasted to somebody else. */}
+          {errorDetail && errorDetail !== error && (
+            <div className="detail">
+              <div className="detail-head">
+                <span>What it said exactly</span>
+                <button className="linkbtn" onClick={copyError}>
+                  {copiedError ? 'Copied' : 'Copy this'}
+                </button>
+              </div>
+              <code>{errorDetail}</code>
+            </div>
+          )}
+        </div>
+      )}
 
       {!supported && canRemote && (
         <div className="note">
@@ -714,11 +790,23 @@ export default function Page() {
         <>
           <p className="rendering">
             {progress.total
-              ? `Making your video — frame ${progress.done} of ${progress.total}.`
+              ? `Making your video — frame ${progress.done} of ${progress.total} (${pct}%).`
               : 'Getting ready…'}
           </p>
-          <div className="bar"><div style={{ width: `${pct}%` }} /></div>
-          <p className="hint">This happens on your own computer, so keep this tab open and in front until it finishes.</p>
+          <div className="bar" role="progressbar" aria-label="Render progress"
+               aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+            <div style={{ width: `${pct}%` }} />
+          </div>
+          {/* Which machine is doing the work decides the advice, and the page
+              knows which. It used to say "your own computer" to everybody,
+              including the people whose browser cannot encode and whose clip
+              is being cut on the render machine - who were then told to sit
+              and watch a tab that did not need watching. */}
+          <p className="hint">
+            {supported
+              ? 'This happens on your own computer, so keep this tab open and in front until it finishes.'
+              : 'This is being made on the render machine, so it does not matter if this tab is in the background — just do not close it.'}
+          </p>
         </>
       )}
 
@@ -793,27 +881,6 @@ export default function Page() {
         </details>
       )}
 
-      {error && (
-        <div className="note error">
-          {error}
-          {/* Shown, not folded away. Twice now a fault has been reported with
-              this collapsed, so the one line that identifies it was missing
-              from the screenshot - which is the page's fault, not the
-              reporter's. The button is here because an error on this screen is
-              nearly always going to be pasted to somebody else. */}
-          {errorDetail && errorDetail !== error && (
-            <div className="detail">
-              <div className="detail-head">
-                <span>What it said exactly</span>
-                <button className="linkbtn" onClick={copyError}>
-                  {copiedError ? 'Copied' : 'Copy this'}
-                </button>
-              </div>
-              <code>{errorDetail}</code>
-            </div>
-          )}
-        </div>
-      )}
     </main>
   );
 }

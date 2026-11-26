@@ -181,3 +181,29 @@ test('a real Google 5xx still reads as Google, and still says to retry', () => {
     assert.match(message, /try again/i, String(status));
   }
 });
+
+/* --- whether the page should offer a "try again" button --- */
+
+test('a fault that passes on its own is worth trying again', () => {
+  /* All three of these have actually happened to somebody mid-script: a
+     demand spike, the free tier's rate limit, and a dropped connection. The
+     page can only offer the button if the explainer says which is which. */
+  assert.equal(explain(Object.assign(new Error('503 high demand'), { status: 503 }), true).retryable, true);
+  assert.equal(explain(new Error('429 Too Many Requests'), true).retryable, true);
+  assert.equal(explain(new TypeError('Failed to fetch'), true).retryable, true);
+  assert.equal(explain(Object.assign(new Error('500 internal'), { status: 500 }), true).retryable, true);
+});
+
+test('a fault that will say the same thing twice is not', () => {
+  /* Offering to repeat these sends somebody round the same loop to be told
+     the same thing, and teaches them the button is a lie. */
+  assert.equal(explain(new Error('401 authentication_error'), true).retryable, false);
+  assert.equal(explain(new Error('400 API key not valid'), true).retryable, false);
+  assert.equal(explain(Object.assign(new Error('403 forbidden'), { status: 403 }), true).retryable, false);
+  assert.equal(explain(new Error('Your session has expired'), true).retryable, false);
+  assert.equal(
+    explain(new Error('501 {"error":"gemini-not-configured"}'), true).retryable, false,
+    'the message says trying again will not help - the button must not contradict it'
+  );
+  assert.equal(explain(new Error('something nobody anticipated'), true).retryable, false, 'nothing known, nothing promised');
+});

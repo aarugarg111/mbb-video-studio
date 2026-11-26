@@ -15,6 +15,14 @@ export interface Explained {
   message: string;
   /* The original, for whoever they forward it to. */
   detail: string;
+  /* Whether doing the same thing again could plausibly work.
+   *
+   * A busy model, a rate limit and a dropped connection all pass on their
+   * own, and the page can offer the button right there. A rejected key, a
+   * missing setting and an expired sign-in do not: offering "try again" for
+   * those sends somebody round the same loop being told the same thing, and
+   * teaches them the button is a lie. */
+  retryable: boolean;
 }
 
 function statusOf(error: unknown): number | null {
@@ -82,7 +90,11 @@ export function explain(error: unknown, teamMode: boolean): Explained {
    * somebody their key is wrong when they simply need to sign in again sends
    * them to the one place they cannot fix it. */
   if (text.includes('session has expired') || text.includes('sign in again')) {
-    return { message: 'Your sign-in has expired. Sign in again and the script will still be here.', detail };
+    return {
+      message: 'Your sign-in has expired. Sign in again and the script will still be here.',
+      detail,
+      retryable: false
+    };
   }
 
   /* Google answers a bad key with 400 and "API key not valid", not with 401 -
@@ -97,7 +109,8 @@ export function explain(error: unknown, teamMode: boolean): Explained {
   ) {
     return {
       message: `Google would not accept the key. ${keyHolder}`,
-      detail
+      detail,
+      retryable: false
     };
   }
 
@@ -107,7 +120,8 @@ export function explain(error: unknown, teamMode: boolean): Explained {
         'Something refused the request before Google could answer it. That is usually the key ' +
         'being turned off, out of quota, or not allowed to use this model - but it can also be ' +
         `the connection in between. ${keyHolder} Open "What it said exactly" and send that too.`,
-      detail
+      detail,
+      retryable: false
     };
   }
 
@@ -128,14 +142,17 @@ export function explain(error: unknown, teamMode: boolean): Explained {
         'This studio is not finished being set up — its Google key is missing or empty. ' +
         'Send this to Aryan; it is a setting on the server, not anything you did, and ' +
         'trying again will not help until it is set.',
-      detail
+      detail,
+      /* Said in the sentence above, so the button must not contradict it. */
+      retryable: false
     };
   }
 
   if (status === 429 || text.includes('rate_limit')) {
     return {
       message: 'Too many scripts at once for the free tier. Wait a minute and try again — nothing is broken, and nothing is being charged.',
-      detail
+      detail,
+      retryable: true
     };
   }
 
@@ -157,23 +174,32 @@ export function explain(error: unknown, teamMode: boolean): Explained {
         'The free model is busy right now - a spike in demand, which passes on its own. ' +
         'The studio already tried several times and asked the other free models too. ' +
         'Nothing is broken and nothing is being charged; give it a minute and try again.',
-      detail
+      detail,
+      retryable: true
     };
   }
 
   if (status !== null && status >= 500) {
     return {
       message: 'Google had a problem at its end. Try again in a minute.',
-      detail
+      detail,
+      retryable: true
     };
   }
 
   if (text.includes('failed to fetch') || text.includes('networkerror') || text.includes('load failed')) {
-    return { message: 'The studio could not be reached. Check the connection and try again.', detail };
+    return {
+      message: 'The studio could not be reached. Check the connection and try again.',
+      detail,
+      retryable: true
+    };
   }
 
   return {
     message: detail || 'Something went wrong reading the script.',
-    detail
+    detail,
+    /* Nothing known about it, so nothing promised. A button that offers to
+     * repeat an unexplained failure is a guess dressed as advice. */
+    retryable: false
   };
 }

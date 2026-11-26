@@ -252,7 +252,12 @@ video { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 20px; di
    copy it to whoever can. */
 .note.error .detail { margin-top: 10px; }
 .note.error .detail summary { cursor: pointer; font-size: 12px; opacity: 0.85; }
-.note.error .detail code { display: block; margin-top: 7px; padding: 9px 11px; border-radius: 7px; background: rgba(0, 0, 0, 0.06); font-size: 11.5px; line-height: 1.45; word-break: break-word; }
+/* Capped, and scrolls. A 503 body is twenty lines of JSON, and at full
+   height it pushed the one sentence that says what to do - and the button
+   that does it - off the screen the error was moved to the top for. */
+.note.error .detail code { display: block; margin-top: 7px; padding: 9px 11px; border-radius: 7px; background: rgba(0, 0, 0, 0.06); font-size: 11.5px; line-height: 1.45; word-break: break-word; max-height: 11rem; overflow: auto; }
+.note.error .said { margin: 0; }
+.note.error .retry { margin-top: 11px; width: auto; padding: 8px 15px; font-size: 13px; }
 .note.error .detail-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 7px; font-size: 12px; font-weight: 600; opacity: 0.85; }
 .note.error .detail-head .linkbtn { font-size: 12px; }
 
